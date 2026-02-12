@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import api from "@/services/api";
 
 export default function EditSettingModal({
-  setting, // Agar null hai, matlab "Add New" mode hai
+  setting,
   onClose,
   onUpdated,
-  defaultRestaurantId, // Parent se ID aayegi
+  defaultRestaurantId, 
 }: any) {
   // State for form data
   const [formData, setFormData] = useState({

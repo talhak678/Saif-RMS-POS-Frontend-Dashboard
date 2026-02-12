@@ -61,15 +61,12 @@ export default function SettingsPage() {
 
                 <button
                     onClick={handleAddClick}
-                    // Using standard Tailwind classes to mimic 'bg-button' if it's not available
-                    // Replaced 'bg-button' with 'bg-blue-600/90' for safety, but kept your requested classes
                     className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus size={16} />
                     Add Setting
                 </button>
             </div>
-            {/* ----------------------------------------------- */}
 
             {/* Settings List */}
             <div className="space-y-3">
@@ -123,7 +120,7 @@ export default function SettingsPage() {
                         fetchSettings();
                         setIsModalOpen(false);
                     }}
-                    // Hardcoded ID jaisa aapne kaha
+                    // Hardcoded ID 
                     defaultRestaurantId="cmljaoung000fv5w8os1foeb2"
                 />
             )}

@@ -3,6 +3,8 @@ import './globals.css';
 import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import 'dotenv/config'
+
 
 const outfit = Outfit({
   subsets: ["latin"],
