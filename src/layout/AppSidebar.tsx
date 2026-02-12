@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Users, ShieldCheck } from "lucide-react"; 
+import { ShoppingCart, Users, ShieldCheck, Settings, ChefHat } from "lucide-react"; 
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -45,12 +45,25 @@ const navItems: NavItem[] = [
     path: "/customers",
   },
   {
+    icon: <ChefHat className="w-5 h-5" />,
+    name: "Restaurant & Config",
+    subItems: [
+      { name: "Restaurants", path: "/restaurants", pro: false },
+      { name: "Branches", path: "/branches", pro: false },
+    ],
+  },
+  {
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
       { name: "Sign In", path: "/signin", pro: false },
       { name: "Sign Up", path: "/signup", pro: false },
     ],
+  },
+  {
+    icon: <Settings className="w-5 h-5" />,
+    name: "Settings",
+    path: "/settings",
   },
   // {
   //   icon: <CalenderIcon />,
