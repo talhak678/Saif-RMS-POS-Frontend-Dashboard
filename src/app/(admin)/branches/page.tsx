@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
 import { Eye, Trash2, Plus, X } from "lucide-react";
 
-export default function BranchesPage() {
+function Branch() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const restaurantId = searchParams.get("restaurantId");
@@ -186,5 +186,13 @@ export default function BranchesPage() {
                 </div>
             )}
         </div>
+    );
+}
+export default function BranchPage() {
+    return (
+        // 2. Yahan Suspense wrap karein
+        <Suspense fallback={<div className="p-10 text-center">Loading Form...</div>}>
+            <Branch />
+        </Suspense>
     );
 }
