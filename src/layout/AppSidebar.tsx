@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Users, ShieldCheck } from "lucide-react"; 
+import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react"; 
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -45,11 +45,11 @@ const navItems: NavItem[] = [
     path: "/customers",
   },
   {
-    icon: <PlugInIcon />,
+    icon: <Shield />,
     name: "Authentication",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Users", path: "/users", pro: false },
+      { name: "Roles", path: "/roles", pro: false },
     ],
   },
   // {

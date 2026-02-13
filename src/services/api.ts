@@ -1,8 +1,9 @@
+import { baseUrl } from "@/types/environment";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 
 const api = axios.create({
-    baseURL: 'https://saif-rms-pos-backend.vercel.app/api',
+    baseURL: baseUrl,
     withCredentials: false
 });
 
