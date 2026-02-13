@@ -287,7 +287,7 @@ export default function MenuItemsPage() {
                                         {/* Empty State Card */}
                                         <Link
                                             href={`/items/add?categoryId=${group.info.id}`}
-                                            className="min-w-[150px] w-[150px] flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-900 transition-colors bg-gray-50 dark:bg-gray-800/50"
+                                            className="min-w-[150px] w-[150px] flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-400 dark:border-gray-700 rounded-xl text-gray-400 hover:text-blue-500 hover:border-blue-400 dark:hover:border-blue-900 transition-colors bg-blend dark:bg-gray-800/50"
                                         >
                                             <Plus size={24} />
                                             <span className="text-sm font-medium">Add Item</span>

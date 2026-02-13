@@ -7,7 +7,7 @@ export default function EditSettingModal({
   setting,
   onClose,
   onUpdated,
-  defaultRestaurantId, 
+  defaultRestaurantId,
 }: any) {
   // State for form data
   const [formData, setFormData] = useState({
@@ -32,7 +32,10 @@ export default function EditSettingModal({
       if (setting?.id) {
         // === UPDATE (PUT) ===
         await api.put(`/settings/${setting.id}`, {
+          key: formData.key,
           value: formData.value,
+          restaurantId: defaultRestaurantId,
+
         });
       } else {
         // === CREATE (POST) ===
@@ -72,10 +75,9 @@ export default function EditSettingModal({
             disabled={isEditing} // Edit mode me disable rahega
             placeholder="e.g. tax_rate"
             className={`w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all 
-              ${
-                isEditing
-                  ? "bg-gray-100 text-gray-500 cursor-not-allowed dark:bg-gray-700/50"
-                  : "bg-white dark:bg-gray-700 dark:text-white"
+              ${isEditing
+                ? "bg-gray-100 text-gray-500 cursor-not-allowed dark:bg-gray-700/50"
+                : "bg-white dark:bg-gray-700 dark:text-white"
               } dark:border-gray-600`}
           />
           {!isEditing && (

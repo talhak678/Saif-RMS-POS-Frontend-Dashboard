@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Users, Settings, ChefHat, ShoppingCartIcon } from "lucide-react";
+import { ShoppingCart, Users, Settings, ChefHat, ShoppingCartIcon, Warehouse } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <ShoppingCartIcon className="w-5 h-5" />,
+    icon: <Warehouse className="w-5 h-5" />,
     name: "Inventory & Recipes",
     subItems: [
       { name: "Ingredients", path: "/ingredients", pro: false },
@@ -323,7 +323,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-transparent backdrop-blur-xs dark:bg-transparent dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-700 md:bg-transparent backdrop-blur-xs dark:md:bg-transparent dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${isExpanded || isMobileOpen
           ? "w-[290px]"
           : isHovered

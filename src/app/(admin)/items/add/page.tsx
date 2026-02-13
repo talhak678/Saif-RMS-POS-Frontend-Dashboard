@@ -130,7 +130,7 @@ function AddItemForm() {
 
   return (
     <div className="min-h-screen p-4 md:p-8 bg-blend backdrop-blur-1xl dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-screen mx-auto">
         
         {/* Header with Back Button */}
         <div className="flex items-center gap-4 mb-8">
@@ -147,7 +147,6 @@ function AddItemForm() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* --- SECTION 1: BASIC INFO --- */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-semibold mb-4 dark:text-white border-b dark:border-gray-700 pb-2">
               Basic Information
