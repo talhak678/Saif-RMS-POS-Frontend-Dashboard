@@ -1,31 +1,31 @@
-import React, { useState } from 'react'
-import { Plus, Trash } from 'lucide-react'
-import { AuthServiceInstance } from '@/services/auth.service'
-import { iRole, iUser, UserSchema } from '@/types/auth.types'
+import { useState } from 'react'
+import { Trash } from 'lucide-react'
+import { iPermission } from '@/types/auth.types'
 import { toast } from 'sonner'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button/Button'
+import { RoleServiceInstance } from '@/services/role.service'
 
-const DeleteUser = ({ onAction, user }: { onAction?: () => void, user: iUser }) => {
+const DeletePermission = ({ onAction, Permission }: { onAction?: () => void, Permission: iPermission }) => {
     const [modal, setModal] = useState<boolean>(false)
     const [deleting, setDeleting] = useState<boolean>(false)
-    const authServ = AuthServiceInstance()
+    const permServ = RoleServiceInstance()
 
-    async function deleteUser() {
+    async function deletePermission() {
         setDeleting(true)
         try {
-            const res = await authServ.deleteUser(user?.id!)
+            const res = await permServ.deletePermission(Permission?.id!)
             if (res.success) {
-                toast.success('User deleted successfully!')
+                toast.success('Permission deleted successfully!')
                 onAction?.()
                 setModal(false)
             }
             else {
-                toast.error(res?.message || 'Failed to delete user')
+                toast.error(res?.message || 'Failed to delete Permission')
             }
         }
         catch (err) {
-            toast.error('Failed to delete user')
+            toast.error('Failed to delete Permission')
         }
         finally {
             setDeleting(false)
@@ -41,7 +41,7 @@ const DeleteUser = ({ onAction, user }: { onAction?: () => void, user: iUser }) 
                 <form>
 
                     <span className="text-sm">
-                        Are you sure you want to delete this user?
+                        Are you sure you want to delete this Permission?
                     </span>
                     <div>
                         <div className="gap-2 flex justify-between items-center bg-muted/30">
@@ -54,7 +54,7 @@ const DeleteUser = ({ onAction, user }: { onAction?: () => void, user: iUser }) 
                             </Button>
 
                             <Button
-                                onClick={() => deleteUser()}
+                                onClick={() => deletePermission()}
                                 disabled={deleting}
                                 loading={deleting}
                             >
@@ -69,4 +69,4 @@ const DeleteUser = ({ onAction, user }: { onAction?: () => void, user: iUser }) 
     )
 }
 
-export default DeleteUser
+export default DeletePermission

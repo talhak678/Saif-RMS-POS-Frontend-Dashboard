@@ -41,21 +41,29 @@ class AuthService extends BaseService {
 
     // function to logout
     public logout(): void {
-        localStorage.clear();
-        sessionStorage.clear();
-        this.deleteAllCookies()
         this.redirectToLogin()
+        this.logout()
     }
 
-    // public async login(credentials: { username: string, password: string }): Promise<iApiResponse> {
-    //     try {
-    //         const res = await axios.post<iApiResponse>(endpoints.login, credentials)
-    //         return res.data
-    //     } catch (e: iAPIErrorRes | any) {
-    //         console.error(e)
-    //         return e.response.data
-    //     }
-    // }
+    public async login(credentials: { email: string, password: string }): Promise<iApiResponse> {
+        try {
+            const res = await api.post<iApiResponse>(endpoints.login, credentials)
+            return res.data
+        } catch (e: iAPIErrorRes | any) {
+            console.error(e)
+            return e.response.data
+        }
+    }
+
+    public async logoutUser(): Promise<iApiResponse> {
+        try {
+            const res = await api.post<iApiResponse>(endpoints.logout)
+            return res.data
+        } catch (e: iAPIErrorRes | any) {
+            console.error(e)
+            return e.response.data
+        }
+    }
 
     public async addUser(payload: iUser): Promise<iApiResponse> {
         try {
@@ -77,7 +85,7 @@ class AuthService extends BaseService {
         }
     }
 
-    public async deleteUser(userId: number): Promise<iApiResponse> {
+    public async deleteUser(userId: string): Promise<iApiResponse> {
         try {
             const res = await api.delete<iApiResponse>(`${endpoints.deleteUser}${userId}`)
             return res.data
@@ -98,6 +106,16 @@ class AuthService extends BaseService {
                 :
                 ''
                 }`)
+            return res.data
+        } catch (e: iAPIErrorRes | any) {
+            console.error(e)
+            return e.response.data
+        }
+    }
+
+    public async getCurrentUser(): Promise<iApiResponse> {
+        try {
+            const res = await api.get<iApiResponse>(endpoints.getCurrentUser)
             return res.data
         } catch (e: iAPIErrorRes | any) {
             console.error(e)

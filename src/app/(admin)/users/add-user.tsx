@@ -2,22 +2,42 @@ import React, { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { BaseServiceInstance } from '@/services/base.service'
 import { AuthServiceInstance } from '@/services/auth.service'
-import { iUser, UserSchema } from '@/types/auth.types'
+import { iRole, iUser, UserSchema } from '@/types/auth.types'
 import { toast } from 'sonner'
 import { Modal } from '@/components/ui/modal'
-import Button from '@/components/ui/button/Button'
 import Alert from '@/components/ui/alert/Alert'
 import Input from '@/components/form/input/InputField'
 import Select from '@/components/form/Select'
+import { RoleServiceInstance } from '@/services/role.service'
+import { Button } from '@/components/ui/button/Button'
 
 const AddUser = ({ onAction }: { onAction?: () => void }) => {
     const [UserForm, setUserForm] = useState<iUser>({ name: '', email: '', password: '', roleId: '', restaurantId: '' })
+    const [roles, setRoles] = useState<iRole[]>([])
     const [modal, setModal] = useState<boolean>(false)
     const [savingUser, setSavingUser] = useState<boolean>(false)
+    const [loadingRoles, setLoadingRoles] = useState<boolean>(true)
     const [showAlert, setShowAlert] = useState<boolean>(false)
     const [errors, setErrors] = useState<Partial<Record<keyof iUser, any>>>()
     const baseServ = BaseServiceInstance()
     const authServ = AuthServiceInstance()
+    const roleServ = RoleServiceInstance()
+
+    const fetchRoles = async () => {
+        try {
+            const res = await roleServ.getRoles();
+            if (res?.success) {
+                setRoles(res?.data || []);
+            }
+            else {
+                toast.error(res?.message || 'Failed to fetch roles')
+            }
+        } catch (error) {
+            console.error("Failed to fetch roles", error);
+        } finally {
+            setLoadingRoles(false);
+        }
+    };
 
     async function saveUser(e: any) {
         e.preventDefault()
@@ -55,11 +75,16 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
         setShowAlert(false)
         setUserForm({ name: '', email: '', password: '', roleId: '', restaurantId: '' })
         setSavingUser(false)
+        setModal(false)
     }
+
+    useEffect(() => {
+        fetchRoles()
+    }, [])
 
     return (
         <>
-            <Button>
+            <Button variant={'ghost'} size={'icon'} onClick={() => setModal(true)}>
                 <Plus /> Add User
             </Button>
             <Modal isOpen={modal} onClose={() => setModal(false)} >
@@ -78,12 +103,17 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
                         <Input required name='password' value={UserForm.password} onChange={(e) => setUserForm({ ...UserForm, [e.target.name]: e.target.value })} placeholder='Enter password' label='Password' type='password' disabled={savingUser} />
 
                         <Select
-                            disabled
+                            disabled={loadingRoles || savingUser}
                             defaultValue={UserForm.roleId}
-                            options={ }
-                            placeholder="Select Status"
+                            options={
+                                roles.map((role) => ({
+                                    label: role.name,
+                                    value: role.id!
+                                }))
+                            }
+                            placeholder="Select role"
                             required
-                            onChange={(v) => handleInput({ target: { name: "status", value: Number(v) } })}
+                            onChange={(v) => setUserForm({ ...UserForm, roleId: v })}
                         />
 
                     </div>
@@ -103,7 +133,7 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
                                 disabled={savingUser}
                                 loading={savingUser}
                             >
-                                {usersIndex.userToEdit ? 'Update' : 'Create'}
+                                Create
                             </Button>
                         </div>
                     </div>

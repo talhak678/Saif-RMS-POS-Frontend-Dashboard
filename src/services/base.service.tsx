@@ -162,7 +162,7 @@ class BaseService extends EncryptionService {
     }
 
     public redirectToLogin(url?: string): void {
-        window.location.replace(url || '/auth');
+        window.location.replace(url || '/signin');
     }
 
     public getEncryptedCookie(name: string): string | null {

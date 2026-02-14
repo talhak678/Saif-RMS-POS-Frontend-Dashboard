@@ -9,7 +9,7 @@ interface className {
   text?: string;
 }
 
-const Loader: React.FC<className> = ({ full = false, color = 'border-current', size = '8', border = 4, className, ...props }) => {
+const Loader: React.FC<className> = ({ full = false, color = 'border-current', size = '4', border = 4, className, ...props }) => {
   return (
     <div {...props} className={`${full ? "w-full flex items-center justify-center min-h-40" : ''} ${className}`}>
       <div
