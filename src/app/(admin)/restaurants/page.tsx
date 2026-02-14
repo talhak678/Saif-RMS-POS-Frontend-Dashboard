@@ -70,7 +70,7 @@ export default function RestaurantsPage() {
                     className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus className="h-4 w-4" />
-                    Adw Restaurant
+                    Add New Restaurant
                 </Link>
             </div>
             <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
