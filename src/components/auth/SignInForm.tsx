@@ -1,5 +1,4 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
@@ -11,14 +10,13 @@ import { AuthServiceInstance } from "@/services/auth.service";
 import { toast } from "sonner";
 
 export default function SignInForm() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] =  useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [text, setText] = useState("");
   const authServ = AuthServiceInstance()
 
   const router = useRouter();

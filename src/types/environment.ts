@@ -1,9 +1,9 @@
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
 export const endpoints = {
-    login: '/login',
-    logout: '/logout',
-    getCurrentUser: '/me',
+    login: '/auth/login',
+    logout: '/auth/logout',
+    getCurrentUser: '/auth/me',
 
     getUsers: '/users',
     addUser: '/users',
