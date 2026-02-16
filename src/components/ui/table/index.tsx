@@ -33,17 +33,21 @@ interface TableCellProps {
 
 // Table Component
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full  ${className}`}>{children}</table>;
+  return (
+    <div className="overflow-x-auto glass rounded-md">
+      <table className={`min-w-full  ${className}`}>{children}</table>
+    </div>
+  );
 };
 
 // TableHeader Component
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-  return <thead className={className}>{children}</thead>;
+  return <thead className={`${className} glass-border`}>{children}</thead>;
 };
 
 // TableBody Component
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
-  return <tbody className={className}>{children}</tbody>;
+  return <tbody className={`${className} `}>{children}</tbody>;
 };
 
 // TableRow Component
@@ -55,7 +59,7 @@ const TableRow: React.FC<TableRowProps> = ({ children, className }) => {
 const TableCell: React.FC<TableCellProps> = ({
   children,
   isHeader = false,
-  className,
+  className
 }) => {
   const CellTag = isHeader ? "th" : "td";
   return <CellTag className={` ${className}`}>{children}</CellTag>;

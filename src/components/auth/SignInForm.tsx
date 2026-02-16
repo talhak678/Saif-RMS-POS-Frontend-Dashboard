@@ -2,15 +2,57 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import Button from "@/components/ui/button/Button";
+import { Button } from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation"; // 1. Import Router
+import api from "@/services/api"; // 2. Import your API instance
+import { AuthServiceInstance } from "@/services/auth.service";
 
 export default function SignInForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  // 3. States for inputs and loading/error
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // 4. Handle Login Function
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(""); // Clear previous errors
+
+    try {
+      // API Call using your axios instance
+      const res = await api.post("/auth/login", {
+        email: email,
+        password: password,
+      });
+
+      // Assuming your API returns success, redirect to dashboard
+      if (res.data.success) {
+        // Save token using AuthService (which handles encryption and cookies)
+        const authService = AuthServiceInstance();
+        authService.setEncryptedCookie("token", res.data.data.token);
+
+        console.log("Login successful:", res.data);
+        window.location.replace("/"); // Using location replace to ensure clean state and bypass router issues
+      }
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      // Set error message based on API response or default message
+      setError(err.response?.data?.message || "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-2xl bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10">
       <div className="flex justify-center mb-8">
@@ -50,6 +92,7 @@ export default function SignInForm() {
           </div>
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+              {/* Social Buttons (kept as is) */}
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
                   width="20"
@@ -101,13 +144,28 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form>
+
+            {/* 5. Connected Form */}
+            <form onSubmit={handleLogin}>
               <div className="space-y-6">
+
+                {/* Error Message Display */}
+                {error && (
+                  <div className="p-3 text-sm text-center text-red-500 bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-400">
+                    {error}
+                  </div>
+                )}
+
                 <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="info@gmail.com" type="email" />
+                  <Input
+                    placeholder="info@gmail.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label>
@@ -117,6 +175,8 @@ export default function SignInForm() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -145,8 +205,8 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm">
-                    Sign in
+                  <Button className="w-full" size="sm" disabled={loading}>
+                    {loading ? "Signing in..." : "Sign in"}
                   </Button>
                 </div>
               </div>
