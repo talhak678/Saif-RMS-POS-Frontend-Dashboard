@@ -43,7 +43,7 @@ export default function Roles() {
                         Roles
                     </h1>
 
-                    <AddRole />
+                    <AddRole onAction={fetchRoles} />
                 </div>
 
                 {/* Table */}

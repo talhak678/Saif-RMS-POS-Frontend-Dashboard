@@ -43,7 +43,7 @@ export default function Users() {
                         Users
                     </h1>
 
-                    <AddUser />
+                    <AddUser onAction={fetchUsers} />
                 </div>
 
                 {/* Table */}
@@ -79,8 +79,8 @@ export default function Users() {
                                         {user?.role?.name || '---'}
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
-                                      <EditUser onAction={fetchUsers} user={user}/>
-                                      <DeleteUser onAction={fetchUsers} user={user}/>
+                                        <EditUser onAction={fetchUsers} user={user} />
+                                        <DeleteUser onAction={fetchUsers} user={user} />
                                     </TableCell>
                                 </TableRow>
                             ))
