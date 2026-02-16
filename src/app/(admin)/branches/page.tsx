@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
 import { Eye, Trash2, Plus, X } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 function Branch() {
     const searchParams = useSearchParams();
@@ -12,7 +13,10 @@ function Branch() {
 
     const [branches, setBranches]: any = useState([]);
     const [loading, setLoading] = useState(true);
-    const [openId, setOpenId] = useState<string | null>(null);
+
+    // --- VIEW DETAILS MODAL ---
+    const [viewBranch, setViewBranch] = useState<any>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     const [deleteModal, setDeleteModal] = useState(false);
     const [selectedBranch, setSelectedBranch]: any = useState(null);
@@ -107,52 +111,42 @@ function Branch() {
                             </tr>
                         ) : (
                             branches.map((branch: any, i: number) => (
-                                <>
-                                    <tr
-                                        key={branch.id}
-                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">{i + 1}</td>
-                                        <td className="px-4 py-3">{branch.name}</td>
-                                        <td className="px-4 py-3">
-                                            {branch.restaurant?.name}
-                                        </td>
-                                        <td className="px-4 py-3">{branch.phone}</td>
-                                        <td className="px-4 py-3 flex gap-2">
-                                            <button
-                                                onClick={() =>
-                                                    setOpenId(openId === branch.id ? null : branch.id)
-                                                }
-                                                className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                                            >
-                                                <Eye size={16} />
-                                            </button>
+                                <tr
+                                    key={branch.id}
+                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    onDoubleClick={() => {
+                                        setViewBranch(branch);
+                                        setIsViewModalOpen(true);
+                                    }}
+                                >
+                                    <td className="px-4 py-3">{i + 1}</td>
+                                    <td className="px-4 py-3">{branch.name}</td>
+                                    <td className="px-4 py-3">
+                                        {branch.restaurant?.name}
+                                    </td>
+                                    <td className="px-4 py-3">{branch.phone}</td>
+                                    <td className="px-4 py-3 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setViewBranch(branch);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                                        >
+                                            <Eye size={16} />
+                                        </button>
 
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedBranch(branch);
-                                                    setDeleteModal(true);
-                                                }}
-                                                className="p-2 rounded bg-red-600 text-white"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                    {/* DETAILS */}
-                                    {openId === branch.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700">
-                                            <td colSpan={5} className="p-4 text-sm">
-                                                <p><b>Address:</b> {branch.address}</p>
-                                                <p><b>Delivery Radius:</b> {branch.deliveryRadius} km</p>
-                                                <p><b>Free Delivery:</b> Rs. {branch.freeDeliveryThreshold}</p>
-                                                <p><b>Delivery Charge:</b> Rs. {branch.deliveryCharge}</p>
-                                                <p><b>Off Time:</b> {branch.deliveryOffTime}</p>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedBranch(branch);
+                                                setDeleteModal(true);
+                                            }}
+                                            className="p-2 rounded bg-red-600 text-white"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
                             ))
                         )}
                     </tbody>
@@ -185,6 +179,24 @@ function Branch() {
                     </div>
                 </div>
             )}
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Branch Details"
+                data={viewBranch}
+                fields={[
+                    { label: "Name", key: "name" },
+                    { label: "Restaurant", render: (data: any) => data?.restaurant?.name },
+                    { label: "Phone", key: "phone" },
+                    { label: "Address", key: "address" },
+                    { label: "Delivery Radius", render: (data: any) => `${data?.deliveryRadius || 0} km` },
+                    { label: "Free Delivery Threshold", render: (data: any) => `Rs. ${data?.freeDeliveryThreshold || 0}` },
+                    { label: "Delivery Charge", render: (data: any) => `Rs. ${data?.deliveryCharge || 0}` },
+                    { label: "Delivery Off Time", key: "deliveryOffTime" },
+                ]}
+            />
         </div>
     );
 }

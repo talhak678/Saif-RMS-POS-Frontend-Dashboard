@@ -5,10 +5,15 @@ import Link from "next/link";
 import api from "@/services/api";
 import { Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 export default function CustomersPage() {
   const [customers, setCustomers]: any = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // View Modal State
+  const [viewCustomer, setViewCustomer] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -73,6 +78,10 @@ export default function CustomersPage() {
                     <button
                       className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
                       title="View"
+                      onClick={() => {
+                        setViewCustomer(customer);
+                        setIsViewModalOpen(true);
+                      }}
                     >
                       <Eye size={18} />
                     </button>
@@ -92,6 +101,20 @@ export default function CustomersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <ViewDetailModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title="Customer Details"
+        data={viewCustomer}
+        fields={[
+          { label: "Name", key: "name" },
+          { label: "Email", key: "email" },
+          { label: "Phone", key: "phone" },
+          { label: "Total Orders", render: (data) => data?._count?.orders ?? 0 },
+          { label: "Created At", render: (data) => data?.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A' },
+        ]}
+      />
     </div>
   );
 }

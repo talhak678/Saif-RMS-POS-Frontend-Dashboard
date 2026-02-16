@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { Eye, X } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -39,7 +40,10 @@ const getStatusBadge = (status: string) => {
 export default function OrdersPage() {
   const [orders, setOrders]: any = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+
+  // View Modal State
+  const [viewOrder, setViewOrder] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -99,6 +103,28 @@ export default function OrdersPage() {
     }
   };
 
+  const renderOrderItems = (order: any) => (
+    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+      {order.items.map((item: any) => (
+        <div
+          key={item.id}
+          className="flex justify-between border-b dark:border-gray-600 py-2 last:border-0"
+        >
+          <span className="text-gray-700 dark:text-gray-300">
+            {item.menuItem.name} × {item.quantity}
+          </span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">
+            Rs. {item.price * item.quantity}
+          </span>
+        </div>
+      ))}
+      <div className="flex justify-between pt-3 mt-1 border-t dark:border-gray-600 font-bold text-lg">
+        <span>Total Amount</span>
+        <span>Rs. {order.total}</span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900">
       <div className="flex justify-between items-center mb-5">
@@ -151,130 +177,111 @@ export default function OrdersPage() {
               </tr>
             ) : (
               orders.map((order: any, index: number) => (
-                <>
-                  {/* MAIN ROW */}
-                  <tr
-                    key={order.id}
-                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td className="px-4 py-3">{index + 1}</td>
-                    <td className="px-4 py-3 font-medium">
-                      #{order.orderNo}
-                    </td>
-                    <td className="px-4 py-3">
-                      {order.customer?.name}
-                    </td>
-                    <td className="px-4 py-3">{order.type}</td>
-                    <td className="px-4 py-3">
-                      <span className={getStatusBadge(order.status)}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-semibold">
-                      Rs. {order.total}
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {new Date(order.createdAt).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 flex gap-2">
-                      <button
-                        onClick={() =>
-                          setOpenOrderId(
-                            openOrderId === order.id
-                              ? null
-                              : order.id
-                          )
-                        }
-                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                      >
-                        <Eye size={18} />
-                      </button>
+                <tr
+                  key={order.id}
+                  className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3 font-medium">
+                    #{order.orderNo}
+                  </td>
+                  <td className="px-4 py-3">
+                    {order.customer?.name}
+                  </td>
+                  <td className="px-4 py-3">{order.type}</td>
+                  <td className="px-4 py-3">
+                    <span className={getStatusBadge(order.status)}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-semibold">
+                    Rs. {order.total}
+                  </td>
+                  <td className="px-4 py-3 text-xs">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setViewOrder(order);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                    >
+                      <Eye size={18} />
+                    </button>
 
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setNewStatus(order.status);
-                          setStatusModal(true);
-                        }}
-                        className="text-xs px-3 py-1 rounded bg-blue-600 text-white"
-                      >
-                        Change Status
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* INVOICE DETAILS */}
-                  {openOrderId === order.id && (
-                    <tr className="bg-gray-50 dark:bg-gray-700">
-                      <td colSpan={8} className="p-5 text-sm">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          {/* LEFT */}
-                          <div>
-                            <h3 className="font-semibold mb-3">
-                              Order Items
-                            </h3>
-                            {order.items.map((item: any) => (
-                              <div
-                                key={item.id}
-                                className="flex justify-between border-b py-1"
-                              >
-                                <span>
-                                  {item.menuItem.name} ×{" "}
-                                  {item.quantity}
-                                </span>
-                                <span>
-                                  Rs. {item.price * item.quantity}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* RIGHT */}
-                          <div>
-                            <h3 className="font-semibold mb-3">
-                              Order Summary
-                            </h3>
-                            <p>
-                              <b>Customer:</b>{" "}
-                              {order.customer.name}
-                            </p>
-                            <p>
-                              <b>Phone:</b>{" "}
-                              {order.customer.phone}
-                            </p>
-                            <p>
-                              <b>Order Type:</b> {order.type}
-                            </p>
-                            <p>
-                              <b>Branch:</b>{" "}
-                              {order.branch?.name}
-                            </p>
-                            <p>
-                              <b>Payment:</b>{" "}
-                              {order.payment.method} (
-                              {order.payment.status})
-                            </p>
-                            <p>
-                              <b>Placed At:</b>{" "}
-                              {new Date(
-                                order.createdAt
-                              ).toLocaleString()}
-                            </p>
-
-                            <p className="mt-3 text-lg font-semibold">
-                              Total: Rs. {order.total}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setNewStatus(order.status);
+                        setStatusModal(true);
+                      }}
+                      className="text-xs px-3 py-1 rounded bg-blue-600 text-white"
+                    >
+                      Change Status
+                    </button>
+                  </td>
+                </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {/* VIEW ORDER MODAL */}
+      <ViewDetailModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title={`Order Details #${viewOrder?.orderNo || ""}`}
+        data={viewOrder}
+        fields={[
+          {
+            label: "Customer Name",
+            render: (data: any) => data?.customer?.name,
+          },
+          {
+            label: "Phone Number",
+            render: (data: any) => data?.customer?.phone,
+          },
+          {
+            label: "Order Type",
+            key: "type",
+          },
+          {
+            label: "Branch",
+            render: (data: any) => data?.branch?.name,
+          },
+          {
+            label: "Status",
+            render: (data: any) => (
+              <span className={getStatusBadge(data?.status || "")}>
+                {data?.status}
+              </span>
+            ),
+          },
+          {
+            label: "Payment",
+            render: (data: any) => (
+              <span>
+                {data?.payment?.method} ({data?.payment?.status})
+              </span>
+            ),
+          },
+          {
+            label: "Placed At",
+            render: (data: any) =>
+              data?.createdAt
+                ? new Date(data.createdAt).toLocaleString()
+                : "N/A",
+          },
+          {
+            label: "Order Items",
+            fullWidth: true,
+            render: renderOrderItems,
+          },
+        ]}
+      />
 
       {/* STATUS MODAL */}
       {statusModal && (

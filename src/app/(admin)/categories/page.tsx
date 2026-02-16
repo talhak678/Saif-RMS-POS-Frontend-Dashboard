@@ -6,11 +6,15 @@ import { Eye, Plus, Utensils, LayoutGrid, Trash2 } from "lucide-react";
 // Modals import karein
 import AddCategoryModal from "./AddCategoryModal";
 import DeleteCategoryModal from "./DeleteCategoryModal";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openId, setOpenId] = useState<string | null>(null);
+
+    // --- VIEW DETAILS MODAL ---
+    const [viewCategory, setViewCategory] = useState<any>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     // Modal States
     const [showAddModal, setShowAddModal] = useState(false);
@@ -64,7 +68,7 @@ export default function CategoriesPage() {
                     <LayoutGrid className="w-6 h-6 text-blue-600" />
                     Categories
                 </h1>
-                
+
                 <button
                     onClick={() => setShowAddModal(true)}
                     className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 hover:opacity-90"
@@ -103,114 +107,53 @@ export default function CategoriesPage() {
                             </tr>
                         ) : (
                             categories.map((cat: any, index: number) => (
-                                <>
-                                    {/* MAIN ROW */}
-                                    <tr
-                                        key={cat.id}
-                                        className={`hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors ${
-                                            openId === cat.id ? "bg-gray-50 dark:bg-gray-700/50" : ""
-                                        }`}
-                                    >
-                                        <td className="px-4 py-3 text-gray-500">{index + 1}</td>
+                                <tr
+                                    key={cat.id}
+                                    className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                                >
+                                    <td className="px-4 py-3 text-gray-500">{index + 1}</td>
 
-                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-                                            {cat.name}
-                                        </td>
+                                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+                                        {cat.name}
+                                    </td>
 
-                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                            {cat.description || "N/A"}
-                                        </td>
+                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                                        {cat.description || "N/A"}
+                                    </td>
 
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                {cat._count?.menuItems || 0} Items
-                                            </span>
-                                        </td>
+                                    <td className="px-4 py-3 text-center">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            {cat._count?.menuItems || 0} Items
+                                        </span>
+                                    </td>
 
-                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
-                                            {new Date(cat.createdAt).toLocaleDateString()}
-                                        </td>
+                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
+                                        {new Date(cat.createdAt).toLocaleDateString()}
+                                    </td>
 
-                                        <td className="px-4 py-3 flex items-center gap-2">
-                                            {/* View Button */}
-                                            <button
-                                                onClick={() => setOpenId(openId === cat.id ? null : cat.id)}
-                                                className={`p-2 rounded transition-colors ${
-                                                    openId === cat.id 
-                                                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300"
-                                                    : "hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500"
-                                                }`}
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                    <td className="px-4 py-3 flex items-center gap-2">
+                                        {/* View Button */}
+                                        <button
+                                            onClick={() => {
+                                                setViewCategory(cat);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="p-2 rounded transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                            title="View Details"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
 
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={() => setDeleteId(cat.id)}
-                                                className="p-2 rounded hover:bg-red-100 text-gray-500 hover:text-red-600 dark:hover:bg-red-900/30 transition-colors"
-                                                title="Delete Category"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                    {/* DETAILS DROPDOWN ROW */}
-                                    {openId === cat.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700/30 border-b dark:border-gray-700 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <td colSpan={6} className="p-6 text-sm">
-                                                <div className="grid md:grid-cols-2 gap-8">
-                                                    
-                                                    {/* Left Column */}
-                                                    <div>
-                                                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                                            <Utensils size={16} className="text-blue-500"/>
-                                                            Category Details
-                                                        </h3>
-                                                        <div className="space-y-2 text-gray-600 dark:text-gray-300">
-                                                            <p>
-                                                                <span className="font-medium text-gray-900 dark:text-gray-200">Name:</span> {cat.name}
-                                                            </p>
-                                                            <p>
-                                                                <span className="font-medium text-gray-900 dark:text-gray-200">Description:</span> {cat.description}
-                                                            </p>
-                                                            <p>
-                                                                <span className="font-medium text-gray-900 dark:text-gray-200">Total Menu Items:</span> {cat._count?.menuItems || 0}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Right Column */}
-                                                    <div>
-                                                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                                                            System Information
-                                                        </h3>
-                                                        <div className="space-y-2 text-gray-600 dark:text-gray-300">
-                                                            <p className="text-xs font-mono">
-                                                                <span className="font-sans font-medium text-gray-900 dark:text-gray-200 text-sm">ID:</span> {cat.id}
-                                                            </p>
-                                                            <p className="text-xs font-mono">
-                                                                <span className="font-sans font-medium text-gray-900 dark:text-gray-200 text-sm">Restaurant ID:</span> {cat.restaurantId}
-                                                            </p>
-                                                            <div className="border-t dark:border-gray-600 my-2 pt-2">
-                                                                <p>
-                                                                    <span className="font-medium text-gray-900 dark:text-gray-200">Created At:</span>{" "}
-                                                                    {new Date(cat.createdAt).toLocaleString()}
-                                                                </p>
-                                                                <p>
-                                                                    <span className="font-medium text-gray-900 dark:text-gray-200">Last Updated:</span>{" "}
-                                                                    {new Date(cat.updatedAt).toLocaleString()}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </>
+                                        {/* Delete Button */}
+                                        <button
+                                            onClick={() => setDeleteId(cat.id)}
+                                            className="p-2 rounded hover:bg-red-100 text-gray-500 hover:text-red-600 dark:hover:bg-red-900/30 transition-colors"
+                                            title="Delete Category"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
                             ))
                         )}
                     </tbody>
@@ -219,7 +162,7 @@ export default function CategoriesPage() {
 
             {/* ADD CATEGORY MODAL */}
             {showAddModal && (
-                <AddCategoryModal 
+                <AddCategoryModal
                     onClose={() => setShowAddModal(false)}
                     onSuccess={fetchCategories}
                 />
@@ -233,6 +176,23 @@ export default function CategoriesPage() {
                     onConfirm={handleDelete}
                 />
             )}
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Category Details"
+                data={viewCategory}
+                fields={[
+                    { label: "Name", key: "name" },
+                    { label: "Description", key: "description", fullWidth: true },
+                    { label: "Total Menu Items", render: (data: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">{data?._count?.menuItems || 0} Items</span> },
+                    { label: "ID", key: "id" },
+                    { label: "Restaurant ID", key: "restaurantId" },
+                    { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
+                    { label: "Last Updated", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
+                ]}
+            />
         </div>
     );
 }
