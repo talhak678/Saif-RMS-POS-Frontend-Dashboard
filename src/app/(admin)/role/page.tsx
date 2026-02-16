@@ -52,9 +52,8 @@ export default function Roles() {
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                         Roles
                     </h1>
-                    <div className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                        <AddRole />
-                    </div>
+
+                    <AddRole />
                 </div>
 
                 {/* Table */}

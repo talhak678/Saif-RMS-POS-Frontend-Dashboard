@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // 1. Import Router
 import api from "@/services/api"; // 2. Import your API instance
 import { AuthServiceInstance } from "@/services/auth.service";
-
+import Router from "next/navigation";
 export default function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -36,12 +36,16 @@ export default function SignInForm() {
       });
 
       // Assuming your API returns success, redirect to dashboard
-      if (res.data) {
-        // Optional: Save token here if your api interceptor doesn't handle it automatically
-        // localStorage.setItem("token", res.data.token); 
-        
-        console.log("Login successful:", res.data);
-        window.location.replace("/"); // Using location replace to ensure clean state and bypass router issues
+
+      if (res.data.success) {
+        // Save token using AuthService (which handles encryption and cookies)
+        const authService = AuthServiceInstance();
+        authService.setEncryptedCookie("token", res.data.data.token);
+         console.log("Login successful:", res.data);
+        router.push("/");
+        // Using location replace to ensure clean state and bypass router issues
+
+       
       }
     } catch (err: any) {
       console.error("Login Error:", err);
