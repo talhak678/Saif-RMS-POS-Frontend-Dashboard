@@ -81,7 +81,7 @@ export default function CategoriesPage() {
             {/* TABLE */}
             <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
+                    <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
                         <tr>
                             <th className="px-4 py-3 text-left">#</th>
                             <th className="px-4 py-3 text-left">Category Name</th>
