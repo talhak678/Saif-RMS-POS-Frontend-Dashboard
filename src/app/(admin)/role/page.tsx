@@ -47,7 +47,7 @@ export default function Roles() {
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <div className="p-2 md:p-4 dark:bg-gray-900">
+            <div className="p-2 md:p-4 dark:bg-gray-900 dark:text-gray-200">
                 <div className="md:flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                         Roles
