@@ -28,7 +28,7 @@ interface inputProps {
     accept?: string,
     checked?: boolean;
     readOnly?: boolean;
-
+    defaultValue?: string;
 }
 
 const Input: React.FC<inputProps> = ({
@@ -55,6 +55,7 @@ const Input: React.FC<inputProps> = ({
     disabled,
     checked,
     id,
+    defaultValue,
     ...props
 }) => {
     const [touched, setTouched] = useState(false)
@@ -116,7 +117,7 @@ const Input: React.FC<inputProps> = ({
                 name={name}
                 className={`${baseClasses} ${focusClasses} ${className}`}
                 type={type}
-                value={value}
+                value={value !== undefined ? value : defaultValue}
                 onChange={onChange}
                 onBlur={() => {
                     setTouched(true)

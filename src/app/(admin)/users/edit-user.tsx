@@ -95,7 +95,7 @@ const EditUser = ({ onAction, user }: { onAction?: () => void, user: iUser }) =>
                 <form onSubmit={saveUser}>
                     {
                         showAlert &&
-                        <Alert variant='error' title='Validation Error' message={errors!} />
+                        <Alert variant='error' title='Validation Error' message={JSON.stringify(errors!)} />
                     }
 
                     <div className='grid grid-cols-1 my-2 gap-4'>
