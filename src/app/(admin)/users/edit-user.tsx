@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from 'react'
 import { Edit, Pencil, Plus } from 'lucide-react'
 import { BaseServiceInstance } from '@/services/base.service'

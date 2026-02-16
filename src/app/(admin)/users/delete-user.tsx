@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react'
 import { Plus, Trash } from 'lucide-react'
 import { AuthServiceInstance } from '@/services/auth.service'

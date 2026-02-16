@@ -1,3 +1,4 @@
+"use client";
 import Loader from '@/components/ui/spinner';
 import { File } from 'lucide-react';
 import React, { useEffect } from 'react';
@@ -29,6 +30,9 @@ interface inputProps {
     checked?: boolean;
     readOnly?: boolean;
     defaultValue?: string;
+    error?: boolean;
+    success?: boolean;
+    hint?: string;
 }
 
 const Input: React.FC<inputProps> = ({
@@ -56,6 +60,9 @@ const Input: React.FC<inputProps> = ({
     checked,
     id,
     defaultValue,
+    error,
+    success,
+    hint,
     ...props
 }) => {
     const [touched, setTouched] = useState(false)
@@ -84,7 +91,7 @@ const Input: React.FC<inputProps> = ({
     }, [value, touched, required, type, errorMessage]);
 
     const baseClasses = `
-        w-${width} border ${isInvalid ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+        w-${width} border ${isInvalid || error ? "border-red-500" : success ? "border-green-500" : "border-gray-300 dark:border-gray-600"} 
         bg-white disabled:bg-gray-100 disabled:cursor-not-allowed disabled:dark:bg-gray-800 
         disabled:text-muted dark:bg-gray-900 rounded-lg px-3 py-2 
         text-gray-900 dark:text-white transition-colors duration-200`
@@ -129,6 +136,7 @@ const Input: React.FC<inputProps> = ({
                 {...props}
             />
             {isInvalid && <p className="text-sm text-red-500 mt-1 transition-opacity duration-200">{customError}</p>}
+            {!isInvalid && hint && <p className={`text-sm mt-1 ${error ? "text-red-500" : success ? "text-green-500" : "text-gray-500"}`}>{hint}</p>}
         </div>
     )
 }
