@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Settings, ChefHat, ShoppingCartIcon, Warehouse } from "lucide-react";
-import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react"; 
+import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -75,7 +75,7 @@ const navItems: NavItem[] = [
     name: "Authentication",
     subItems: [
       { name: "Users", path: "/users", pro: false },
-      { name: "Roles", path: "/roles", pro: false },
+      { name: "Roles", path: "/role", pro: false },
     ],
   },
   {
