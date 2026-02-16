@@ -29,7 +29,7 @@ export default function AdminLayout({
       <ProtectedRoute>
         <ModulesProvider>
           <SplashService>
-            <div style={{ backgroundImage: "url('/images/authentication-images/background-2.png')" }} className="min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
+            <div className="bg-[url('/images/authentication-images/background-2.png')] min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
               {/* Sidebar and Backdrop */}
               <AppSidebar />
               <Backdrop />
