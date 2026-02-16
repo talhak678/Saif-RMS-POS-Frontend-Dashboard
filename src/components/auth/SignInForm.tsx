@@ -11,7 +11,7 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   return (
-    <div className="w-full max-w-[480px] bg-white dark:bg-gray-900 p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
+    <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-2xl bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10">
       <div className="w-full mx-auto mb-5">
         <Link
           href="/"

@@ -1,7 +1,6 @@
 
 "use client";
 
-import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -40,9 +39,6 @@ export default function AuthLayout({
           {children}
         </div>
 
-        <div className="fixed bottom-6 right-6 z-50 hidden sm:block">
-          <ThemeTogglerTwo />
-        </div>
       </ThemeProvider>
     </div>
   );
