@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Settings, ChefHat, ShoppingCartIcon, Warehouse } from "lucide-react";
+import { Settings, ChefHat, ShoppingCartIcon, Warehouse, Bike, Motorbike, TicketPercent } from "lucide-react";
 import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import {
@@ -54,6 +54,11 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    icon: <Motorbike className="w-5 h-5" />,
+    name: "Riders",
+    path: "/riders",
+  },
+  {
     icon: <ShoppingCartIcon className="w-5 h-5" />,
     name: "Menu & Categories",
     subItems: [
@@ -68,6 +73,15 @@ const navItems: NavItem[] = [
       { name: "Ingredients", path: "/ingredients", pro: false },
       { name: "Stock", path: "/stock", pro: false },
       { name: "Recipes", path: "/recipes", pro: false },
+    ],
+  },
+  {
+    icon: <TicketPercent className="w-5 h-5" />,
+    name: "Marketing & Discount",
+    subItems: [
+      { name: "Discounts", path: "/discounts", pro: false },
+      { name: "Reviews", path: "/reviews", pro: false },
+      { name: "Loyalty", path: "/loyalty", pro: false },
     ],
   },
   {

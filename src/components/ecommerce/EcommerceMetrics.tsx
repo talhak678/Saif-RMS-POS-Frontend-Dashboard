@@ -3,7 +3,13 @@ import React from "react";
 import Badge from "../ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
 
-export const EcommerceMetrics = () => {
+interface EcommerceMetricsProps {
+  totalRevenue: string;
+  totalOrders: number;
+  newCustomers: number;
+}
+
+export const EcommerceMetrics = ({ totalRevenue, totalOrders, newCustomers }: EcommerceMetricsProps) => {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
       {/* <!-- Metric Item Start --> */}
@@ -18,7 +24,7 @@ export const EcommerceMetrics = () => {
               Customers
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              3,782
+              {newCustomers.toLocaleString()}
             </h4>
           </div>
           <Badge color="success">
@@ -40,7 +46,7 @@ export const EcommerceMetrics = () => {
               Orders
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              5,359
+              {totalOrders.toLocaleString()}
             </h4>
           </div>
 
