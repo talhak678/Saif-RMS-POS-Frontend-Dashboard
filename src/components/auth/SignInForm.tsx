@@ -36,8 +36,7 @@ export default function SignInForm() {
 
       // Assuming your API returns success, redirect to dashboard
       if (res.data) {
-        // Optional: Save token here if your api interceptor doesn't handle it automatically
-        // localStorage.setItem("token", res.data.token); 
+        localStorage.setItem("token", res.data.token); 
         
         console.log("Login successful:", res.data);
         router.push("/");

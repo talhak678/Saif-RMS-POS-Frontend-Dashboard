@@ -4,7 +4,7 @@ import { AuthServiceInstance } from "./auth.service";
 
 const api = axios.create({
     baseURL: "https://saif-rms-pos-backend.vercel.app/api",
-    withCredentials: false
+    withCredentials: true,
 });
 
 // api.interceptors.request.use(
