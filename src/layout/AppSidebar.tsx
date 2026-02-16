@@ -75,7 +75,7 @@ const navItems: NavItem[] = [
     name: "Authentication",
     subItems: [
       { name: "Users", path: "/users", pro: false },
-      { name: "Roles", path: "/role", pro: false },
+      { name: "Role", path: "/role", pro: false },
     ],
   },
   {
