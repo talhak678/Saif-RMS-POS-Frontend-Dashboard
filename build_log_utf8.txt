@@ -1,0 +1,41 @@
+﻿
+> free-nextjs-admin-dashboard@2.2.2 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in this module is over two months 
+old.  To ensure accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\Huzaifa\AppData\Roamin ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:Stri 
+   ng) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Γû▓ Next.js 16.0.10 (Turbopack)
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To 
+ensure accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+ Γ£ô Compiled successfully in 12.5s
+   Running TypeScript ...
+Failed to compile.
+
+./src/app/(admin)/users/add-user.tsx:94:73
+Type error: Type 'Partial<Record<keyof iUser, any>>' is not assignable to type 
+'string'.
+
+[0m [90m 92 |[39m                     {
+ [90m 93 |[39m                         showAlert [33m&&[39m
+[31m[1m>[22m[39m[90m 94 |[39m                         
+[33m<[39m[33mAlert[39m variant[33m=[39m[32m'error'[39m 
+title[33m=[39m[32m'Validation Error'[39m message[33m=[39m{errors[33m![39m} 
+[33m/[39m[33m>[39m
+ [90m    |[39m                                                                    
+     [31m[1m^[22m[39m
+ [90m 95 |[39m                     }
+ [90m 96 |[39m
+ [90m 97 |[39m                     [33m<[39m[33mdiv[39m 
+className[33m=[39m[32m'grid grid-cols-1 my-2 gap-4'[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

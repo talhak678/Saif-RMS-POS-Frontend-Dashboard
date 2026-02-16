@@ -14,10 +14,10 @@ export interface iUser extends iBaseDTO {
 }
 
 export interface iToken {
-  UserId: string,
-  Name: string,
-  Username: string,
-  Role: string,
+  userId: string,
+  email: string,
+  role: string,
+  restaurantId?: string,
   exp: number
 }
 

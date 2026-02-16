@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: any }) => {
             const res = await authServ.getCurrentUser();
             if (res?.success) {
                 setUser(res?.data);
+                setPermissions(res?.data?.role?.permissions || []);
             }
             else {
                 toast.error(res?.message || 'Failed to fetch user details')

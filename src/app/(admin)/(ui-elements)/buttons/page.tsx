@@ -1,6 +1,6 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import Button from "@/components/ui/button/Button";
+import { Button } from "@/components/ui/button/Button";
 import { BoxIcon } from "@/icons";
 import { Metadata } from "next";
 import React from "react";
@@ -19,10 +19,10 @@ export default function Buttons() {
         {/* Primary Button */}
         <ComponentCard title="Primary Button">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary">
+            <Button size="sm">
               Button Text
             </Button>
-            <Button size="md" variant="primary">
+            <Button>
               Button Text
             </Button>
           </div>
@@ -30,10 +30,12 @@ export default function Buttons() {
         {/* Primary Button with Start Icon */}
         <ComponentCard title="Primary Button with Left Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary" startIcon={<BoxIcon />}>
+            <Button size="sm">
+              <BoxIcon />
               Button Text
             </Button>
-            <Button size="md" variant="primary" startIcon={<BoxIcon />}>
+            <Button>
+              <BoxIcon />
               Button Text
             </Button>
           </div>
@@ -41,11 +43,13 @@ export default function Buttons() {
         {/* Primary Button with Start Icon */}
         <ComponentCard title="Primary Button with Right Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="primary" endIcon={<BoxIcon />}>
+            <Button size="sm">
               Button Text
+              <BoxIcon />
             </Button>
-            <Button size="md" variant="primary" endIcon={<BoxIcon />}>
+            <Button>
               Button Text
+              <BoxIcon />
             </Button>
           </div>
         </ComponentCard>
@@ -56,7 +60,7 @@ export default function Buttons() {
             <Button size="sm" variant="outline">
               Button Text
             </Button>
-            <Button size="md" variant="outline">
+            <Button variant="outline">
               Button Text
             </Button>
           </div>
@@ -64,10 +68,12 @@ export default function Buttons() {
         {/* Outline Button with Start Icon */}
         <ComponentCard title="Outline Button with Left Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="outline" startIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
+              <BoxIcon />
               Button Text
             </Button>
-            <Button size="md" variant="outline" startIcon={<BoxIcon />}>
+            <Button variant="outline">
+              <BoxIcon />
               Button Text
             </Button>
           </div>
@@ -75,11 +81,13 @@ export default function Buttons() {
         {/* Outline Button with Start Icon */}
         <ComponentCard title="Outline Button with Right Icon">
           <div className="flex items-center gap-5">
-            <Button size="sm" variant="outline" endIcon={<BoxIcon />}>
+            <Button size="sm" variant="outline">
               Button Text
+              <BoxIcon />
             </Button>
-            <Button size="md" variant="outline" endIcon={<BoxIcon />}>
+            <Button variant="outline">
               Button Text
+              <BoxIcon />
             </Button>
           </div>
         </ComponentCard>

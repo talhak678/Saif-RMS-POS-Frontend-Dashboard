@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import Loader from "../spinner"
@@ -115,7 +116,6 @@ function Button({
   }
 
   const Comp = "button"
-    typeof children === "string" ? children.toLowerCase().trim() : null
 
   return (
     <Comp
@@ -148,3 +148,4 @@ function Button({
 }
 
 export { Button, buttonVariants }
+export default Button

@@ -4,6 +4,7 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
+import Image from "next/image";
 import React, { useState } from "react";
 
 export default function SignUpForm() {
@@ -11,6 +12,22 @@ export default function SignUpForm() {
   const [isChecked, setIsChecked] = useState(false);
   return (
     <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-2xl bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10 my-10">
+      <div className="flex justify-center mb-8">
+        <Image
+          src="/images/authentication-images/logo-black.png"
+          alt="Logo"
+          width={180}
+          height={48}
+          className="dark:hidden"
+        />
+        <Image
+          src="/images/authentication-images/logo-white.png"
+          alt="Logo"
+          width={180}
+          height={48}
+          className="hidden dark:block"
+        />
+      </div>
       <div className="w-full mx-auto mb-5">
         <Link
           href="/"

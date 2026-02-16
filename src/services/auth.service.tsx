@@ -35,14 +35,14 @@ class AuthService extends BaseService {
         }
         else {
             const decodedToken = this.decryptToken(authStates.token)
-            return decodedToken.UserId
+            return decodedToken.userId
         }
     }
 
     // function to logout
     public logout(): void {
+        this.deleteAllCookies()
         this.redirectToLogin()
-        this.logout()
     }
 
     public async login(credentials: { email: string, password: string }): Promise<iApiResponse> {

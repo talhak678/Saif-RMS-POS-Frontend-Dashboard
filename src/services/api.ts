@@ -4,26 +4,29 @@ import { AuthServiceInstance } from "./auth.service";
 
 const api = axios.create({
     baseURL: "https://saif-rms-pos-backend.vercel.app/api",
-    withCredentials: true,
+    withCredentials: false
 });
 
-// api.interceptors.request.use(
-//     (config) => {
-//         const token = isUserLoggedIn();
-//         if (config.data && config.data instanceof FormData) {
-//             delete config.headers['Content-Type'];
-//         } else {
-//             config.headers['Content-Type'] = 'application/json';
-//         }
-//         if (token.token) {
-//             config.headers['Authorization'] = `Bearer ${token.token}`;
-//         }
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
+api.interceptors.request.use(
+    (config) => {
+        const authService = AuthServiceInstance();
+        const { token } = authService.getAuthStates();
+
+        if (config.data && config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        } else {
+            config.headers['Content-Type'] = 'application/json';
+        }
+
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 api.interceptors.response.use(
     (response) => response,

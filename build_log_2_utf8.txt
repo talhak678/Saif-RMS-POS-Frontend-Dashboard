@@ -1,0 +1,39 @@
+﻿
+> free-nextjs-admin-dashboard@2.2.2 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in this module is over two months 
+old.  To ensure accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\Huzaifa\AppData\Roamin ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:Stri 
+   ng) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Γû▓ Next.js 16.0.10 (Turbopack)
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To 
+ensure accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+ Γ£ô Compiled successfully in 13.5s
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/form/form-elements/InputStates.tsx:36:13
+Type error: Type '{ type: string; defaultValue: string; error: boolean; onChange: 
+(e: ChangeEvent<HTMLInputElement>) => void; placeholder: string; hint: string; }' 
+is not assignable to type 'IntrinsicAttributes & inputProps'.
+  Property 'error' does not exist on type 'IntrinsicAttributes & inputProps'.
+
+[0m [90m 34 |[39m             type[33m=[39m[32m"email"[39m
+ [90m 35 |[39m             defaultValue[33m=[39m{email}
+[31m[1m>[22m[39m[90m 36 |[39m             error[33m=[39m{error}
+ [90m    |[39m             [31m[1m^[22m[39m
+ [90m 37 |[39m             onChange[33m=[39m{handleEmailChange}
+ [90m 38 |[39m             placeholder[33m=[39m[32m"Enter your email"[39m
+ [90m 39 |[39m             hint[33m=[39m{error [33m?[39m [32m"This is an 
+invalid email address."[39m [33m:[39m [32m""[39m}[0m
+Next.js build worker exited with code: 1 and signal: null

@@ -348,7 +348,14 @@ const AppSidebar: React.FC = () => {
                 alt="Logo"
                 width={150}
                 height={40}
-                className="dark:filter dark:brightness-200"
+                className="dark:hidden"
+              />
+              <Image
+                src="/images/authentication-images/logo-white.png"
+                alt="Logo"
+                width={150}
+                height={40}
+                className="hidden dark:block"
               />
             </>
           ) : (

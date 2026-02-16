@@ -9,6 +9,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // 1. Import Router
 import api from "@/services/api"; // 2. Import your API instance
+import { AuthServiceInstance } from "@/services/auth.service";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -36,10 +37,11 @@ export default function SignInForm() {
 
       // Assuming your API returns success, redirect to dashboard
       if (res.data) {
-        localStorage.setItem("token", res.data.token); 
+        // Optional: Save token here if your api interceptor doesn't handle it automatically
+        // localStorage.setItem("token", res.data.token); 
         
         console.log("Login successful:", res.data);
-        router.push("/");
+        window.location.replace("/"); // Using location replace to ensure clean state and bypass router issues
       }
     } catch (err: any) {
       console.error("Login Error:", err);
@@ -145,7 +147,7 @@ export default function SignInForm() {
             {/* 5. Connected Form */}
             <form onSubmit={handleLogin}>
               <div className="space-y-6">
-                
+
                 {/* Error Message Display */}
                 {error && (
                   <div className="p-3 text-sm text-center text-red-500 bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-400">
@@ -157,8 +159,8 @@ export default function SignInForm() {
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input 
-                    placeholder="info@gmail.com" 
+                  <Input
+                    placeholder="info@gmail.com"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
