@@ -9,6 +9,7 @@ import { AuthProvider } from "@/services/permission.service";
 import { ProtectedRoute } from "@/services/protected-route";
 import SplashService from "@/services/splash.service";
 import React from "react";
+import { Toaster } from "react-hot-toast";
 
 export default function AdminLayout({
   children,
@@ -29,7 +30,8 @@ export default function AdminLayout({
       <ProtectedRoute>
         <ModulesProvider>
           <SplashService>
-            <div className="bg-[url('/images/authentication-images/background-2.png')] min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
+            <Toaster position="top-right" />
+            <div className="bg-[url('/images/authentication-images/background-3.png')] min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
               {/* Sidebar and Backdrop */}
               <AppSidebar />
               <Backdrop />

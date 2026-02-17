@@ -12,6 +12,8 @@ api.interceptors.request.use(
         const authService = AuthServiceInstance();
         const { token } = authService.getAuthStates();
 
+        console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+
         if (config.data && config.data instanceof FormData) {
             delete config.headers['Content-Type'];
         } else {
