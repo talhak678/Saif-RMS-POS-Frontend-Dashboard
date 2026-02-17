@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthServiceInstance } from "./auth.service";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: "https://saif-rms-pos-backend.vercel.app/api",
     withCredentials: true
 });
 
