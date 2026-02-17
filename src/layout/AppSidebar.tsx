@@ -39,9 +39,14 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <ShoppingCart className="w-5 h-5" />,
+    icon: <ListIcon className="w-5 h-5" />,
     name: "Orders",
     path: "/orders",
+  },
+  {
+    icon: <ShoppingCartIcon className="w-5 h-5" />,
+    name: "POS",
+    path: "/pos",
   },
   {
     icon: <Users className="w-5 h-5" />,
