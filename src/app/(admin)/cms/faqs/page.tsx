@@ -3,31 +3,37 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { toast } from "react-hot-toast";
-import { HelpCircle, Plus, Trash2, Edit3, ChevronDown, ChevronUp, MessageCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, X, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { createPortal } from "react-dom";
 
-interface FAQ {
+type Faq = {
     id: string;
     question: string;
     answer: string;
-}
+};
 
-export default function FAQPage() {
-    const [faqs, setFaqs] = useState<FAQ[]>([]);
+type Props = {
+    embedded?: boolean;
+};
+
+export default function FaqsPage({ embedded = false }: Props) {
+    const [faqs, setFaqs] = useState<Faq[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({ question: "", answer: "" });
-    const [submitting, setSubmitting] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentFaq, setCurrentFaq] = useState<Partial<Faq>>({});
+    const [saving, setSaving] = useState(false);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchFAQs();
+        fetchFaqs();
     }, []);
 
-    const fetchFAQs = async () => {
+    const fetchFaqs = async () => {
         try {
             const res = await api.get("/cms/faq");
-            if (res.data?.success) {
-                setFaqs(res.data.data || []);
+            if (res.data.success) {
+                setFaqs(res.data.data);
             }
         } catch (error) {
             console.error("Failed to fetch FAQs", error);
@@ -36,183 +42,221 @@ export default function FAQPage() {
         }
     };
 
-    const handleSubmit = async () => {
-        if (!formData.question || !formData.answer) return toast.error("Both fields are required");
-        setSubmitting(true);
-        try {
-            let res;
-            if (editingId) {
-                res = await api.post("/cms/faq", { ...formData, id: editingId, faqId: editingId });
-            } else {
-                res = await api.post("/cms/faq", formData);
-            }
-
-            if (res.data?.success) {
-                toast.success(editingId ? "FAQ updated" : "FAQ added");
-                fetchFAQs();
-                resetForm();
-            }
-        } catch (error) {
-            toast.error("Process failed");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this FAQ?")) return;
+        if (!confirm("Are you sure you want to delete this FAQ?")) return;
         try {
             await api.delete(`/cms/faq/${id}`);
-            setFaqs(faqs.filter(f => f.id !== id));
-            toast.success("FAQ deleted");
+            setFaqs(prev => prev.filter(f => f.id !== id));
+            toast.success("FAQ deleted successfully");
         } catch (error) {
-            toast.error("Deletion failed");
+            toast.error("Failed to delete FAQ");
         }
     };
 
-    const startEdit = (faq: FAQ) => {
-        setFormData({ question: faq.question, answer: faq.answer });
-        setEditingId(faq.id);
-        setShowForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            if (currentFaq.id) {
+                const res = await api.put(`/cms/faq/${currentFaq.id}`, currentFaq);
+                if (res.data.success) {
+                    setFaqs(prev => prev.map(f => f.id === currentFaq.id ? res.data.data : f));
+                    toast.success("FAQ updated successfully");
+                }
+            } else {
+                const res = await api.post("/cms/faq", currentFaq);
+                if (res.data.success) {
+                    setFaqs(prev => [res.data.data, ...prev]);
+                    toast.success("FAQ created successfully");
+                }
+            }
+            setIsModalOpen(false);
+            setCurrentFaq({});
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Failed to save FAQ");
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const resetForm = () => {
-        setFormData({ question: "", answer: "" });
-        setEditingId(null);
-        setShowForm(false);
-    };
+    const filteredFaqs = faqs.filter(f =>
+        f.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.answer.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    if (loading) return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
+    if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
 
     return (
-        <div className="max-w-5xl mx-auto pb-20">
-            <div className="flex justify-between items-center mb-10">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
-                        <HelpCircle className="w-8 h-8 text-brand-500" />
-                        Help Center FAQs
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Manage frequently asked questions that appear on your support page.</p>
-                </div>
-                <button
-                    onClick={() => { if (showForm) resetForm(); else setShowForm(true); }}
-                    className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-2xl transition-all shadow-lg active:scale-95 font-bold"
-                >
-                    <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} />
-                    {editingId ? "Edit Item" : "Add FAQ"}
-                </button>
-            </div>
-
-            {/* Editor Box */}
-            {showForm && (
-                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-brand-500/20 rounded-[2.5rem] p-10 mb-12 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-brand-500 rounded-3xl text-white shadow-xl shadow-brand-500/30">
-                            {editingId ? <Edit3 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-black text-gray-800 dark:text-white">{editingId ? "Update FAQ" : "New Support Question"}</h2>
-                            <p className="text-sm text-gray-500">Use clear and concise language for better customer understanding.</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="space-y-3">
-                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                                <MessageCircle className="w-3 h-3" /> The Question
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="e.g. Do you offer contactless delivery?"
-                                value={formData.question}
-                                onChange={e => setFormData({ ...formData, question: e.target.value })}
-                                className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent border-gray-100 dark:border-gray-800 focus:border-brand-500/50 rounded-2xl px-6 py-4 text-base font-semibold focus:ring-0 transition-all outline-none"
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                                <Edit3 className="w-3 h-3" /> The Answer
-                            </label>
-                            <textarea
-                                rows={5}
-                                placeholder="Describe the answer in detail here..."
-                                value={formData.answer}
-                                onChange={e => setFormData({ ...formData, answer: e.target.value })}
-                                className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent border-gray-100 dark:border-gray-800 focus:border-brand-500/50 rounded-2xl px-6 py-4 text-base font-medium focus:ring-0 transition-all outline-none resize-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="mt-10 flex gap-4">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={submitting}
-                            className="bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-2xl font-black text-lg transition-all shadow-xl shadow-brand-500/20 disabled:opacity-50 active:scale-95"
-                        >
-                            {submitting ? "Publishing..." : editingId ? "Save Changes" : "Post Question"}
-                        </button>
-                        <button
-                            onClick={resetForm}
-                            className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-10 py-4 rounded-2xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-                        >
-                            Dismiss
-                        </button>
+        <div className="space-y-8">
+            {!embedded && (
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                            <div className="p-3 bg-brand-500 rounded-2xl text-white shadow-lg shadow-brand-500/20">
+                                <HelpCircle className="w-6 h-6" />
+                            </div>
+                            FAQ Manager
+                        </h1>
+                        <p className="text-gray-500 font-medium mt-1">Manage frequently asked questions.</p>
                     </div>
                 </div>
             )}
 
-            {/* List Section */}
-            <div className="space-y-6">
-                {faqs.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/20 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
-                        <HelpCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 font-bold text-lg">Your FAQ list is empty.</p>
-                        <p className="text-sm text-gray-400 mt-2">Help your customers by providing quick answers.</p>
-                    </div>
-                ) : (
-                    faqs.map((faq) => (
-                        <div key={faq.id} className="group bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-200/50 rounded-[2rem] p-8 hover:shadow-2xl hover:shadow-brand-500/5 transition-all duration-300">
-                            <div className="flex justify-between items-start gap-6">
-                                <div className="flex-1">
-                                    <h3 className="text-xl font-black text-gray-800 dark:text-white leading-tight mb-4 group-hover:text-brand-500 transition-colors">
-                                        Q: {faq.question}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed font-normak">
-                                        {faq.answer}
-                                    </p>
+            {embedded && (
+                <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold">Manage FAQs</h3>
+                    <button
+                        onClick={() => { setCurrentFaq({}); setIsModalOpen(true); }}
+                        className="flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg hover:bg-brand-600 text-sm"
+                    >
+                        <Plus className="w-4 h-4" /> Add FAQ
+                    </button>
+                </div>
+            )}
+
+            {!embedded && (
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => { setCurrentFaq({}); setIsModalOpen(true); }}
+                        className="flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all active:scale-95"
+                    >
+                        <Plus className="w-5 h-5" /> Add New FAQ
+                    </button>
+                </div>
+            )}
+
+            {/* Search */}
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                <Search className="w-5 h-5 text-gray-400" />
+                <input
+                    type="text"
+                    placeholder="Search FAQs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 bg-transparent border-none outline-none font-medium placeholder-gray-400"
+                />
+            </div>
+
+            {/* List */}
+            <div className="space-y-4">
+                {filteredFaqs.map((faq) => (
+                    <div key={faq.id} className="group bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                        <div
+                            onClick={() => setExpandedId(expandedId === faq.id ? null : faq.id)}
+                            className="p-6 cursor-pointer flex items-center justify-between"
+                        >
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-4">
+                                <span className="w-8 h-8 rounded-full bg-brand-50/50 dark:bg-brand-900/10 flex items-center justify-center text-brand-500 text-sm font-black">Q</span>
+                                {faq.question}
+                            </h3>
+                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${expandedId === faq.id ? "rotate-180" : ""}`} />
+                        </div>
+
+                        <div className={`overflow-hidden transition-all duration-300 ${expandedId === faq.id ? "max-h-96" : "max-h-0"}`}>
+                            <div className="px-6 pb-6 pt-0 text-gray-600 dark:text-gray-400 font-medium leading-relaxed border-t border-gray-50 dark:border-gray-800/50">
+                                <div className="pt-4 flex gap-4">
+                                    <span className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm font-black shrink-0">A</span>
+                                    {faq.answer}
                                 </div>
-                                <div className="flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-2 justify-end mt-4">
                                     <button
-                                        onClick={() => startEdit(faq)}
-                                        className="p-3 bg-brand-500/10 text-brand-500 rounded-2xl hover:bg-brand-500 hover:text-white transition-all shadow-sm"
-                                        title="Edit"
+                                        onClick={(e) => { e.stopPropagation(); setCurrentFaq(faq); setIsModalOpen(true); }}
+                                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors"
                                     >
-                                        <Edit3 className="w-5 h-5" />
+                                        Edit
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(faq.id)}
-                                        className="p-3 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                                        title="Delete"
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(faq.id); }}
+                                        className="px-4 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors"
                                     >
-                                        <Trash2 className="w-5 h-5" />
+                                        Delete
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
             </div>
 
-            <div className="mt-12 p-8 bg-brand-500/5 border-2 border-brand-500/10 rounded-[2.5rem] flex items-center gap-6">
-                <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-brand-500/20">
-                    <HelpCircle className="w-8 h-8" />
-                </div>
-                <div>
-                    <h4 className="text-xl font-black text-gray-900 dark:text-white">Customer Satisfaction</h4>
-                    <p className="text-gray-500 dark:text-gray-400">Studies show that a Good FAQ section reduces support tickets by up to 35%.</p>
-                </div>
-            </div>
+            {/* Modal */}
+            {isModalOpen && createPortal(
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white">{currentFaq.id ? "Edit FAQ" : "New FAQ"}</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                                <X className="w-6 h-6 text-gray-500" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSave} className="p-8 space-y-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Question</label>
+                                    <input
+                                        required
+                                        value={currentFaq.question || ""}
+                                        onChange={e => setCurrentFaq({ ...currentFaq, question: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 py-4 font-bold outline-none transition-all"
+                                        placeholder="Enter question (e.g., What are your hours?)"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Answer</label>
+                                    <textarea
+                                        required
+                                        value={currentFaq.answer || ""}
+                                        onChange={e => setCurrentFaq({ ...currentFaq, answer: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 py-4 font-medium outline-none transition-all resize-none"
+                                        rows={4}
+                                        placeholder="Enter answer..."
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-6 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                {!currentFaq.id && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setSaving(true);
+                                            api.post("/cms/faq", currentFaq).then(res => {
+                                                if (res.data.success) {
+                                                    setFaqs(prev => [res.data.data, ...prev]);
+                                                    toast.success("FAQ created successfully");
+                                                    setCurrentFaq({}); // Clear form
+                                                    // Keep modal open
+                                                }
+                                            }).catch(error => {
+                                                toast.error(error.response?.data?.message || "Failed to save FAQ");
+                                            }).finally(() => {
+                                                setSaving(false);
+                                            });
+                                        }}
+                                        disabled={saving}
+                                        className="px-6 py-3 rounded-xl font-bold bg-white text-brand-500 border-2 border-brand-500 hover:bg-brand-50 transition-colors disabled:opacity-50"
+                                    >
+                                        Save & Add Another
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="px-8 py-3 rounded-xl font-bold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/20 disabled:opacity-50"
+                                >
+                                    {saving ? "Saving..." : "Save FAQ"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>, document.body
+            )}
         </div>
     );
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { toast } from "react-hot-toast";
 import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check, Search, Info, Phone, MessageSquare, Plus, Trash2, List } from "lucide-react";
+import BlogsPage from "./blogs/page";
+import FaqsPage from "./faqs/page";
 
 const DEFAULT_CONFIG = {
     home: {
@@ -119,6 +121,64 @@ const DEFAULT_CONFIG = {
             form: {
                 required: true, enabled: true,
                 content: { title: "Make A Reservation", description: "Fill out the form below to book a table." }
+            },
+        }
+    },
+    blogs: {
+        sections: {
+            banner: {
+                required: false, enabled: true,
+                content: { title: "Our Blogs", breadcrumb: "Latest News", imageUrl: "" }
+            },
+            blogList: {
+                required: true, enabled: true,
+                content: { title: "Latest Articles" }
+            },
+            footer: {
+                required: true, enabled: true,
+                content: {
+                    address: "123 Street, City, Country",
+                    description: "Quality food delivered to your doorstep.",
+                    contactEmail: "info@example.com",
+                    contactPhone: "+123456789",
+                    facebook: "",
+                    instagram: "",
+                    tiktok: "",
+                    openHours: "Mon-Sun: 9AM - 11PM"
+                }
+            },
+            copyrightBar: {
+                required: false, enabled: false,
+                content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
+            },
+        }
+    },
+    faq: {
+        sections: {
+            banner: {
+                required: false, enabled: true,
+                content: { title: "Frequently Asked Questions", breadcrumb: "Help Center", imageUrl: "" }
+            },
+            faqList: {
+                required: true, enabled: true,
+                content: { title: "Common Questions" }
+            },
+            footer: {
+                required: true, enabled: true,
+                content: {
+                    address: "123 Street, City, Country",
+                    description: "Quality food delivered to your doorstep.",
+                    contactEmail: "info@example.com",
+                    contactPhone: "+123456789",
+                    facebook: "",
+                    instagram: "",
+                    tiktok: "",
+                    openHours: "Mon-Sun: 9AM - 11PM"
+                }
+            },
+            copyrightBar: {
+                required: false, enabled: false,
+                content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
             },
         }
     }
@@ -321,10 +381,13 @@ export default function CMSPage() {
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${activeTab === p ? "bg-white/20" : "bg-gray-100 dark:bg-gray-800"}`}>
+                                            {p === 'p' && <Layout className="w-4 h-4" />}
                                             {p === 'home' && <Layout className="w-4 h-4" />}
                                             {p === 'about' && <Info className="w-4 h-4" />}
                                             {p === 'contact' && <Phone className="w-4 h-4" />}
                                             {p === 'menu' && <List className="w-4 h-4" />}
+                                            {p === 'blogs' && <MessageSquare className="w-4 h-4" />}
+                                            {p === 'faq' && <Check className="w-4 h-4" />}
                                         </div>
                                         {p} Page Setup
                                     </div>
@@ -526,6 +589,15 @@ export default function CMSPage() {
                                                                     </div>
                                                                 </div>
                                                             ))}
+                                                    </div>
+                                                )}
+                                                {/* SPECIAL: Embedded Managers */}
+                                                {(sectionKey === 'blogList' || sectionKey === 'faqList') && (
+                                                    <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+                                                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] p-6 border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                                            {sectionKey === 'blogList' && <BlogsPage embedded={true} />}
+                                                            {sectionKey === 'faqList' && <FaqsPage embedded={true} />}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
