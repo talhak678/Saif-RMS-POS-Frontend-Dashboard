@@ -105,7 +105,7 @@ export default function IngredientsPage() {
     };
 
     return (
-        <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900">
+        <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
 
             {/* HEADER */}
             <div className="md:flex gap-1 items-center justify-between mb-6">
