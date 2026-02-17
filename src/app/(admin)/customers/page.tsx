@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { Eye } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openCustomerId, setOpenCustomerId] = useState<string | null>(null);
+
+  // View Modal State
+  const [viewCustomer, setViewCustomer] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -62,63 +66,52 @@ export default function CustomersPage() {
                 </td>
               </tr>
             ) : (
-              customers.map((customer, index) => (
-                <>
-                  {/* MAIN ROW */}
-                  <tr
-                    key={customer.id}
-                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td className="px-4 py-3">{index + 1}</td>
-                    <td className="px-4 py-3 font-medium">{customer.name}</td>
-                    <td className="px-4 py-3">{customer.email}</td>
-                    <td className="px-4 py-3">{customer.phone}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                        {customer._count?.orders ?? 0} Orders
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 flex gap-2">
-                      <button
-                        onClick={() =>
-                          setOpenCustomerId(
-                            openCustomerId === customer.id ? null : customer.id
-                          )
-                        }
-                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                        title="View Details"
-                      >
-                        <Eye size={18} />
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* DETAILS ROW */}
-                  {openCustomerId === customer.id && (
-                    <tr className="bg-gray-50 dark:bg-gray-700">
-                      <td colSpan={6} className="p-5 text-sm">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                            <h3 className="font-semibold mb-3">Customer Profile</h3>
-                            <p><b>Name:</b> {customer.name}</p>
-                            <p><b>Email:</b> {customer.email}</p>
-                            <p><b>Phone:</b> {customer.phone}</p>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold mb-3">Stats</h3>
-                            <p><b>Total Orders:</b> {customer._count?.orders ?? 0}</p>
-                            {/* You could add "Total Spent" or "Last Order Date" here if available in API */}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
+              customers.map((customer: any, index: number) => (
+                <tr
+                  key={customer.id}
+                  className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3 font-medium">{customer.name}</td>
+                  <td className="px-4 py-3">{customer.email}</td>
+                  <td className="px-4 py-3">{customer.phone}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      {customer._count?.orders ?? 0} Orders
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setViewCustomer(customer);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                      title="View Details"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      <ViewDetailModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title="Customer Details"
+        data={viewCustomer}
+        fields={[
+          { label: "Name", key: "name" },
+          { label: "Email", key: "email" },
+          { label: "Phone", key: "phone" },
+          { label: "Total Orders", render: (data) => data?._count?.orders ?? 0 },
+          { label: "Created At", render: (data) => data?.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A' },
+        ]}
+      />
     </div>
   );
 }

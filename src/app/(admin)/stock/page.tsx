@@ -2,36 +2,39 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { 
-  Eye, 
-  Package, 
-  RefreshCcw, 
-  Save, 
-  X, 
-  Store, 
-  TrendingUp,
+import {
+  Eye,
+  Package,
+  RefreshCcw,
+  Save,
+  X,
+  Store,
   Plus
 } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 export default function StocksPage() {
   // --- MAIN STATES ---
   const [branches, setBranches] = useState<any[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
-  
+
   const [stocks, setStocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
+
+  // --- VIEW DETAILS MODAL ---
+  const [viewStock, setViewStock] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   // --- MODAL STATES ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'ADD' | 'UPDATE'>('ADD');
-  
+
   // Form Data
   const [ingredientId, setIngredientId] = useState<string>("");
   const [quantity, setQuantity] = useState<string | number>("");
   const [selectedIngredientName, setSelectedIngredientName] = useState<string>(""); // Display name for Update mode
   const [selectedIngredientUnit, setSelectedIngredientUnit] = useState<string>(""); // Unit display
-  
+
   // Data for Dropdown
   const [ingredientsList, setIngredientsList] = useState<any[]>([]);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -97,13 +100,13 @@ export default function StocksPage() {
     setModalMode('ADD');
     setIngredientId(""); // Reset selection
     setQuantity("");
-    setSelectedIngredientUnit(""); 
-    
+    setSelectedIngredientUnit("");
+
     // Fetch ingredients agar pehle nahi kiye
     if (ingredientsList.length === 0) {
-        await fetchIngredients();
+      await fetchIngredients();
     }
-    
+
     setIsModalOpen(true);
   };
 
@@ -119,10 +122,10 @@ export default function StocksPage() {
 
   // Handle Dropdown Change (to set unit dynamically)
   const handleIngredientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const id = e.target.value;
-      setIngredientId(id);
-      const ing = ingredientsList.find(i => i.id === id);
-      if (ing) setSelectedIngredientUnit(ing.unit);
+    const id = e.target.value;
+    setIngredientId(id);
+    const ing = ingredientsList.find(i => i.id === id);
+    if (ing) setSelectedIngredientUnit(ing.unit);
   };
 
   // Submit Form
@@ -151,44 +154,44 @@ export default function StocksPage() {
 
   return (
     <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900">
-      
+
       {/* HEADER & CONTROLS */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
             <Package className="text-blue-600" />
             Stock Management
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Manage inventory for your branches.
-            </p>
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Manage inventory for your branches.
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-            {/* Branch Selector */}
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border dark:border-gray-700">
-                <Store size={18} className="text-gray-500" />
-                <select
-                    value={selectedBranchId}
-                    onChange={(e) => setSelectedBranchId(e.target.value)}
-                    className="bg-transparent outline-none text-sm font-medium text-gray-700 dark:text-gray-200 min-w-[180px]"
-                >
-                    <option value="" disabled>Select a Branch</option>
-                    {branches.map((b) => (
-                        <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Add Stock Button */}
-            <button
-                onClick={openAddModal}
-                disabled={!selectedBranchId}
-                    className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          {/* Branch Selector */}
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border dark:border-gray-700">
+            <Store size={18} className="text-gray-500" />
+            <select
+              value={selectedBranchId}
+              onChange={(e) => setSelectedBranchId(e.target.value)}
+              className="bg-transparent outline-none text-sm font-medium text-gray-700 dark:text-gray-200 min-w-[180px]"
             >
-                <Plus size={18} />
-                Add Stock
-            </button>
+              <option value="" disabled>Select a Branch</option>
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Add Stock Button */}
+          <button
+            onClick={openAddModal}
+            disabled={!selectedBranchId}
+            className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Add Stock
+          </button>
         </div>
       </div>
 
@@ -219,77 +222,45 @@ export default function StocksPage() {
               </tr>
             ) : (
               stocks.map((stock: any) => (
-                <>
-                  <tr
-                    key={stock.id}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors ${
-                      openId === stock.id ? "bg-gray-50 dark:bg-gray-700/50" : ""
-                    }`}
-                  >
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
-                      {stock.ingredient?.name}
-                    </td>
+                <tr
+                  key={stock.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                    {stock.ingredient?.name}
+                  </td>
 
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
-                          stock.quantity < 10 
-                          ? "bg-red-100 text-red-800 border-red-200" 
-                          : "bg-green-100 text-green-800 border-green-200"
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${stock.quantity < 10
+                        ? "bg-red-100 text-red-800 border-red-200"
+                        : "bg-green-100 text-green-800 border-green-200"
                       }`}>
-                        {stock.quantity} {stock.ingredient?.unit}
-                      </span>
-                    </td>
+                      {stock.quantity} {stock.ingredient?.unit}
+                    </span>
+                  </td>
 
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">
-                      {new Date(stock.updatedAt).toLocaleString()}
-                    </td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">
+                    {new Date(stock.updatedAt).toLocaleString()}
+                  </td>
 
-                    <td className="px-6 py-4 flex items-center gap-2">
-                        <button
-                            onClick={() => openUpdateModal(stock)}
-                            className="text-xs px-3 py-1.5 rounded bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-1 transition-colors"
-                        >
-                            <RefreshCcw size={12} /> Update
-                        </button>
-                        <button
-                            onClick={() => setOpenId(openId === stock.id ? null : stock.id)}
-                            className={`p-1.5 rounded transition-colors ${
-                            openId === stock.id
-                                ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30"
-                                : "hover:bg-gray-100 text-gray-500 dark:hover:bg-gray-700"
-                            }`}
-                        >
-                            <Eye size={18} />
-                        </button>
-                    </td>
-                  </tr>
-
-                  {/* DETAILS ACCORDION */}
-                  {openId === stock.id && (
-                    <tr className="bg-gray-50 dark:bg-gray-700/30 border-b dark:border-gray-700 animate-in fade-in slide-in-from-top-2">
-                      <td colSpan={4} className="p-6 text-sm">
-                        <div className="grid md:grid-cols-2 gap-8">
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                              <TrendingUp size={16} className="text-blue-500" />
-                              Detailed Information
-                            </h3>
-                            <div className="space-y-2 text-gray-600 dark:text-gray-300">
-                              <p><span className="font-medium text-gray-900 dark:text-gray-200">Ingredient:</span> {stock.ingredient?.name}</p>
-                              <p><span className="font-medium text-gray-900 dark:text-gray-200">Measuring Unit:</span> {stock.ingredient?.unit}</p>
-                              <p><span className="font-medium text-gray-900 dark:text-gray-200">Current Qty:</span> {stock.quantity}</p>
-                            </div>
-                          </div>
-                          <div className="text-xs font-mono text-gray-500 dark:text-gray-400 space-y-1">
-                             <p>Stock ID: {stock.id}</p>
-                             <p>Ing ID: {stock.ingredientId}</p>
-                             <p>Branch: {stock.branch?.name}</p>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
+                  <td className="px-6 py-4 flex items-center gap-2">
+                    <button
+                      onClick={() => openUpdateModal(stock)}
+                      className="text-xs px-3 py-1.5 rounded bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-1 transition-colors"
+                    >
+                      <RefreshCcw size={12} /> Update
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewStock(stock);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="p-1.5 rounded transition-colors hover:bg-gray-100 text-gray-500 dark:hover:bg-gray-700"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </tr>
               ))
             )}
           </tbody>
@@ -300,7 +271,7 @@ export default function StocksPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-            
+
             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                 {modalMode === 'ADD' ? "Add Stock" : "Update Stock"}
@@ -311,33 +282,33 @@ export default function StocksPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              
+
               {/* Ingredient Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Ingredient
                 </label>
-                
+
                 {modalMode === 'UPDATE' ? (
-                    // Update Mode: Read-only Text
-                    <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium">
-                        {selectedIngredientName}
-                    </div>
+                  // Update Mode: Read-only Text
+                  <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium">
+                    {selectedIngredientName}
+                  </div>
                 ) : (
-                    // Add Mode: Dropdown
-                    <select
-                        required
-                        value={ingredientId}
-                        onChange={handleIngredientSelect}
-                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    >
-                        <option value="" disabled>Select Ingredient</option>
-                        {ingredientsList.map((ing) => (
-                            <option key={ing.id} value={ing.id}>
-                                {ing.name} ({ing.unit})
-                            </option>
-                        ))}
-                    </select>
+                  // Add Mode: Dropdown
+                  <select
+                    required
+                    value={ingredientId}
+                    onChange={handleIngredientSelect}
+                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  >
+                    <option value="" disabled>Select Ingredient</option>
+                    {ingredientsList.map((ing) => (
+                      <option key={ing.id} value={ing.id}>
+                        {ing.name} ({ing.unit})
+                      </option>
+                    ))}
+                  </select>
                 )}
               </div>
 
@@ -370,7 +341,7 @@ export default function StocksPage() {
                   disabled={updateLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 shadow-md"
                 >
-                  {updateLoading ? "Saving..." : <><Save size={16}/> Save Stock</>}
+                  {updateLoading ? "Saving..." : <><Save size={16} /> Save Stock</>}
                 </button>
               </div>
             </form>
@@ -378,6 +349,22 @@ export default function StocksPage() {
         </div>
       )}
 
+      {/* VIEW DETAIL MODAL */}
+      <ViewDetailModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title="Stock Details"
+        data={viewStock}
+        fields={[
+          { label: "Ingredient", render: (data: any) => data?.ingredient?.name },
+          { label: "Measuring Unit", render: (data: any) => data?.ingredient?.unit },
+          { label: "Current Quantity", key: "quantity" },
+          { label: "Branch", render: (data: any) => data?.branch?.name },
+          { label: "Last Updated", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
+          { label: "Stock ID", key: "id" },
+          { label: "Ingredient ID", key: "ingredientId" },
+        ]}
+      />
     </div>
   );
 }

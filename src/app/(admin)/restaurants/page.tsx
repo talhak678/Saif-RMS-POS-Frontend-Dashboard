@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { Eye, ExternalLink, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 
 const getStatusBadge = (status: string) => {
@@ -29,7 +30,10 @@ const getSubscriptionBadge = (sub: string) => {
 export default function RestaurantsPage() {
     const [restaurants, setRestaurants]: any = useState([]);
     const [loading, setLoading] = useState(true);
-    const [openId, setOpenId] = useState<string | null>(null);
+
+    // --- VIEW DETAILS MODAL ---
+    const [viewRestaurant, setViewRestaurant] = useState<any>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     const router = useRouter();
 
@@ -103,191 +107,119 @@ export default function RestaurantsPage() {
                             </tr>
                         ) : (
                             restaurants.map((res: any, index: number) => (
-                                <>
-                                    {/* MAIN ROW */}
-                                    <tr
-                                        key={res.id}
-                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">{index + 1}</td>
+                                <tr
+                                    key={res.id}
+                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                    <td className="px-4 py-3">{index + 1}</td>
 
-                                        <td className="px-4 py-3 font-medium flex items-center gap-3">
-                                            <img
-                                                src={res.logo}
-                                                alt={res.name}
-                                                className="w-10 h-10 rounded object-cover"
-                                            />
-                                            <div>
-                                                <div>{res.name}</div>
-                                                <div className="text-xs text-gray-500">
-                                                    {res.slug}
-                                                </div>
+                                    <td className="px-4 py-3 font-medium flex items-center gap-3">
+                                        <img
+                                            src={res.logo}
+                                            alt={res.name}
+                                            className="w-10 h-10 rounded object-cover"
+                                        />
+                                        <div>
+                                            <div>{res.name}</div>
+                                            <div className="text-xs text-gray-500">
+                                                {res.slug}
                                             </div>
-                                        </td>
+                                        </div>
+                                    </td>
 
-                                        <td className="px-4 py-3">
-                                            <span
-                                                className={getSubscriptionBadge(
-                                                    res.subscription
-                                                )}
-                                            >
-                                                {res.subscription}
-                                            </span>
-                                        </td>
+                                    <td className="px-4 py-3">
+                                        <span
+                                            className={getSubscriptionBadge(
+                                                res.subscription
+                                            )}
+                                        >
+                                            {res.subscription}
+                                        </span>
+                                    </td>
 
-                                        <td className="px-4 py-3">
-                                            <span
-                                                className={getStatusBadge(res.status)}
-                                            >
-                                                {res.status}
-                                            </span>
-                                        </td>
+                                    <td className="px-4 py-3">
+                                        <span
+                                            className={getStatusBadge(res.status)}
+                                        >
+                                            {res.status}
+                                        </span>
+                                    </td>
 
-                                        <td className="px-4 py-3">
-                                            {res._count.branches}
-                                        </td>
+                                    <td className="px-4 py-3">
+                                        {res._count.branches}
+                                    </td>
 
-                                        <td className="px-4 py-3">
-                                            {res._count.users}
-                                        </td>
+                                    <td className="px-4 py-3">
+                                        {res._count.users}
+                                    </td>
 
-                                        <td className="px-4 py-3 text-xs">
-                                            {new Date(
-                                                res.createdAt
-                                            ).toLocaleDateString()}
-                                        </td>
+                                    <td className="px-4 py-3 text-xs">
+                                        {new Date(
+                                            res.createdAt
+                                        ).toLocaleDateString()}
+                                    </td>
 
-                                        <td className="px-4 py-3 flex gap-2">
+                                    <td className="px-4 py-3 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setViewRestaurant(res);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
+
+                                        {res._count.branches > 0 && (
                                             <button
                                                 onClick={() =>
-                                                    setOpenId(
-                                                        openId === res.id ? null : res.id
+                                                    router.push(
+                                                        `/branches?restaurantId=${res.id}`
                                                     )
                                                 }
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1"
                                             >
-                                                <Eye size={18} />
+                                                View Branches
+                                                <ExternalLink size={12} />
                                             </button>
-
-                                            {res._count.branches > 0 && (
-                                                <button
-                                                    onClick={() =>
-                                                        router.push(
-                                                            `/branches?restaurantId=${res.id}`
-                                                        )
-                                                    }
-                                                    className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1"
-                                                >
-                                                    View Branches
-                                                    <ExternalLink size={12} />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-
-                                    {/* DETAILS DROPDOWN */}
-                                    {openId === res.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700">
-                                            <td colSpan={8} className="p-5 text-sm">
-                                                <div className="grid md:grid-cols-2 gap-6">
-                                                    {/* LEFT */}
-                                                    <div>
-                                                        <h3 className="font-semibold mb-2">
-                                                            Restaurant Details
-                                                        </h3>
-                                                        <p>
-                                                            <b>Name:</b> {res.name}
-                                                        </p>
-                                                        <p>
-                                                            <b>Description:</b>{" "}
-                                                            {res.description}
-                                                        </p>
-                                                        <p>
-                                                            <b>Slug:</b> {res.slug}
-                                                        </p>
-                                                        <p>
-                                                            <b>Subscription:</b>{" "}
-                                                            {res.subscription}
-                                                        </p>
-                                                        <p>
-                                                            <b>Status:</b> {res.status}
-                                                        </p>
-                                                    </div>
-
-                                                    {/* RIGHT */}
-                                                    <div>
-                                                        <h3 className="font-semibold mb-2">
-                                                            Social & Meta
-                                                        </h3>
-
-                                                        {res.facebookUrl && (
-                                                            <p>
-                                                                <b>Facebook:</b>{" "}
-                                                                <a
-                                                                    href={res.facebookUrl}
-                                                                    target="_blank"
-                                                                    className="text-blue-600 underline"
-                                                                >
-                                                                    Link
-                                                                </a>
-                                                            </p>
-                                                        )}
-
-                                                        {res.instagramUrl && (
-                                                            <p>
-                                                                <b>Instagram:</b>{" "}
-                                                                <a
-                                                                    href={res.instagramUrl}
-                                                                    target="_blank"
-                                                                    className="text-pink-600 underline"
-                                                                >
-                                                                    Link
-                                                                </a>
-                                                            </p>
-                                                        )}
-
-                                                        {res.tiktokUrl && (
-                                                            <p>
-                                                                <b>TikTok:</b>{" "}
-                                                                <a
-                                                                    href={res.tiktokUrl}
-                                                                    target="_blank"
-                                                                    className="underline"
-                                                                >
-                                                                    Link
-                                                                </a>
-                                                            </p>
-                                                        )}
-
-                                                        <p>
-                                                            <b>Meta Pixel ID:</b>{" "}
-                                                            {res.metaPixelId || "N/A"}
-                                                        </p>
-
-                                                        <p>
-                                                            <b>Created:</b>{" "}
-                                                            {new Date(
-                                                                res.createdAt
-                                                            ).toLocaleString()}
-                                                        </p>
-
-                                                        <p>
-                                                            <b>Updated:</b>{" "}
-                                                            {new Date(
-                                                                res.updatedAt
-                                                            ).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </>
+                                        )}
+                                    </td>
+                                </tr>
                             ))
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Restaurant Details"
+                data={viewRestaurant}
+                fields={[
+                    { label: "Name", key: "name" },
+                    { label: "Description", key: "description", fullWidth: true },
+                    { label: "Slug", key: "slug" },
+                    { label: "Subscription", render: (data: any) => <span className={getSubscriptionBadge(data?.subscription)}>{data?.subscription}</span> },
+                    { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.status)}>{data?.status}</span> },
+                    {
+                        label: "Facebook",
+                        render: (data: any) => data?.facebookUrl ? <a href={data.facebookUrl} target="_blank" className="text-blue-600 underline">Link</a> : 'N/A'
+                    },
+                    {
+                        label: "Instagram",
+                        render: (data: any) => data?.instagramUrl ? <a href={data.instagramUrl} target="_blank" className="text-pink-600 underline">Link</a> : 'N/A'
+                    },
+                    {
+                        label: "TikTok",
+                        render: (data: any) => data?.tiktokUrl ? <a href={data.tiktokUrl} target="_blank" className="underline">Link</a> : 'N/A'
+                    },
+                    { label: "Meta Pixel ID", key: "metaPixelId" },
+                    { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
+                    { label: "Updated At", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
+                ]}
+            />
         </div>
     );
 }
