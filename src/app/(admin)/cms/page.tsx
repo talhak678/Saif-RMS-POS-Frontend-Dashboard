@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check, Search, Info, Phone, MessageSquare, Plus, Trash2, List } from "lucide-react";
 
 const DEFAULT_CONFIG = {
@@ -11,7 +11,7 @@ const DEFAULT_CONFIG = {
             header: {
                 required: true, enabled: true,
                 content: {
-                    menuItems: "Home, About Us, Our Menu, Contact Us, FAQ",
+                    menuItems: "Home, Our Menu, Contact Us",
                     showCart: "true",
                     showLogin: "true",
                     logoUrl: ""
@@ -22,7 +22,7 @@ const DEFAULT_CONFIG = {
                 content: { title: "Delicious Food For You", subtitle: "Best quality food in town", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
             },
             browseMenu: {
-                required: false, enabled: false,
+                required: false, enabled: true,
                 content: { title: "Browse Our Menu", selectedCategoryIds: [] }
             },
             todaysSpecial: {
@@ -162,6 +162,17 @@ export default function CMSPage() {
                                         ...mergedConfig[page].sections[sec].content,
                                         ...data.configJson[page].sections[sec].content
                                     };
+                                    // FORCE: Ensure selection arrays exist
+                                    if (sec === 'todaysSpecial') {
+                                        // Clean up old category selection if it exists
+                                        delete mergedConfig[page].sections[sec].content.selectedCategoryIds;
+                                        if (!mergedConfig[page].sections[sec].content.selectedItemIds)
+                                            mergedConfig[page].sections[sec].content.selectedItemIds = [];
+                                    }
+                                    if (sec === 'ourMenu' || sec === 'browseMenu' || sec === 'menuGallery') {
+                                        if (!mergedConfig[page].sections[sec].content.selectedCategoryIds)
+                                            mergedConfig[page].sections[sec].content.selectedCategoryIds = [];
+                                    }
                                 }
                             });
                         }
@@ -186,8 +197,9 @@ export default function CMSPage() {
                 api.get("/categories"),
                 api.get("/menu-items")
             ]);
-            if (catRes.data?.success) setCategories(catRes.data.data);
-            if (itemRes.data?.success) setMenuItems(itemRes.data.data);
+            console.log("CMS Data Fetch:", { categories: catRes.data, items: itemRes.data });
+            if (catRes.data?.success) setCategories(catRes.data.data || []);
+            if (itemRes.data?.success) setMenuItems(itemRes.data.data || []);
         } catch (error) {
             console.error("Failed to fetch business data", error);
         }
@@ -383,7 +395,7 @@ export default function CMSPage() {
                                                     {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds').map((field) => (
                                                         <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' ? 'md:col-span-2' : ''} space-y-3`}>
                                                             <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">{field.replace(/([A-Z])/g, ' $1')}</label>
-                                                            {field === 'description' || field === 'address' || field === 'menuItems' ? (
+                                                            {field === 'description' || field === 'address' ? (
                                                                 <textarea
                                                                     rows={3}
                                                                     value={section.content[field]}
@@ -391,6 +403,40 @@ export default function CMSPage() {
                                                                     className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-[1.5rem] px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner"
                                                                     placeholder={`Enter ${field}...`}
                                                                 />
+                                                            ) : field === 'menuItems' ? (
+                                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-gray-100/50 dark:bg-gray-800/50 p-6 rounded-[2rem] border-2 border-white dark:border-gray-800 shadow-inner">
+                                                                    {["Home", "Our Menu", "About Us", "Contact Us", "Blogs"].map((item) => {
+                                                                        const currentItems = (section.content[field] || "").split(",").map((i: string) => i.trim()).filter(Boolean);
+                                                                        const isSelected = currentItems.includes(item);
+                                                                        return (
+                                                                            <div
+                                                                                key={item}
+                                                                                onClick={() => {
+                                                                                    let newItems;
+                                                                                    if (isSelected) {
+                                                                                        if (currentItems.length <= 1) {
+                                                                                            toast.error("You must select at least one menu item!");
+                                                                                            return;
+                                                                                        }
+                                                                                        newItems = currentItems.filter((i: string) => i !== item);
+                                                                                    } else {
+                                                                                        newItems = [...currentItems, item];
+                                                                                    }
+                                                                                    handleContentChange(activeTab, sectionKey, field, newItems.join(", "));
+                                                                                }}
+                                                                                className={`p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 border-2 flex items-center justify-between gap-3 ${isSelected
+                                                                                    ? "bg-brand-500 border-brand-500 text-white shadow-xl shadow-brand-500/30 scale-[1.03]"
+                                                                                    : "bg-white dark:bg-gray-900 border-white dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-900/40 text-gray-500 dark:text-gray-400 hover:text-brand-500 shadow-sm"
+                                                                                    }`}
+                                                                            >
+                                                                                <span className="text-xs font-black uppercase tracking-wider">{item}</span>
+                                                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isSelected ? "bg-white text-brand-500" : "bg-gray-100 dark:bg-gray-800"}`}>
+                                                                                    {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
                                                             ) : (
                                                                 <input
                                                                     type="text"
@@ -436,37 +482,50 @@ export default function CMSPage() {
 
                                                 {/* SPECIAL: Live Picker for Categories/Items */}
                                                 {(section.content?.selectedCategoryIds || section.content?.selectedItemIds) && (
-                                                    <div className="space-y-6 pt-8 border-t border-gray-50 dark:border-gray-800">
-                                                        <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border-2 border-white dark:border-gray-700">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 bg-brand-500/20 rounded-xl flex items-center justify-center text-brand-500"><List className="w-5 h-5" /></div>
-                                                                <label className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest ml-1">Live Data Selection Picker</label>
-                                                            </div>
-                                                            <div className="flex items-center gap-3 bg-white dark:bg-gray-900 px-5 py-2.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                                                                <Search className="w-4 h-4 text-gray-400" />
-                                                                <input placeholder="Quick search..." className="bg-transparent border-none outline-none text-sm w-48 font-bold" onChange={(e) => setSearchTerm(e.target.value)} />
-                                                            </div>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-80 overflow-y-auto no-scrollbar p-1">
-                                                            {(section.content.selectedCategoryIds ? categories : menuItems)
-                                                                .filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                                                                .map(item => {
-                                                                    const field = section.content.selectedCategoryIds ? 'selectedCategoryIds' : 'selectedItemIds';
-                                                                    const isSelected = section.content[field]?.includes(item.id);
-                                                                    return (
-                                                                        <div
-                                                                            key={item.id}
-                                                                            onClick={() => toggleSelection(activeTab, sectionKey, field, item.id)}
-                                                                            className={`p-5 rounded-3xl cursor-pointer transition-all border-2 flex items-center justify-between gap-2 overflow-hidden ${isSelected ? "bg-brand-500 border-brand-500 text-white shadow-xl shadow-brand-500/30 scale-[1.05]" : "bg-white dark:bg-gray-800 border-white dark:border-gray-700 hover:border-brand-200 shadow-sm"
-                                                                                }`}
-                                                                        >
-                                                                            <span className="text-[11px] font-black truncate">{item.name}</span>
-                                                                            {isSelected && <Check className="w-4 h-4 shrink-0" />}
+                                                    <div className="space-y-10 pt-8 border-t border-gray-50 dark:border-gray-800">
+                                                        {[
+                                                            ['selectedCategoryIds', categories, 'Pick Categories'],
+                                                            ['selectedItemIds', menuItems, 'Pick Menu Items']
+                                                        ]
+                                                            .filter(([field]) => section.content[field as string])
+                                                            .map(([field, data, label]) => (
+                                                                <div key={field as string} className="space-y-6">
+                                                                    <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border-2 border-white dark:border-gray-700">
+                                                                        <div className="flex items-center gap-4">
+                                                                            <div className="w-10 h-10 bg-brand-500/20 rounded-xl flex items-center justify-center text-brand-500"><List className="w-5 h-5" /></div>
+                                                                            <label className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest ml-1">{label as string}</label>
                                                                         </div>
-                                                                    );
-                                                                })
-                                                            }
-                                                        </div>
+                                                                        <div className="flex items-center gap-3 bg-white dark:bg-gray-900 px-5 py-2.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                                                                            <Search className="w-4 h-4 text-gray-400" />
+                                                                            <input placeholder="Quick search..." className="bg-transparent border-none outline-none text-sm w-48 font-bold" onChange={(e) => setSearchTerm(e.target.value)} />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-80 overflow-y-auto no-scrollbar p-1">
+                                                                        {(data as any[])
+                                                                            .filter(item => (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()))
+                                                                            .map(item => {
+                                                                                const isSelected = section.content[field as string]?.includes(item.id);
+                                                                                return (
+                                                                                    <div
+                                                                                        key={item.id}
+                                                                                        onClick={() => toggleSelection(activeTab, sectionKey, field as string, item.id)}
+                                                                                        className={`p-5 rounded-3xl cursor-pointer transition-all border-2 flex items-center justify-between gap-2 overflow-hidden ${isSelected ? "bg-brand-500 border-brand-500 text-white shadow-xl shadow-brand-500/30 scale-[1.05]" : "bg-white dark:bg-gray-800 border-white dark:border-gray-700 hover:border-brand-200 shadow-sm"
+                                                                                            }`}
+                                                                                    >
+                                                                                        <span className="text-[11px] font-black truncate">{item.name}</span>
+                                                                                        {isSelected && <Check className="w-4 h-4 shrink-0" />}
+                                                                                    </div>
+                                                                                );
+                                                                            })
+                                                                        }
+                                                                        {(data as any[]).length === 0 && (
+                                                                            <div className="col-span-full py-10 text-center text-gray-400 font-bold border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl">
+                                                                                No data found. Check your {field === 'selectedCategoryIds' ? 'Categories' : 'Menu Items'} module.
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                     </div>
                                                 )}
                                             </div>
