@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { Eye, Edit, Trash2, Plus, X } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { toast } from "sonner";
 
 const getStatusBadge = (isActive: boolean, expiresAt: string) => {
     const base = "px-2 py-1 rounded text-xs font-medium";
@@ -42,7 +44,10 @@ interface Discount {
 export default function DiscountsPage() {
     const [discounts, setDiscounts] = useState<Discount[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openDiscountId, setOpenDiscountId] = useState<string | null>(null);
+
+    // View Detail Modal
+    const [viewDiscount, setViewDiscount] = useState<Discount | null>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     // Add Discount Modal
     const [showAddModal, setShowAddModal] = useState(false);
@@ -81,9 +86,12 @@ export default function DiscountsPage() {
 
             if (res.data?.success) {
                 setDiscounts(res.data.data);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch discounts");
             }
         } catch (err) {
             console.error("Failed to fetch discounts", err);
+            toast.error("Failed to fetch discounts");
         } finally {
             setLoading(false);
         }
@@ -91,7 +99,7 @@ export default function DiscountsPage() {
 
     const handleAddDiscount = async () => {
         if (!addFormData.code || !addFormData.value || !addFormData.expiresAt) {
-            alert("Please fill all required fields");
+            toast.error("Please fill all required fields");
             return;
         }
 
@@ -110,6 +118,7 @@ export default function DiscountsPage() {
             }
 
             await api.post("/marketing/discounts", payload);
+            toast.success("Discount added successfully!");
             setShowAddModal(false);
             setAddFormData({
                 code: "",
@@ -121,7 +130,7 @@ export default function DiscountsPage() {
             fetchDiscounts();
         } catch (err) {
             console.error("Failed to add discount", err);
-            alert("Failed to add discount");
+            toast.error("Failed to add discount");
         } finally {
             setAdding(false);
         }
@@ -129,7 +138,7 @@ export default function DiscountsPage() {
 
     const handleEditDiscount = async () => {
         if (!selectedDiscount || !editFormData.code || !editFormData.value || !editFormData.expiresAt) {
-            alert("Please fill all required fields");
+            toast.error("Please fill all required fields");
             return;
         }
 
@@ -148,12 +157,13 @@ export default function DiscountsPage() {
             }
 
             await api.put(`/marketing/discounts/${selectedDiscount.id}`, payload);
+            toast.success("Discount updated successfully!");
             setShowEditModal(false);
             setSelectedDiscount(null);
             fetchDiscounts();
         } catch (err) {
             console.error("Failed to update discount", err);
-            alert("Failed to update discount");
+            toast.error("Failed to update discount");
         } finally {
             setUpdating(false);
         }
@@ -165,10 +175,11 @@ export default function DiscountsPage() {
         try {
             setDeleting(discountId);
             await api.delete(`/marketing/discounts/${discountId}`);
+            toast.success("Discount deleted successfully!");
             fetchDiscounts();
         } catch (err) {
             console.error("Failed to delete discount", err);
-            alert("Failed to delete discount");
+            toast.error("Failed to delete discount");
         } finally {
             setDeleting(null);
         }
@@ -255,11 +266,10 @@ export default function DiscountsPage() {
                                         </td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button
-                                                onClick={() =>
-                                                    setOpenDiscountId(
-                                                        openDiscountId === discount.id ? null : discount.id
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    setViewDiscount(discount);
+                                                    setIsViewModalOpen(true);
+                                                }}
                                                 className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                                                 title="View Details"
                                             >
@@ -285,48 +295,7 @@ export default function DiscountsPage() {
                                         </td>
                                     </tr>
 
-                                    {/* DETAILS ROW */}
-                                    {openDiscountId === discount.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700">
-                                            <td colSpan={7} className="p-5 text-sm">
-                                                <div className="grid md:grid-cols-2 gap-6">
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">Discount Details</h3>
-                                                        <p>
-                                                            <b>Code:</b> {discount.code}
-                                                        </p>
-                                                        <p>
-                                                            <b>Type:</b> {discount.percentage ? "Percentage" : "Fixed Amount"}
-                                                        </p>
-                                                        <p>
-                                                            <b>Value:</b>{" "}
-                                                            {discount.percentage ? `${discount.percentage}%` : `Rs. ${discount.amount}`}
-                                                        </p>
-                                                        <p>
-                                                            <b>Status:</b>{" "}
-                                                            <span className={getStatusBadge(discount.isActive, discount.expiresAt)}>
-                                                                {getStatusText(discount.isActive, discount.expiresAt)}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">Dates</h3>
-                                                        <p>
-                                                            <b>Created:</b>{" "}
-                                                            {new Date(discount.createdAt).toLocaleDateString()}
-                                                        </p>
-                                                        <p>
-                                                            <b>Expires:</b>{" "}
-                                                            {new Date(discount.expiresAt).toLocaleDateString()}
-                                                        </p>
-                                                        <p>
-                                                            <b>ID:</b> {discount.id}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
+
                                 </>
                             ))
                         )}
@@ -553,6 +522,23 @@ export default function DiscountsPage() {
                     </div>
                 </div>
             )}
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Discount Details"
+                data={viewDiscount}
+                fields={[
+                    { label: "Code", key: "code" },
+                    { label: "Type", render: (data: any) => data?.percentage ? "Percentage" : "Fixed Amount" },
+                    { label: "Value", render: (data: any) => data?.percentage ? `${data.percentage}%` : `Rs. ${data.amount}` },
+                    { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.isActive, data?.expiresAt)}>{getStatusText(data?.isActive, data?.expiresAt)}</span> },
+                    { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                    { label: "Expires", render: (data: any) => new Date(data?.expiresAt).toLocaleDateString() },
+                    { label: "ID", key: "id" },
+                ]}
+            />
         </div>
     );
 }

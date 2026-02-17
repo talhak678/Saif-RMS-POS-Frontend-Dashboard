@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye } from "lucide-react";
+import { Eye, Gift } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 export default function CustomersPage() {
+  const router = useRouter();
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,6 +92,16 @@ export default function CustomersPage() {
                       title="View Details"
                     >
                       <Eye size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        router.push(`/loyalty?customerId=${customer.id}`);
+                      }}
+                      className="p-2 hover:bg-green-100 dark:hover:bg-green-900 rounded text-green-600 dark:text-green-400"
+                      title="Add Loyalty Points"
+                    >
+                      <Gift size={18} />
                     </button>
                   </td>
                 </tr>

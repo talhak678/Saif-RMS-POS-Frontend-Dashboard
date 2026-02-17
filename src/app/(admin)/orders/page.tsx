@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, X } from "lucide-react";
+import { Eye, X, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 
 const ORDER_STATUSES = [
@@ -38,6 +39,7 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [orders, setOrders]: any = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -217,9 +219,20 @@ export default function OrdersPage() {
                         setNewStatus(order.status);
                         setStatusModal(true);
                       }}
-                      className="text-xs px-3 py-1 rounded bg-blue-600 text-white"
+                      className="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
                     >
                       Change Status
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const firstMenuItem = order.items?.[0]?.menuItemId || "";
+                        router.push(`/reviews?orderId=${order.id}&menuItemId=${firstMenuItem}`);
+                      }}
+                      className="p-2 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded text-yellow-600 dark:text-yellow-400"
+                      title="Add Review"
+                    >
+                      <Star size={18} />
                     </button>
                   </td>
                 </tr>

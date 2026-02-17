@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { Eye, Edit, Trash2, Plus, X } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { toast } from "sonner";
 
 const RIDER_STATUSES = ["AVAILABLE", "BUSY", "OFFLINE"];
 
@@ -31,8 +33,11 @@ interface Rider {
 export default function RidersPage() {
     const [riders, setRiders] = useState<Rider[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openRiderId, setOpenRiderId] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState("ALL");
+
+    // View Detail Modal
+    const [viewRider, setViewRider] = useState<Rider | null>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     // Add Rider Modal
     const [showAddModal, setShowAddModal] = useState(false);
@@ -68,9 +73,12 @@ export default function RidersPage() {
 
             if (res.data?.success) {
                 setRiders(res.data.data);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch riders");
             }
         } catch (err) {
             console.error("Failed to fetch riders", err);
+            toast.error("Failed to fetch riders");
         } finally {
             setLoading(false);
         }
@@ -78,19 +86,20 @@ export default function RidersPage() {
 
     const handleAddRider = async () => {
         if (!addFormData.name || !addFormData.phone) {
-            alert("Please fill all fields");
+            toast.error("Please fill all fields");
             return;
         }
 
         try {
             setAdding(true);
             await api.post("/riders", addFormData);
+            toast.success("Rider added successfully!");
             setShowAddModal(false);
             setAddFormData({ name: "", phone: "", status: "AVAILABLE" });
             fetchRiders();
         } catch (err) {
             console.error("Failed to add rider", err);
-            alert("Failed to add rider");
+            toast.error("Failed to add rider");
         } finally {
             setAdding(false);
         }
@@ -98,19 +107,20 @@ export default function RidersPage() {
 
     const handleEditRider = async () => {
         if (!selectedRider || !editFormData.name || !editFormData.phone) {
-            alert("Please fill all fields");
+            toast.error("Please fill all fields");
             return;
         }
 
         try {
             setUpdating(true);
             await api.put(`/riders/${selectedRider.id}`, editFormData);
+            toast.success("Rider updated successfully!");
             setShowEditModal(false);
             setSelectedRider(null);
             fetchRiders();
         } catch (err) {
             console.error("Failed to update rider", err);
-            alert("Failed to update rider");
+            toast.error("Failed to update rider");
         } finally {
             setUpdating(false);
         }
@@ -122,10 +132,11 @@ export default function RidersPage() {
         try {
             setDeleting(riderId);
             await api.delete(`/riders/${riderId}`);
+            toast.success("Rider deleted successfully!");
             fetchRiders();
         } catch (err) {
             console.error("Failed to delete rider", err);
-            alert("Failed to delete rider");
+            toast.error("Failed to delete rider");
         } finally {
             setDeleting(null);
         }
@@ -201,89 +212,48 @@ export default function RidersPage() {
                             </tr>
                         ) : (
                             riders.map((rider, index) => (
-                                <>
-                                    {/* MAIN ROW */}
-                                    <tr
-                                        key={rider.id}
-                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">{index + 1}</td>
-                                        <td className="px-4 py-3 font-medium">{rider.name}</td>
-                                        <td className="px-4 py-3">{rider.phone}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={getStatusBadge(rider.status)}>
-                                                {rider.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 flex gap-2">
-                                            <button
-                                                onClick={() =>
-                                                    setOpenRiderId(
-                                                        openRiderId === rider.id ? null : rider.id
-                                                    )
-                                                }
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                <tr
+                                    key={rider.id}
+                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                    <td className="px-4 py-3">{index + 1}</td>
+                                    <td className="px-4 py-3 font-medium">{rider.name}</td>
+                                    <td className="px-4 py-3">{rider.phone}</td>
+                                    <td className="px-4 py-3">
+                                        <span className={getStatusBadge(rider.status)}>
+                                            {rider.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setViewRider(rider);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                            title="View Details"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
 
-                                            <button
-                                                onClick={() => openEditModal(rider)}
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="Edit Rider"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
+                                        <button
+                                            onClick={() => openEditModal(rider)}
+                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                            title="Edit Rider"
+                                        >
+                                            <Edit size={18} />
+                                        </button>
 
-                                            <button
-                                                onClick={() => handleDeleteRider(rider.id)}
-                                                disabled={deleting === rider.id}
-                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
-                                                title="Delete Rider"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                    {/* DETAILS ROW */}
-                                    {openRiderId === rider.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700">
-                                            <td colSpan={5} className="p-5 text-sm">
-                                                <div className="grid md:grid-cols-2 gap-6">
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">
-                                                            Rider Profile
-                                                        </h3>
-                                                        <p>
-                                                            <b>Name:</b> {rider.name}
-                                                        </p>
-                                                        <p>
-                                                            <b>Phone:</b> {rider.phone}
-                                                        </p>
-                                                        <p>
-                                                            <b>Status:</b>{" "}
-                                                            <span className={getStatusBadge(rider.status)}>
-                                                                {rider.status}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">Information</h3>
-                                                        <p>
-                                                            <b>Joined:</b>{" "}
-                                                            {new Date(rider.createdAt).toLocaleDateString()}
-                                                        </p>
-                                                        <p>
-                                                            <b>ID:</b> {rider.id}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </>
+                                        <button
+                                            onClick={() => handleDeleteRider(rider.id)}
+                                            disabled={deleting === rider.id}
+                                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                            title="Delete Rider"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
                             ))
                         )}
                     </tbody>
@@ -427,6 +397,21 @@ export default function RidersPage() {
                     </div>
                 </div>
             )}
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Rider Details"
+                data={viewRider}
+                fields={[
+                    { label: "Name", key: "name" },
+                    { label: "Phone", key: "phone" },
+                    { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.status)}>{data?.status}</span> },
+                    { label: "Joined", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                    { label: "ID", key: "id" },
+                ]}
+            />
         </div>
     );
 }

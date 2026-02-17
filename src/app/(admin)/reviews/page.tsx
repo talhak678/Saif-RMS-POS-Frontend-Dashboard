@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { Eye, Edit, Trash2, Plus, X, Star } from "lucide-react";
+import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { toast } from "sonner";
 
 const StarRating = ({ rating, interactive = false, onChange }: { rating: number; interactive?: boolean; onChange?: (rating: number) => void }) => {
     return (
@@ -12,8 +15,8 @@ const StarRating = ({ rating, interactive = false, onChange }: { rating: number;
                     key={star}
                     size={18}
                     className={`${star <= rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300 dark:text-gray-600"
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300 dark:text-gray-600"
                         } ${interactive ? "cursor-pointer hover:fill-yellow-300" : ""}`}
                     onClick={() => interactive && onChange && onChange(star)}
                 />
@@ -38,9 +41,13 @@ interface Review {
 }
 
 export default function ReviewsPage() {
+    const searchParams = useSearchParams();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openReviewId, setOpenReviewId] = useState<string | null>(null);
+
+    // View Detail Modal
+    const [viewReview, setViewReview] = useState<Review | null>(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     // Add Review Modal
     const [showAddModal, setShowAddModal] = useState(false);
@@ -68,6 +75,20 @@ export default function ReviewsPage() {
 
     useEffect(() => {
         fetchReviews();
+
+        // Check for URL params and auto-open add modal
+        const orderId = searchParams.get("orderId");
+        const menuItemId = searchParams.get("menuItemId");
+
+        if (orderId) {
+            setAddFormData({
+                rating: 5,
+                comment: "",
+                orderId: orderId,
+                menuItemId: menuItemId || "",
+            });
+            setShowAddModal(true);
+        }
     }, []);
 
     const fetchReviews = async () => {
@@ -77,9 +98,12 @@ export default function ReviewsPage() {
 
             if (res.data?.success) {
                 setReviews(res.data.data);
+            } else {
+                toast.error(res.data?.message || "Failed to fetch reviews");
             }
         } catch (err) {
             console.error("Failed to fetch reviews", err);
+            toast.error("Failed to fetch reviews");
         } finally {
             setLoading(false);
         }
@@ -87,7 +111,7 @@ export default function ReviewsPage() {
 
     const handleAddReview = async () => {
         if (!addFormData.orderId || addFormData.rating < 1 || addFormData.rating > 5) {
-            alert("Please fill all required fields with valid data");
+            toast.error("Please fill all required fields with valid data");
             return;
         }
 
@@ -104,6 +128,7 @@ export default function ReviewsPage() {
             }
 
             await api.post("/marketing/reviews", payload);
+            toast.success("Review added successfully!");
             setShowAddModal(false);
             setAddFormData({
                 rating: 5,
@@ -114,7 +139,7 @@ export default function ReviewsPage() {
             fetchReviews();
         } catch (err) {
             console.error("Failed to add review", err);
-            alert("Failed to add review");
+            toast.error("Failed to add review");
         } finally {
             setAdding(false);
         }
@@ -122,7 +147,7 @@ export default function ReviewsPage() {
 
     const handleEditReview = async () => {
         if (!selectedReview || !editFormData.orderId || editFormData.rating < 1 || editFormData.rating > 5) {
-            alert("Please fill all required fields with valid data");
+            toast.error("Please fill all required fields with valid data");
             return;
         }
 
@@ -139,12 +164,13 @@ export default function ReviewsPage() {
             }
 
             await api.put(`/marketing/reviews/${selectedReview.id}`, payload);
+            toast.success("Review updated successfully!");
             setShowEditModal(false);
             setSelectedReview(null);
             fetchReviews();
         } catch (err) {
             console.error("Failed to update review", err);
-            alert("Failed to update review");
+            toast.error("Failed to update review");
         } finally {
             setUpdating(false);
         }
@@ -156,10 +182,11 @@ export default function ReviewsPage() {
         try {
             setDeleting(reviewId);
             await api.delete(`/marketing/reviews/${reviewId}`);
+            toast.success("Review deleted successfully!");
             fetchReviews();
         } catch (err) {
             console.error("Failed to delete review", err);
-            alert("Failed to delete review");
+            toast.error("Failed to delete review");
         } finally {
             setDeleting(null);
         }
@@ -221,99 +248,54 @@ export default function ReviewsPage() {
                             </tr>
                         ) : (
                             reviews.map((review, index) => (
-                                <>
-                                    {/* MAIN ROW */}
-                                    <tr
-                                        key={review.id}
-                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">{index + 1}</td>
-                                        <td className="px-4 py-3 font-medium">{review.order.customer.name}</td>
-                                        <td className="px-4 py-3">
-                                            <StarRating rating={review.rating} />
-                                        </td>
-                                        <td className="px-4 py-3">{review.menuItem?.name || "N/A"}</td>
-                                        <td className="px-4 py-3">#{review.order.orderNo}</td>
-                                        <td className="px-4 py-3">
-                                            {review.aiEnhanced && (
-                                                <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                    AI Enhanced
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-3 flex gap-2">
-                                            <button
-                                                onClick={() =>
-                                                    setOpenReviewId(
-                                                        openReviewId === review.id ? null : review.id
-                                                    )
-                                                }
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                <tr
+                                    key={review.id}
+                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                    <td className="px-4 py-3">{index + 1}</td>
+                                    <td className="px-4 py-3 font-medium">{review.order.customer.name}</td>
+                                    <td className="px-4 py-3">
+                                        <StarRating rating={review.rating} />
+                                    </td>
+                                    <td className="px-4 py-3">{review.menuItem?.name || "N/A"}</td>
+                                    <td className="px-4 py-3">#{review.order.orderNo}</td>
+                                    <td className="px-4 py-3">
+                                        {review.aiEnhanced && (
+                                            <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                AI Enhanced
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setViewReview(review);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                            title="View Details"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
 
-                                            <button
-                                                onClick={() => openEditModal(review)}
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="Edit Review"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
+                                        <button
+                                            onClick={() => openEditModal(review)}
+                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                            title="Edit Review"
+                                        >
+                                            <Edit size={18} />
+                                        </button>
 
-                                            <button
-                                                onClick={() => handleDeleteReview(review.id)}
-                                                disabled={deleting === review.id}
-                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
-                                                title="Delete Review"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                    {/* DETAILS ROW */}
-                                    {openReviewId === review.id && (
-                                        <tr className="bg-gray-50 dark:bg-gray-700">
-                                            <td colSpan={7} className="p-5 text-sm">
-                                                <div className="grid md:grid-cols-2 gap-6">
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">Review Details</h3>
-                                                        <p>
-                                                            <b>Customer:</b> {review.order.customer.name}
-                                                        </p>
-                                                        <p>
-                                                            <b>Rating:</b> <StarRating rating={review.rating} />
-                                                        </p>
-                                                        <p>
-                                                            <b>Comment:</b> {review.comment || "No comment"}
-                                                        </p>
-                                                        <p>
-                                                            <b>AI Enhanced:</b> {review.aiEnhanced ? "Yes" : "No"}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold mb-3">Order Information</h3>
-                                                        <p>
-                                                            <b>Order #:</b> {review.order.orderNo}
-                                                        </p>
-                                                        <p>
-                                                            <b>Menu Item:</b> {review.menuItem?.name || "N/A"}
-                                                        </p>
-                                                        <p>
-                                                            <b>Created:</b>{" "}
-                                                            {new Date(review.createdAt).toLocaleDateString()}
-                                                        </p>
-                                                        <p>
-                                                            <b>ID:</b> {review.id}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </>
+                                        <button
+                                            onClick={() => handleDeleteReview(review.id)}
+                                            disabled={deleting === review.id}
+                                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                            title="Delete Review"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
                             ))
                         )}
                     </tbody>
@@ -463,6 +445,24 @@ export default function ReviewsPage() {
                     </div>
                 </div>
             )}
+
+            {/* VIEW DETAIL MODAL */}
+            <ViewDetailModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                title="Review Details"
+                data={viewReview}
+                fields={[
+                    { label: "Customer", render: (data: any) => data?.order?.customer?.name },
+                    { label: "Rating", render: (data: any) => <StarRating rating={data?.rating || 0} /> },
+                    { label: "Comment", key: "comment" },
+                    { label: "AI Enhanced", render: (data: any) => data?.aiEnhanced ? "Yes" : "No" },
+                    { label: "Order #", render: (data: any) => `#${data?.order?.orderNo}` },
+                    { label: "Menu Item", render: (data: any) => data?.menuItem?.name || "N/A" },
+                    { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                    { label: "ID", key: "id" },
+                ]}
+            />
         </div>
     );
 }
