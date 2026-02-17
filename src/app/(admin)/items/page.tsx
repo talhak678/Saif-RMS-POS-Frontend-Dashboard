@@ -79,7 +79,7 @@ export default function MenuItemsPage() {
 
     // --- FIX IS HERE (Data Formatting) ---
     const handleToggleStatus = async (e: React.MouseEvent, item: MenuItem) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
 
         const newStatus = !item.isAvailable;
         const catId = item.category?.id || "uncategorized";
@@ -105,13 +105,13 @@ export default function MenuItemsPage() {
                 image: item.image,
                 categoryId: item.categoryId,
                 isAvailable: newStatus,
-                
+
                 // Variations Fix: Map kar ke price ko number bana rahe hain
                 variations: item.variations.map((v: any) => ({
                     // Agar purana variation hai to ID bhejein, nahi to sirf name/price
-                    ...(v.id ? { id: v.id } : {}), 
+                    ...(v.id ? { id: v.id } : {}),
                     name: v.name,
-                    price: parseFloat(v.price.toString()) 
+                    price: parseFloat(v.price.toString())
                 })),
 
                 // Addons Fix: Same here
@@ -123,7 +123,7 @@ export default function MenuItemsPage() {
             };
 
             await api.put(`/menu-items/${item.id}`, payload);
-            
+
         } catch (error) {
             console.error("Failed to update status", error);
             // Revert UI if failed
@@ -149,7 +149,7 @@ export default function MenuItemsPage() {
     }
 
     return (
-        <div className="max-w-[calc(73vw)] mx-auto">
+        <div className="max-w-[calc(98vw)] lg:max-w-[calc(78vw)] mx-auto p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl my-4">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
                     Menu Items
@@ -265,13 +265,13 @@ export default function MenuItemsPage() {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    
+
                                                     {/* Toggle Switch */}
                                                     <div className="mt-auto pt-3 border-t dark:border-gray-700 flex items-center justify-between">
                                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                                                             Available?
                                                         </span>
-                                                        <div 
+                                                        <div
                                                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${item.isAvailable ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                                                             onClick={(e) => handleToggleStatus(e, item)}
                                                         >

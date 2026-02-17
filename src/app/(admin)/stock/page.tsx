@@ -153,7 +153,7 @@ export default function StocksPage() {
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900">
+    <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
 
       {/* HEADER & CONTROLS */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -232,8 +232,8 @@ export default function StocksPage() {
 
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${stock.quantity < 10
-                        ? "bg-red-100 text-red-800 border-red-200"
-                        : "bg-green-100 text-green-800 border-green-200"
+                      ? "bg-red-100 text-red-800 border-red-200"
+                      : "bg-green-100 text-green-800 border-green-200"
                       }`}>
                       {stock.quantity} {stock.ingredient?.unit}
                     </span>

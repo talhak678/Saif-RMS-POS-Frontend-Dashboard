@@ -47,7 +47,7 @@ export default function Roles() {
     return (
         <div className="min-h-screen">
             {/* Header */}
-            <div className="p-2 md:p-4 dark:bg-gray-900 dark:text-gray-200">
+            <div className="p-2 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 <div className="md:flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                         Roles
@@ -57,7 +57,7 @@ export default function Roles() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="overflow-x-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
                     <Table className="w-full text-sm">
                         <TableHeader>
                             <TableRow className="whitespace-nowrap bg-gray-100 dark:bg-gray-700">

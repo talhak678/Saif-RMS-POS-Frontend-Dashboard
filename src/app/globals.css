@@ -201,7 +201,7 @@
 
   body {
     @apply relative font-normal font-outfit z-1;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 50%, #f5f0ff 100%);
+    background: linear-gradient(135deg, #f8faff 0%, #ecefff 50%, #fbf8ff 100%);
     background-attachment: fixed;
   }
 
@@ -214,25 +214,29 @@
     height: 100%;
     z-index: -1;
     background:
-      radial-gradient(circle at 5% 5%, rgba(70, 95, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 95% 95%, rgba(238, 70, 188, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 50% 10%, rgba(122, 90, 248, 0.08) 0%, transparent 60%),
-      radial-gradient(circle at 10% 90%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+      radial-gradient(circle at 10% 10%, rgba(70, 95, 255, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(238, 70, 188, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(122, 90, 248, 0.1) 0%, transparent 60%);
     pointer-events: none;
-    filter: blur(40px);
+    filter: blur(100px);
   }
 
   .dark body {
-    background: linear-gradient(135deg, #0c111d 0%, #101828 100%);
+    background: linear-gradient(135deg, #080b11 0%, #101828 100%);
   }
 }
 
 @utility glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.dark .glass {
+  background: rgba(16, 24, 40, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 @utility glass-button {
