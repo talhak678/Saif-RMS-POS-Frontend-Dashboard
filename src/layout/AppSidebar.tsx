@@ -96,11 +96,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <Settings className="w-5 h-5" />,
-    name: "Settings",
-    path: "/settings",
-  },
-  {
     icon: <PageIcon />,
     name: "CMS & Website",
     subItems: [
@@ -109,6 +104,12 @@ const navItems: NavItem[] = [
       { name: "FAQs", path: "/cms/faqs", pro: false },
     ],
   },
+  {
+    icon: <Settings className="w-5 h-5" />,
+    name: "Settings",
+    path: "/settings",
+  },
+
   // {
   //   icon: <CalenderIcon />,
   //   name: "Calendar",
