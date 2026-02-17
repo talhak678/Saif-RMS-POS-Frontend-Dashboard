@@ -268,14 +268,23 @@ export default function CMSPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await api.post("/cms/config", {
+            const response = await api.post("/cms/config", {
                 configJson: config,
                 backgroundColor: theme.backgroundColor,
                 primaryColor: theme.primaryColor
             });
-            toast.success("All settings published successfully!");
-        } catch (error) {
-            toast.error("Failed to save settings");
+
+            console.log("✅ CMS Save Response:", response.data);
+
+            if (response.data?.success) {
+                toast.success("✅ All settings published successfully!");
+            } else {
+                toast.error(response.data?.message || "Save failed");
+            }
+        } catch (error: any) {
+            console.error("❌ CMS Save Error:", error);
+            const errorMsg = error.response?.data?.message || error.message || "Failed to save settings";
+            toast.error(`❌ ${errorMsg}`);
         } finally {
             setSaving(false);
         }
