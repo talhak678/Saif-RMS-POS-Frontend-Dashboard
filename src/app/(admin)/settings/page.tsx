@@ -120,8 +120,8 @@ export default function SettingsPage() {
                         fetchSettings();
                         setIsModalOpen(false);
                     }}
-                    // Hardcoded ID 
-                    defaultRestaurantId="cmljaoung000fv5w8os1foeb2"
+                    // Use restaurantId from selected setting, or first setting if creating new
+                    defaultRestaurantId={selected?.restaurantId || settings[0]?.restaurantId}
                 />
             )}
 

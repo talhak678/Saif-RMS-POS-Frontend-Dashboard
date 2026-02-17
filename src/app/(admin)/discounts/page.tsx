@@ -39,6 +39,7 @@ interface Discount {
     isActive: boolean;
     expiresAt: string;
     createdAt: string;
+    restaurantId: string;
 }
 
 export default function DiscountsPage() {
@@ -148,6 +149,7 @@ export default function DiscountsPage() {
                 code: editFormData.code,
                 isActive: editFormData.isActive,
                 expiresAt: new Date(editFormData.expiresAt).toISOString(),
+                restaurantId: selectedDiscount.restaurantId, // Use existing restaurantId
             };
 
             if (editFormData.discountType === "percentage") {

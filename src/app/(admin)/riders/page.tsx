@@ -28,6 +28,7 @@ interface Rider {
     phone: string;
     status: "AVAILABLE" | "BUSY" | "OFFLINE";
     createdAt: string;
+    restaurantId: string;
 }
 
 export default function RidersPage() {
@@ -113,7 +114,10 @@ export default function RidersPage() {
 
         try {
             setUpdating(true);
-            await api.put(`/riders/${selectedRider.id}`, editFormData);
+            await api.put(`/riders/${selectedRider.id}`, {
+                ...editFormData,
+                restaurantId: selectedRider.restaurantId, // Use existing restaurantId
+            });
             toast.success("Rider updated successfully!");
             setShowEditModal(false);
             setSelectedRider(null);

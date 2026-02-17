@@ -165,6 +165,7 @@ export default function CategoriesPage() {
                 <AddCategoryModal
                     onClose={() => setShowAddModal(false)}
                     onSuccess={fetchCategories}
+                    restaurantId={categories[0]?.restaurantId}
                 />
             )}
 

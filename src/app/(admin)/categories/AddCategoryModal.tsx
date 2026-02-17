@@ -4,7 +4,7 @@ import { useState } from "react";
 import api from "@/services/api";
 import { X } from "lucide-react";
 
-export default function AddCategoryModal({ onClose, onSuccess }: any) {
+export default function AddCategoryModal({ onClose, onSuccess, restaurantId }: any) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -18,7 +18,7 @@ export default function AddCategoryModal({ onClose, onSuccess }: any) {
     try {
       await api.post("/categories", {
         ...formData,
-        restaurantId: "cmljaoung000fv5w8os1foeb2", // Hardcoded ID
+        restaurantId, // Use prop instead of hardcoded ID
       });
       onSuccess(); // Refresh list
       onClose(); // Close modal
@@ -32,7 +32,7 @@ export default function AddCategoryModal({ onClose, onSuccess }: any) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-        
+
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
