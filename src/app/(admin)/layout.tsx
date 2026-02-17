@@ -31,7 +31,7 @@ export default function AdminLayout({
         <ModulesProvider>
           <SplashService>
             <Toaster position="top-right" />
-            <div className="bg-[url('/images/authentication-images/background-2.png')] min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
+            <div className="bg-[url('/images/authentication-images/background-3.png')] min-h-screen xl:flex w-full dark:bg-none  bg-cover bg-center bg-no-repeat">
               {/* Sidebar and Backdrop */}
               <AppSidebar />
               <Backdrop />
