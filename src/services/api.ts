@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthServiceInstance } from "./auth.service";
 
 const api = axios.create({
-    baseURL: "https://saif-rms-pos-backend.vercel.app/api",
+    baseURL: "http://localhost:3000/api",
     withCredentials: true
 });
 
@@ -11,6 +11,8 @@ api.interceptors.request.use(
     (config) => {
         const authService = AuthServiceInstance();
         const { token } = authService.getAuthStates();
+
+        console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
 
         if (config.data && config.data instanceof FormData) {
             delete config.headers['Content-Type'];
