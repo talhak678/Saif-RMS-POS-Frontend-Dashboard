@@ -137,9 +137,11 @@ export default function OrdersPage() {
       const payload: any = {
         status: newStatus,
         paymentStatus:
-          selectedOrder.payment?.status === "PAID"
+          newStatus === "DELIVERED"
             ? "PAID"
-            : "PENDING",
+            : selectedOrder.payment?.status === "PAID"
+              ? "PAID"
+              : "PENDING",
       };
 
       // Add riderId if status is OUT_FOR_DELIVERY
@@ -242,7 +244,19 @@ export default function OrdersPage() {
                     #{order.orderNo}
                   </td>
                   <td className="px-4 py-3">
-                    {order.customer?.name}
+                    {order.customer
+                      ? (
+                        <span>
+                          {order.customer.name}
+                          {order.source && order.source !== "WEBSITE" && (
+                            <span className="ml-1 text-blue-600 dark:text-blue-400 text-xs font-medium">({order.source})</span>
+                          )}
+                        </span>
+                      )
+                      : order.source === "POS"
+                        ? <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">POS</span>
+                        : <span className="text-gray-400 text-xs">—</span>
+                    }
                   </td>
                   <td className="px-4 py-3">{order.type}</td>
                   <td className="px-4 py-3">
@@ -312,7 +326,25 @@ export default function OrdersPage() {
         fields={[
           {
             label: "Customer Name",
-            render: (data: any) => data?.customer?.name,
+            render: (data: any) => {
+              if (!data?.customer) {
+                return data?.source === "POS"
+                  ? <span className="text-blue-600 font-semibold">POS Order</span>
+                  : <span className="text-gray-400">—</span>;
+              }
+              return (
+                <span>
+                  {data.customer.name}
+                  {data.source && data.source !== "WEBSITE" && (
+                    <span className="ml-1 text-blue-600 text-xs font-medium">({data.source})</span>
+                  )}
+                </span>
+              );
+            },
+          },
+          {
+            label: "Source",
+            render: (data: any) => data?.source || "—",
           },
           {
             label: "Phone Number",
@@ -360,10 +392,10 @@ export default function OrdersPage() {
                   <div className="font-medium text-gray-900 dark:text-gray-100">{assignedRider.name}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">{assignedRider.phone}</div>
                   <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${assignedRider.status === "AVAILABLE"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : assignedRider.status === "BUSY"
-                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : assignedRider.status === "BUSY"
+                      ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                     }`}>
                     {assignedRider.status}
                   </span>

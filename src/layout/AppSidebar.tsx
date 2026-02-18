@@ -40,22 +40,20 @@ const navItems: NavItem[] = [
   },
   {
     icon: <ListIcon className="w-5 h-5" />,
-    name: "Orders",
-    path: "/orders",
-  },
-  {
-    icon: <Computer className="w-5 h-5" />,
-    name: "Point of Sales (POS)",
+    name: "Customers & Orders",
     subItems: [
-      { name: "POS", path: "/pos", pro: false },
-      { name: "Reservations", path: "/reservations", pro: false },
-      { name: "Table Services", path: "/table-services", pro: false },
+      { name: "Orders", path: "/orders", pro: false },
+      { name: "Customers", path: "/customers", pro: false },
     ],
   },
   {
-    icon: <Users className="w-5 h-5" />,
-    name: "Customers",
-    path: "/customers",
+    icon: <Computer className="w-5 h-5" />,
+    name: "Point of Sale (POS)",
+    subItems: [
+      { name: "Menu", path: "/pos", pro: false },
+      { name: "Reservations", path: "/reservations", pro: false },
+      { name: "Table Services", path: "/table-services", pro: false },
+    ],
   },
   {
     icon: <ChefHat className="w-5 h-5" />,
