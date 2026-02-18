@@ -51,7 +51,8 @@ const DEFAULT_CONFIG = {
                     facebook: "",
                     instagram: "",
                     tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM"
+                    openHours: "Mon-Sun: 9AM - 11PM",
+                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
                 }
             },
             copyrightBar: {
@@ -154,7 +155,8 @@ const DEFAULT_CONFIG = {
                     facebook: "",
                     instagram: "",
                     tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM"
+                    openHours: "Mon-Sun: 9AM - 11PM",
+                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
                 }
             },
             copyrightBar: {
@@ -185,7 +187,8 @@ const DEFAULT_CONFIG = {
                     facebook: "",
                     instagram: "",
                     tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM"
+                    openHours: "Mon-Sun: 9AM - 11PM",
+                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
                 }
             },
             copyrightBar: {
@@ -576,6 +579,7 @@ export default function CMSPage() {
                                                             accentColor: "Used for light borders, soft backgrounds & subtle highlights.",
                                                             backgroundColor: "The main background color of the entire website canvas.",
                                                             textColor: "The main text color used for paragraphs and general content.",
+                                                            menuItems: "Comma-separated list of pages to include in the footer (e.g., Home, About Us, Our Menu).",
                                                             primaryFont: "Primary typeface used for headings and prominent text.",
                                                             secondaryFont: "Secondary typeface used for body text and paragraphs."
                                                         };
