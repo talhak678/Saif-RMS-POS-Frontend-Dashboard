@@ -9,6 +9,8 @@ import FaqsPage from "./faqs/page";
 
 const DEFAULT_CONFIG = {
     home: {
+        enabled: true,
+        required: true,
         sections: {
             header: {
                 required: true, enabled: true,
@@ -59,6 +61,8 @@ const DEFAULT_CONFIG = {
         }
     },
     menu: {
+        enabled: true,
+        required: true,
         sections: {
             banner: {
                 required: false, enabled: true,
@@ -75,6 +79,8 @@ const DEFAULT_CONFIG = {
         }
     },
     about: {
+        enabled: true,
+        required: false,
         sections: {
             banner: {
                 required: false, enabled: true,
@@ -100,6 +106,8 @@ const DEFAULT_CONFIG = {
         }
     },
     contact: {
+        enabled: true,
+        required: true,
         sections: {
             banner: {
                 required: false, enabled: true,
@@ -125,6 +133,8 @@ const DEFAULT_CONFIG = {
         }
     },
     blogs: {
+        enabled: true,
+        required: false,
         sections: {
             banner: {
                 required: false, enabled: true,
@@ -154,6 +164,8 @@ const DEFAULT_CONFIG = {
         }
     },
     faq: {
+        enabled: true,
+        required: false,
         sections: {
             banner: {
                 required: false, enabled: true,
@@ -215,6 +227,9 @@ export default function CMSPage() {
                 if (data.configJson) {
                     Object.keys(data.configJson).forEach(page => {
                         if (mergedConfig[page]) {
+                            // Merge page-level enabled status
+                            mergedConfig[page].enabled = data.configJson[page].enabled !== false;
+
                             Object.keys(data.configJson[page].sections).forEach(sec => {
                                 if (mergedConfig[page].sections[sec]) {
                                     mergedConfig[page].sections[sec].enabled = data.configJson[page].sections[sec].enabled !== false;
@@ -292,9 +307,12 @@ export default function CMSPage() {
 
     const handleToggle = (page: string, section: string, e: React.MouseEvent) => {
         e.stopPropagation();
+        if (config[page].sections[section].required) {
+            toast.error("This section is required for the page to function.");
+            return;
+        }
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            if (newConfig[page].sections[section].required) return prev;
             newConfig[page].sections[section].enabled = !newConfig[page].sections[section].enabled;
             return newConfig;
         });
@@ -312,6 +330,18 @@ export default function CMSPage() {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
             newConfig[page].sections[section].content[arrayField][index][subField] = value;
+            return newConfig;
+        });
+    };
+
+    const handlePageToggle = (page: string) => {
+        if (config[page].required) {
+            toast.error("This page is required and cannot be hidden.");
+            return;
+        }
+        setConfig((prev: any) => {
+            const newConfig = JSON.parse(JSON.stringify(prev));
+            newConfig[page].enabled = !newConfig[page].enabled;
             return newConfig;
         });
     };
@@ -388,9 +418,8 @@ export default function CMSPage() {
                                         : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1"
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-4 text-left">
                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${activeTab === p ? "bg-white/20" : "bg-gray-100 dark:bg-gray-800"}`}>
-                                            {p === 'p' && <Layout className="w-4 h-4" />}
                                             {p === 'home' && <Layout className="w-4 h-4" />}
                                             {p === 'about' && <Info className="w-4 h-4" />}
                                             {p === 'contact' && <Phone className="w-4 h-4" />}
@@ -398,7 +427,10 @@ export default function CMSPage() {
                                             {p === 'blogs' && <MessageSquare className="w-4 h-4" />}
                                             {p === 'faq' && <Check className="w-4 h-4" />}
                                         </div>
-                                        {p} page
+                                        <div>
+                                            <div className="capitalize">{p} page</div>
+                                            {!config[p].enabled && <div className="text-[8px] font-black uppercase text-red-500 bg-red-100/50 dark:bg-red-900/30 px-1.5 py-0.5 rounded-md w-fit">Hidden</div>}
+                                        </div>
                                     </div>
                                     <ChevronDown className={`w-4 h-4 transition-transform ${activeTab === p ? "-rotate-90" : "opacity-0"}`} />
                                 </button>
@@ -410,13 +442,37 @@ export default function CMSPage() {
                 {/* Main Content Area */}
                 <div className="lg:col-span-8 space-y-8">
                     <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-white/20 dark:border-gray-800/50 rounded-[3rem] p-10 shadow-2xl min-h-[700px]">
-                        <div className="flex items-center gap-5 mb-12">
+                        <div className="flex items-center gap-5 mb-10">
                             <div className="p-5 bg-brand-500/10 rounded-[1.75rem] text-brand-500">
                                 <SettingsIcon className="w-8 h-8" />
                             </div>
                             <div>
                                 <h2 className="text-3xl font-black text-gray-900 dark:text-white capitalize">{activeTab} Page Customizer</h2>
                                 <p className="text-gray-500 font-medium">Toggle sections and edit content live.</p>
+                            </div>
+                        </div>
+
+                        {/* Page Visibility Toggle */}
+                        <div className={`mb-12 p-8 rounded-[2.5rem] border-2 transition-all flex flex-col sm:flex-row items-center justify-between gap-6 ${config[activeTab].enabled ? 'bg-green-50/30 dark:bg-green-500/5 border-green-100/50 dark:border-green-900/20' : 'bg-red-50/30 dark:bg-red-500/5 border-red-100/50 dark:border-red-900/20 opacity-80'}`}>
+                            <div className="flex items-center gap-6">
+                                <div className={`w-14 h-14 rounded-3xl flex items-center justify-center transition-shadow ${config[activeTab].enabled ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}>
+                                    <ImageIcon className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Live on Website</h3>
+                                    <p className="text-sm text-gray-500 font-medium">
+                                        {config[activeTab].enabled ? "This page is reachable by customers." : "This page is currently disabled for customers."}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {config[activeTab].required && <span className="text-[10px] font-black uppercase text-brand-500 bg-brand-500/10 px-3 py-1.5 rounded-xl">Required Page</span>}
+                                <button
+                                    onClick={() => handlePageToggle(activeTab)}
+                                    className={`relative inline-flex h-10 w-20 items-center rounded-full transition-all duration-300 ${config[activeTab].enabled ? "bg-brand-500" : "bg-gray-300 dark:bg-gray-700"} ${config[activeTab].required ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-90 shadow-xl"}`}
+                                >
+                                    <span className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-2xl transition-transform duration-300 ${config[activeTab].enabled ? "translate-x-11" : "translate-x-1"}`} />
+                                </button>
                             </div>
                         </div>
 
