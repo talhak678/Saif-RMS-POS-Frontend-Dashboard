@@ -204,7 +204,8 @@ const DEFAULT_CONFIG = {
                     primaryColor: "#ff0000",
                     secondaryColor: "#000000",
                     accentColor: "#f3f4f6",
-                    backgroundColor: "#ffffff"
+                    backgroundColor: "#ffffff",
+                    textColor: "#666666"
                 }
             },
             fonts: {
@@ -574,6 +575,7 @@ export default function CMSPage() {
                                                             secondaryColor: "Used for secondary buttons, subtitles & accent text.",
                                                             accentColor: "Used for light borders, soft backgrounds & subtle highlights.",
                                                             backgroundColor: "The main background color of the entire website canvas.",
+                                                            textColor: "The main text color used for paragraphs and general content.",
                                                             primaryFont: "Primary typeface used for headings and prominent text.",
                                                             secondaryFont: "Secondary typeface used for body text and paragraphs."
                                                         };
