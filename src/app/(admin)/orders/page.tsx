@@ -54,6 +54,15 @@ export default function OrdersPage() {
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
 
+  // Rider Assignment States
+  const [availableRiders, setAvailableRiders] = useState<any[]>([]);
+  const [selectedRiderId, setSelectedRiderId] = useState("");
+  const [loadingRiders, setLoadingRiders] = useState(false);
+
+  // Rider Details for View Modal
+  const [assignedRider, setAssignedRider] = useState<any>(null);
+  const [loadingRiderDetails, setLoadingRiderDetails] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, [statusFilter]);
@@ -82,21 +91,66 @@ export default function OrdersPage() {
     }
   };
 
+  // Fetch available riders when status changes to OUT_FOR_DELIVERY
+  const fetchAvailableRiders = async () => {
+    try {
+      setLoadingRiders(true);
+      const res = await api.get("/riders?status=AVAILABLE");
+      if (res.data?.success) {
+        setAvailableRiders(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch riders", err);
+    } finally {
+      setLoadingRiders(false);
+    }
+  };
+
+  // Fetch rider details by ID
+  const fetchRiderDetails = async (riderId: string) => {
+    try {
+      setLoadingRiderDetails(true);
+      const res = await api.get(`/riders/${riderId}`);
+      if (res.data?.success) {
+        setAssignedRider(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch rider details", err);
+      setAssignedRider(null);
+    } finally {
+      setLoadingRiderDetails(false);
+    }
+  };
+
   const handleStatusUpdate = async () => {
     if (!selectedOrder || !newStatus) return;
+
+    // If status is OUT_FOR_DELIVERY, riderId is required
+    if (newStatus === "OUT_FOR_DELIVERY" && !selectedRiderId) {
+      alert("Please select a rider for delivery");
+      return;
+    }
 
     try {
       setUpdating(true);
 
-      await api.put(`/orders/${selectedOrder.id}`, {
+      const payload: any = {
         status: newStatus,
         paymentStatus:
           selectedOrder.payment?.status === "PAID"
             ? "PAID"
             : "PENDING",
-      });
+      };
+
+      // Add riderId if status is OUT_FOR_DELIVERY
+      if (newStatus === "OUT_FOR_DELIVERY" && selectedRiderId) {
+        payload.riderId = selectedRiderId;
+      }
+
+      await api.put(`/orders/${selectedOrder.id}`, payload);
 
       setStatusModal(false);
+      setSelectedRiderId("");
       fetchOrders();
     } catch (err) {
       console.error("Status update failed", err);
@@ -207,6 +261,12 @@ export default function OrdersPage() {
                       onClick={() => {
                         setViewOrder(order);
                         setIsViewModalOpen(true);
+                        // Fetch rider details if order has riderId
+                        if (order.riderId) {
+                          fetchRiderDetails(order.riderId);
+                        } else {
+                          setAssignedRider(null);
+                        }
                       }}
                       className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                     >
@@ -217,6 +277,7 @@ export default function OrdersPage() {
                       onClick={() => {
                         setSelectedOrder(order);
                         setNewStatus(order.status);
+                        setSelectedRiderId("");
                         setStatusModal(true);
                       }}
                       className="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
@@ -289,6 +350,28 @@ export default function OrdersPage() {
                 : "N/A",
           },
           {
+            label: "Assigned Rider",
+            render: (data: any) => {
+              if (!data?.riderId) return <span className="text-gray-500">No rider assigned</span>;
+              if (loadingRiderDetails) return <span className="text-gray-500">Loading...</span>;
+              if (!assignedRider) return <span className="text-gray-500">N/A</span>;
+              return (
+                <div className="space-y-1">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">{assignedRider.name}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{assignedRider.phone}</div>
+                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${assignedRider.status === "AVAILABLE"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : assignedRider.status === "BUSY"
+                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                    }`}>
+                    {assignedRider.status}
+                  </span>
+                </div>
+              );
+            },
+          },
+          {
             label: "Order Items",
             fullWidth: true,
             render: renderOrderItems,
@@ -311,7 +394,14 @@ export default function OrdersPage() {
 
             <select
               value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
+              onChange={(e) => {
+                const status = e.target.value;
+                setNewStatus(status);
+                // Fetch riders when OUT_FOR_DELIVERY is selected
+                if (status === "OUT_FOR_DELIVERY") {
+                  fetchAvailableRiders();
+                }
+              }}
               className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
             >
               {ORDER_STATUSES.map((st) => (
@@ -320,6 +410,32 @@ export default function OrdersPage() {
                 </option>
               ))}
             </select>
+
+            {/* Rider Selection - Only show when OUT_FOR_DELIVERY */}
+            {newStatus === "OUT_FOR_DELIVERY" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Assign Rider *
+                </label>
+                {loadingRiders ? (
+                  <div className="text-sm text-gray-500">Loading riders...</div>
+                ) : (
+                  <select
+                    value={selectedRiderId}
+                    onChange={(e) => setSelectedRiderId(e.target.value)}
+                    className="w-full p-2 border rounded dark:bg-gray-700"
+                    required
+                  >
+                    <option value="">Select a rider</option>
+                    {availableRiders.map((rider) => (
+                      <option key={rider.id} value={rider.id}>
+                        {rider.name} - {rider.phone}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
 
             <button
               onClick={handleStatusUpdate}

@@ -39,9 +39,14 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <ShoppingCart className="w-5 h-5" />,
+    icon: <ListIcon className="w-5 h-5" />,
     name: "Orders",
     path: "/orders",
+  },
+  {
+    icon: <ShoppingCartIcon className="w-5 h-5" />,
+    name: "POS",
+    path: "/pos",
   },
   {
     icon: <Users className="w-5 h-5" />,
@@ -58,8 +63,10 @@ const navItems: NavItem[] = [
   },
   {
     icon: <Motorbike className="w-5 h-5" />,
-    name: "Riders",
-    path: "/riders",
+    name: "Delivery & Support",
+    subItems: [
+      { name: "Riders", path: "/riders", pro: false },
+    ],
   },
   {
     icon: <ShoppingCartIcon className="w-5 h-5" />,
@@ -80,7 +87,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <TicketPercent className="w-5 h-5" />,
-    name: "Marketing & Discount",
+    name: "Marketing & Loyalty",
     subItems: [
       { name: "Discounts", path: "/discounts", pro: false },
       { name: "Reviews", path: "/reviews", pro: false },
