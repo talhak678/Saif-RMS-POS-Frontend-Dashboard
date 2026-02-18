@@ -42,8 +42,9 @@ const navItems: NavItem[] = [
     icon: <ListIcon className="w-5 h-5" />,
     name: "Customers & Orders",
     subItems: [
-      { name: "Orders", path: "/orders", pro: false },
+      { name: "Incoming Orders", path: "/incoming-orders", pro: false },
       { name: "Customers", path: "/customers", pro: false },
+      { name: "Orders History", path: "/orders", pro: false },
     ],
   },
   {
