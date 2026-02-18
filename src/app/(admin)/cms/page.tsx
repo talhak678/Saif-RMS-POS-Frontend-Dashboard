@@ -193,6 +193,36 @@ const DEFAULT_CONFIG = {
                 content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
             },
         }
+    },
+    theme: {
+        enabled: true,
+        required: true,
+        sections: {
+            colors: {
+                required: true, enabled: true,
+                content: {
+                    primaryColor: "#ff0000",
+                    secondaryColor: "#000000",
+                    accentColor: "#f3f4f6",
+                    backgroundColor: "#ffffff"
+                }
+            },
+            fonts: {
+                required: true, enabled: true,
+                content: {
+                    primaryFont: "Inter",
+                    secondaryFont: "Inter"
+                }
+            },
+            logos: {
+                required: true, enabled: true,
+                content: {
+                    mainLogo: "",
+                    favicon: "",
+                    footerLogo: ""
+                }
+            }
+        }
     }
 };
 
@@ -254,6 +284,11 @@ export default function CMSPage() {
                     });
                 }
 
+                if (mergedConfig.theme) {
+                    if (data.backgroundColor) mergedConfig.theme.sections.colors.content.backgroundColor = data.backgroundColor;
+                    if (data.primaryColor) mergedConfig.theme.sections.colors.content.primaryColor = data.primaryColor;
+                }
+
                 setConfig(mergedConfig);
                 setTheme({
                     backgroundColor: data.backgroundColor || "#ffffff",
@@ -283,10 +318,15 @@ export default function CMSPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
+            // Extract latest colors from the theme configuration if available
+            const themeColors = config.theme?.sections?.colors?.content || {};
+            const pColor = themeColors.primaryColor || theme.primaryColor;
+            const bColor = themeColors.backgroundColor || theme.backgroundColor;
+
             const response = await api.post("/cms/config", {
                 configJson: config,
-                backgroundColor: theme.backgroundColor,
-                primaryColor: theme.primaryColor
+                backgroundColor: bColor,
+                primaryColor: pColor
             });
 
             console.log("✅ CMS Save Response:", response.data);
@@ -426,9 +466,10 @@ export default function CMSPage() {
                                             {p === 'menu' && <List className="w-4 h-4" />}
                                             {p === 'blogs' && <MessageSquare className="w-4 h-4" />}
                                             {p === 'faq' && <Check className="w-4 h-4" />}
+                                            {p === 'theme' && <Palette className="w-4 h-4" />}
                                         </div>
                                         <div>
-                                            <div className="capitalize">{p} page</div>
+                                            <div className="capitalize">{p === 'theme' ? 'Theme Config' : `${p} page`}</div>
                                             {!config[p].enabled && <div className="text-[8px] font-black uppercase text-red-500 bg-red-100/50 dark:bg-red-900/30 px-1.5 py-0.5 rounded-md w-fit">Hidden</div>}
                                         </div>
                                     </div>
@@ -447,8 +488,8 @@ export default function CMSPage() {
                                 <SettingsIcon className="w-8 h-8" />
                             </div>
                             <div>
-                                <h2 className="text-3xl font-black text-gray-900 dark:text-white capitalize">{activeTab} Page Customizer</h2>
-                                <p className="text-gray-500 font-medium">Toggle sections and edit content live.</p>
+                                <h2 className="text-3xl font-black text-gray-900 dark:text-white capitalize">{activeTab === 'theme' ? 'Theme Configuration' : `${activeTab} Page Customizer`}</h2>
+                                <p className="text-gray-500 font-medium">{activeTab === 'theme' ? 'Configure your website colors, fonts and logos.' : 'Toggle sections and edit content live.'}</p>
                             </div>
                         </div>
 
@@ -564,6 +605,22 @@ export default function CMSPage() {
                                                                             </div>
                                                                         );
                                                                     })}
+                                                                </div>
+                                                            ) : field.toLowerCase().includes('color') ? (
+                                                                <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border-2 border-transparent focus-within:border-brand-500 transition-all">
+                                                                    <input
+                                                                        type="color"
+                                                                        value={section.content[field]}
+                                                                        onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                        className="h-12 w-12 rounded-xl cursor-pointer border-none bg-transparent"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        value={section.content[field]}
+                                                                        onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                        className="flex-1 bg-transparent border-none outline-none text-sm font-bold"
+                                                                        placeholder="#000000"
+                                                                    />
                                                                 </div>
                                                             ) : (
                                                                 <input
