@@ -398,7 +398,7 @@ export default function CMSPage() {
                                             {p === 'blogs' && <MessageSquare className="w-4 h-4" />}
                                             {p === 'faq' && <Check className="w-4 h-4" />}
                                         </div>
-                                        {p} Page Setup
+                                        {p} page
                                     </div>
                                     <ChevronDown className={`w-4 h-4 transition-transform ${activeTab === p ? "-rotate-90" : "opacity-0"}`} />
                                 </button>
