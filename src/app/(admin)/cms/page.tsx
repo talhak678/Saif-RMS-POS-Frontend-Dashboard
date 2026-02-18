@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check, Search, Info, Phone, MessageSquare, Plus, Trash2, List } from "lucide-react";
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
@@ -196,10 +196,10 @@ const DEFAULT_CONFIG = {
     },
     theme: {
         enabled: true,
-        required: true,
+        required: false,
         sections: {
             colors: {
-                required: true, enabled: true,
+                required: false, enabled: true,
                 content: {
                     primaryColor: "#ff0000",
                     secondaryColor: "#000000",
@@ -208,14 +208,14 @@ const DEFAULT_CONFIG = {
                 }
             },
             fonts: {
-                required: true, enabled: true,
+                required: false, enabled: true,
                 content: {
-                    primaryFont: "Inter",
-                    secondaryFont: "Inter"
+                    primaryFont: "Outfit",
+                    secondaryFont: "Outfit"
                 }
             },
             logos: {
-                required: true, enabled: true,
+                required: false, enabled: true,
                 content: {
                     mainLogo: "",
                     favicon: "",
@@ -494,28 +494,30 @@ export default function CMSPage() {
                         </div>
 
                         {/* Page Visibility Toggle */}
-                        <div className={`mb-12 p-8 rounded-[2.5rem] border-2 transition-all flex flex-col sm:flex-row items-center justify-between gap-6 ${config[activeTab].enabled ? 'bg-green-50/30 dark:bg-green-500/5 border-green-100/50 dark:border-green-900/20' : 'bg-red-50/30 dark:bg-red-500/5 border-red-100/50 dark:border-red-900/20 opacity-80'}`}>
-                            <div className="flex items-center gap-6">
-                                <div className={`w-14 h-14 rounded-3xl flex items-center justify-center transition-shadow ${config[activeTab].enabled ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}>
-                                    <ImageIcon className="w-6 h-6" />
+                        {activeTab !== 'theme' && (
+                            <div className={`mb-12 p-8 rounded-[2.5rem] border-2 transition-all flex flex-col sm:flex-row items-center justify-between gap-6 ${config[activeTab].enabled ? 'bg-green-50/30 dark:bg-green-500/5 border-green-100/50 dark:border-green-900/20' : 'bg-red-50/30 dark:bg-red-500/5 border-red-100/50 dark:border-red-900/20 opacity-80'}`}>
+                                <div className="flex items-center gap-6">
+                                    <div className={`w-14 h-14 rounded-3xl flex items-center justify-center transition-shadow ${config[activeTab].enabled ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}>
+                                        <ImageIcon className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Live on Website</h3>
+                                        <p className="text-sm text-gray-500 font-medium">
+                                            {config[activeTab].enabled ? "This page is reachable by customers." : "This page is currently disabled for customers."}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Live on Website</h3>
-                                    <p className="text-sm text-gray-500 font-medium">
-                                        {config[activeTab].enabled ? "This page is reachable by customers." : "This page is currently disabled for customers."}
-                                    </p>
+                                <div className="flex items-center gap-4">
+                                    {config[activeTab].required && <span className="text-[10px] font-black uppercase text-brand-500 bg-brand-500/10 px-3 py-1.5 rounded-xl">Required Page</span>}
+                                    <button
+                                        onClick={() => handlePageToggle(activeTab)}
+                                        className={`relative inline-flex h-10 w-20 items-center rounded-full transition-all duration-300 ${config[activeTab].enabled ? "bg-brand-500" : "bg-gray-300 dark:bg-gray-700"} ${config[activeTab].required ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-90 shadow-xl"}`}
+                                    >
+                                        <span className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-2xl transition-transform duration-300 ${config[activeTab].enabled ? "translate-x-11" : "translate-x-1"}`} />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                {config[activeTab].required && <span className="text-[10px] font-black uppercase text-brand-500 bg-brand-500/10 px-3 py-1.5 rounded-xl">Required Page</span>}
-                                <button
-                                    onClick={() => handlePageToggle(activeTab)}
-                                    className={`relative inline-flex h-10 w-20 items-center rounded-full transition-all duration-300 ${config[activeTab].enabled ? "bg-brand-500" : "bg-gray-300 dark:bg-gray-700"} ${config[activeTab].required ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-90 shadow-xl"}`}
-                                >
-                                    <span className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-2xl transition-transform duration-300 ${config[activeTab].enabled ? "translate-x-11" : "translate-x-1"}`} />
-                                </button>
-                            </div>
-                        </div>
+                        )}
 
                         <div className="space-y-6">
                             {Object.keys(config[activeTab].sections).map((sectionKey) => {
@@ -545,14 +547,16 @@ export default function CMSPage() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-8">
-                                                <button
-                                                    onClick={(e) => handleToggle(activeTab, sectionKey, e)}
-                                                    disabled={section.required}
-                                                    className={`relative inline-flex h-9 w-16 items-center rounded-full transition-all duration-300 ${section.enabled ? "bg-brand-500" : "bg-gray-300 dark:bg-gray-700"
-                                                        } ${section.required ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-90 shadow-lg"}`}
-                                                >
-                                                    <span className={`inline-block h-7 w-7 transform rounded-full bg-white shadow-xl transition-transform duration-300 ${section.enabled ? "translate-x-8" : "translate-x-1"}`} />
-                                                </button>
+                                                {activeTab !== 'theme' && (
+                                                    <button
+                                                        onClick={(e) => handleToggle(activeTab, sectionKey, e)}
+                                                        disabled={section.required}
+                                                        className={`relative inline-flex h-9 w-16 items-center rounded-full transition-all duration-300 ${section.enabled ? "bg-brand-500" : "bg-gray-300 dark:bg-gray-700"
+                                                            } ${section.required ? "opacity-30 cursor-not-allowed" : "cursor-pointer active:scale-90 shadow-lg"}`}
+                                                    >
+                                                        <span className={`inline-block h-7 w-7 transform rounded-full bg-white shadow-xl transition-transform duration-300 ${section.enabled ? "translate-x-8" : "translate-x-1"}`} />
+                                                    </button>
+                                                )}
                                                 <ChevronDown className={`w-6 h-6 transition-transform duration-500 ${isExpanded ? "rotate-180 text-brand-500" : "text-gray-300"}`} />
                                             </div>
                                         </div>
@@ -561,78 +565,112 @@ export default function CMSPage() {
                                             <div className="p-10 border-t border-gray-100 dark:border-gray-800 space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
                                                 {/* Section Basic Fields */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                    {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds').map((field) => (
-                                                        <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' ? 'md:col-span-2' : ''} space-y-3`}>
-                                                            <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">{field.replace(/([A-Z])/g, ' $1')}</label>
-                                                            {field === 'description' || field === 'address' ? (
-                                                                <textarea
-                                                                    rows={3}
-                                                                    value={section.content[field]}
-                                                                    onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-[1.5rem] px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner"
-                                                                    placeholder={`Enter ${field}...`}
-                                                                />
-                                                            ) : field === 'menuItems' ? (
-                                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-gray-100/50 dark:bg-gray-800/50 p-6 rounded-[2rem] border-2 border-white dark:border-gray-800 shadow-inner">
-                                                                    {["Home", "Our Menu", "About Us", "Contact Us", "Blogs"].map((item) => {
-                                                                        const currentItems = (section.content[field] || "").split(",").map((i: string) => i.trim()).filter(Boolean);
-                                                                        const isSelected = currentItems.includes(item);
-                                                                        return (
-                                                                            <div
-                                                                                key={item}
-                                                                                onClick={() => {
-                                                                                    let newItems;
-                                                                                    if (isSelected) {
-                                                                                        if (currentItems.length <= 1) {
-                                                                                            toast.error("You must select at least one menu item!");
-                                                                                            return;
-                                                                                        }
-                                                                                        newItems = currentItems.filter((i: string) => i !== item);
-                                                                                    } else {
-                                                                                        newItems = [...currentItems, item];
-                                                                                    }
-                                                                                    handleContentChange(activeTab, sectionKey, field, newItems.join(", "));
-                                                                                }}
-                                                                                className={`p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 border-2 flex items-center justify-between gap-3 ${isSelected
-                                                                                    ? "bg-brand-500 border-brand-500 text-white shadow-xl shadow-brand-500/30 scale-[1.03]"
-                                                                                    : "bg-white dark:bg-gray-900 border-white dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-900/40 text-gray-500 dark:text-gray-400 hover:text-brand-500 shadow-sm"
-                                                                                    }`}
-                                                                            >
-                                                                                <span className="text-xs font-black uppercase tracking-wider">{item}</span>
-                                                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isSelected ? "bg-white text-brand-500" : "bg-gray-100 dark:bg-gray-800"}`}>
-                                                                                    {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
+                                                    {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds').map((field) => {
+                                                        const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
+                                                        const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
+
+                                                        const fieldDescriptions: any = {
+                                                            primaryColor: "Used for buttons, icons, highlights & primary brand elements.",
+                                                            secondaryColor: "Used for secondary buttons, subtitles & accent text.",
+                                                            accentColor: "Used for light borders, soft backgrounds & subtle highlights.",
+                                                            backgroundColor: "The main background color of the entire website canvas.",
+                                                            primaryFont: "Primary typeface used for headings and prominent text.",
+                                                            secondaryFont: "Secondary typeface used for body text and paragraphs."
+                                                        };
+
+                                                        const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Oswald', 'Raleway', 'Playfair Display', 'Lora'];
+
+                                                        return (
+                                                            <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' ? 'md:col-span-2' : ''} space-y-3`}>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">{field.replace(/([A-Z])/g, ' $1')}</label>
+                                                                    {fieldDescriptions[field] && <p className="text-[10px] text-brand-500/70 font-bold ml-1">{fieldDescriptions[field]}</p>}
                                                                 </div>
-                                                            ) : field.toLowerCase().includes('color') ? (
-                                                                <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border-2 border-transparent focus-within:border-brand-500 transition-all">
-                                                                    <input
-                                                                        type="color"
+                                                                {field === 'description' || field === 'address' ? (
+                                                                    <textarea
+                                                                        rows={3}
                                                                         value={section.content[field]}
                                                                         onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                        className="h-12 w-12 rounded-xl cursor-pointer border-none bg-transparent"
+                                                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-[1.5rem] px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner"
+                                                                        placeholder={`Enter ${field}...`}
                                                                     />
+                                                                ) : field === 'menuItems' ? (
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-gray-100/50 dark:bg-gray-800/50 p-6 rounded-[2rem] border-2 border-white dark:border-gray-800 shadow-inner">
+                                                                        {["Home", "Our Menu", "About Us", "Contact Us", "Blogs"].map((item) => {
+                                                                            const currentItems = (section.content[field] || "").split(",").map((i: string) => i.trim()).filter(Boolean);
+                                                                            const isSelected = currentItems.includes(item);
+                                                                            return (
+                                                                                <div
+                                                                                    key={item}
+                                                                                    onClick={() => {
+                                                                                        let newItems;
+                                                                                        if (isSelected) {
+                                                                                            if (currentItems.length <= 1) {
+                                                                                                toast.error("At least one menu item required!");
+                                                                                                return;
+                                                                                            }
+                                                                                            newItems = currentItems.filter((i: string) => i !== item);
+                                                                                        } else {
+                                                                                            newItems = [...currentItems, item];
+                                                                                        }
+                                                                                        handleContentChange(activeTab, sectionKey, field, newItems.join(", "));
+                                                                                    }}
+                                                                                    className={`p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 border-2 flex items-center justify-between gap-3 ${isSelected
+                                                                                        ? "bg-brand-500 border-brand-500 text-white shadow-xl shadow-brand-500/30 scale-[1.03]"
+                                                                                        : "bg-white dark:bg-gray-900 border-white dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-900/40 text-gray-500 dark:text-gray-400 hover:text-brand-500 shadow-sm"
+                                                                                        }`}
+                                                                                >
+                                                                                    <span className="text-xs font-black uppercase tracking-wider">{item}</span>
+                                                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isSelected ? "bg-white text-brand-500" : "bg-gray-100 dark:bg-gray-800"}`}>
+                                                                                        {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                ) : isThemeFont ? (
+                                                                    <select
+                                                                        value={section.content[field]}
+                                                                        onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-2xl px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner appearance-none"
+                                                                    >
+                                                                        {fontOptions.map(font => (
+                                                                            <option key={font} value={font}>{font}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                ) : field.toLowerCase().includes('color') ? (
+                                                                    <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border-2 border-transparent focus-within:border-brand-500 transition-all">
+                                                                        <div
+                                                                            className="h-12 w-12 rounded-xl cursor-pointer border-2 border-white/20 shadow-lg relative overflow-hidden"
+                                                                            style={{ backgroundColor: section.content[field] }}
+                                                                        >
+                                                                            <input
+                                                                                type="color"
+                                                                                value={section.content[field]}
+                                                                                onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                className="absolute inset-0 opacity-0 cursor-pointer h-20 w-20"
+                                                                            />
+                                                                        </div>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={section.content[field]}
+                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold"
+                                                                            placeholder="#000000"
+                                                                        />
+                                                                    </div>
+                                                                ) : (
                                                                     <input
                                                                         type="text"
                                                                         value={section.content[field]}
                                                                         onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                        className="flex-1 bg-transparent border-none outline-none text-sm font-bold"
-                                                                        placeholder="#000000"
+                                                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-2xl px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner"
+                                                                        placeholder={`Enter ${field}...`}
                                                                     />
-                                                                </div>
-                                                            ) : (
-                                                                <input
-                                                                    type="text"
-                                                                    value={section.content[field]}
-                                                                    onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 rounded-2xl px-6 py-5 text-sm font-bold outline-none transition-all shadow-inner"
-                                                                    placeholder={`Enter ${field}...`}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
 
                                                 {/* SPECIAL: Dynamic List Handler (ARRAY) */}
