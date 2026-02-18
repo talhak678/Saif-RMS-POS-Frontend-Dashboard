@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Settings, ChefHat, ShoppingCartIcon, Warehouse, Bike, Motorbike, TicketPercent } from "lucide-react";
+import { Settings, ChefHat, ShoppingCartIcon, Warehouse, Bike, Motorbike, TicketPercent, Computer } from "lucide-react";
 import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import {
@@ -44,9 +44,13 @@ const navItems: NavItem[] = [
     path: "/orders",
   },
   {
-    icon: <ShoppingCartIcon className="w-5 h-5" />,
-    name: "POS",
-    path: "/pos",
+    icon: <Computer className="w-5 h-5" />,
+    name: "Point of Sales (POS)",
+    subItems: [
+      { name: "POS", path: "/pos", pro: false },
+      { name: "Reservations", path: "/reservations", pro: false },
+      { name: "Table Services", path: "/table-services", pro: false },
+    ],
   },
   {
     icon: <Users className="w-5 h-5" />,
