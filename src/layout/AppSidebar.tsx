@@ -53,7 +53,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Menu", path: "/pos", pro: false },
       { name: "Reservations", path: "/reservations", pro: false },
-      { name: "Table Services", path: "/table-services", pro: false },
+      // { name: "Table Services", path: "/table-services", pro: false },
     ],
   },
   {
