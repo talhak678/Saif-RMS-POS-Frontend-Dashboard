@@ -44,9 +44,9 @@ const navItems: NavItem[] = [
     icon: <ListIcon className="w-5 h-5" />,
     name: "Customers & Orders",
     subItems: [
-      { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "delivery" },
+      { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "orders" },
       { name: "Customers", path: "/customers", pro: false, permission: "customers" },
-      { name: "Orders History", path: "/orders", pro: false, permission: "delivery" },
+      { name: "Orders History", path: "/orders", pro: false, permission: "orders" },
     ],
   },
   {
@@ -98,7 +98,7 @@ const navItems: NavItem[] = [
   {
     icon: <TicketPercent className="w-5 h-5" />,
     name: "Marketing & Loyalty",
-    permission: "discount",
+    permission: "marketing",
     subItems: [
       { name: "Discounts", path: "/discounts", pro: false, permission: "marketing" },
       { name: "Reviews", path: "/reviews", pro: false, permission: "marketing" },
@@ -176,7 +176,7 @@ const othersItems: NavItem[] = [
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
-  const { permissions, loadingUser } = useAuth();
+  const { permissions, loadingUser, user } = useAuth();
   const pathname = usePathname();
 
   // Helper function to check if a permission exists
@@ -429,7 +429,29 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
+
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+        {/* Profile Section
+        {(isExpanded || isHovered || isMobileOpen) && (
+          <div className="mx-5 mb-6 flex items-center gap-3 rounded-2xl bg-gray-100/50 p-4 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-800/50">
+            <div className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-brand-500 text-sm font-bold text-white uppercase dark:border-gray-800 shadow-sm">
+              {user?.name ? (
+                user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
+              ) : (
+                <div className="h-full w-full bg-gray-200 dark:bg-gray-700" />
+              )}
+            </div>
+            <div className="overflow-hidden">
+              <h3 className="truncate text-sm font-bold text-gray-800 dark:text-gray-100">
+                {user?.name || "Guest User"}
+              </h3>
+              <p className="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
+                {user?.role?.name || "No Role"}
+              </p>
+            </div>
+          </div>
+        )} */}
+
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>

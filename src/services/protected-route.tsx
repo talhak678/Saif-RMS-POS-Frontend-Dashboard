@@ -46,7 +46,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, module, compo
             <div className="min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-4">
                     <Loader size="12" />
-                    <p className="text-sm font-medium text-gray-500 animate-pulse">Verifying credentials...</p>
+                    <p className="text-sm font-medium text-gray-500 animate-pulse">Loading...</p>
                 </div>
             </div>
         );

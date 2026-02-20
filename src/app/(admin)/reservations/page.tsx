@@ -192,7 +192,16 @@ export default function ReservationsPage() {
         if (!selectedItem || !newStatus) return;
         try {
             setUpdatingStatus(true);
-            await api.put(`/reservations/${selectedItem.id}`, { status: newStatus });
+            const body = {
+                customerName: selectedItem.customerName,
+                phone: selectedItem.phone,
+                guestCount: selectedItem.guestCount,
+                startTime: selectedItem.startTime,
+                status: newStatus,
+                branchId: selectedItem.branchId,
+                tableId: selectedItem.tableId,
+            };
+            await api.put(`/reservations/${selectedItem.id}`, body);
             setStatusModal(false);
             fetchReservations();
         } catch (err) { console.error(err); }

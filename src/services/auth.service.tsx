@@ -42,7 +42,7 @@ class AuthService extends BaseService {
     // function to logout
     public logout(): void {
         this.deleteAllCookies()
-        this.redirectToLogin()
+        window.location.href = '/signin'
     }
 
     public async login(credentials: { email: string, password: string }): Promise<iApiResponse> {

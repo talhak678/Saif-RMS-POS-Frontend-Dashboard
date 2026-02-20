@@ -4,6 +4,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { useAuth } from "@/services/permission.service";
+import { AuthServiceInstance } from "@/services/auth.service";
 
 interface UserDropdownProps {
   isOpen: boolean;
@@ -11,23 +13,35 @@ interface UserDropdownProps {
   close: () => void;
 }
 
-export default function UserDropdown({ isOpen, toggle, close }: UserDropdownProps) {
+const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
+  const { user } = useAuth();
+  const authServ = AuthServiceInstance();
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    authServ.logout();
+  };
+
   return (
     <div className="relative">
       <button
         onClick={toggle}
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <Image
-            width={44}
-            height={44}
-            src="/images/user/owner.jpg"
-            alt="User"
-          />
-        </span>
+        <div className="mr-3 flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-brand-500 text-sm font-bold text-white uppercase dark:border-gray-800">
+          {user?.name ? (
+            user.name.split(' ').map(n => n[0]).join('').slice(0, 2)
+          ) : (
+            <Image
+              width={44}
+              height={44}
+              src="/images/user/owner.jpg"
+              alt="User"
+            />
+          )}
+        </div>
 
-        <span className="block mr-1 font-medium text-theme-sm">Saif Abbas</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.name || "Saif Abbas"}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
@@ -55,10 +69,10 @@ export default function UserDropdown({ isOpen, toggle, close }: UserDropdownProp
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Saif Abbas
+            {user?.name || "Saif Abbas"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            Saif@Abbas.com
+            {user?.email || "Saif@Abbas.com"}
           </span>
         </div>
 
@@ -85,7 +99,7 @@ export default function UserDropdown({ isOpen, toggle, close }: UserDropdownProp
                   fill=""
                 />
               </svg>
-              Edit profile
+              Profile
             </DropdownItem>
           </li>
           <li>
@@ -139,9 +153,9 @@ export default function UserDropdown({ isOpen, toggle, close }: UserDropdownProp
             </DropdownItem>
           </li>
         </ul>
-        <Link
-          href="/signin"
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
             className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
@@ -159,8 +173,9 @@ export default function UserDropdown({ isOpen, toggle, close }: UserDropdownProp
             />
           </svg>
           Sign out
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );
-}
+};
+export default UserDropdown;
