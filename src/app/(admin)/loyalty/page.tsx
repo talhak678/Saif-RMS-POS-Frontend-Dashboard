@@ -6,6 +6,7 @@ import api from "@/services/api";
 import { Eye, Trash2, Plus, X, Search } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
+import { ProtectedRoute } from "@/services/protected-route";
 
 const TRANSACTION_TYPES = ["EARNED", "REDEEMED"];
 
@@ -164,205 +165,207 @@ export default function LoyaltyPage() {
     };
 
     return (
-        <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
-            <div className="flex justify-between items-center mb-5">
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                    Loyalty Transactions
-                </h1>
+        <ProtectedRoute module="marketing" >
+            <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
+                <div className="flex justify-between items-center mb-5">
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+                        Loyalty Transactions
+                    </h1>
 
-                <div className="flex gap-3">
-                    {/* CUSTOMER SEARCH */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            value={customerSearch}
-                            onChange={(e) => setCustomerSearch(e.target.value)}
-                            placeholder="Search customer..."
-                            className="pl-10 pr-4 py-2 rounded border dark:bg-gray-800 dark:border-gray-700 min-w-[250px]"
-                        />
+                    <div className="flex gap-3">
+                        {/* CUSTOMER SEARCH */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <input
+                                type="text"
+                                value={customerSearch}
+                                onChange={(e) => setCustomerSearch(e.target.value)}
+                                placeholder="Search customer..."
+                                className="pl-10 pr-4 py-2 rounded border dark:bg-gray-800 dark:border-gray-700 min-w-[250px]"
+                            />
+                        </div>
+
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            <Plus size={18} />
+                            Add Transaction
+                        </button>
                     </div>
-
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        <Plus size={18} />
-                        Add Transaction
-                    </button>
                 </div>
-            </div>
 
-            <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
-                        <tr>
-                            <th className="px-4 py-3 text-left">#</th>
-                            <th className="px-4 py-3 text-left">Customer</th>
-                            <th className="px-4 py-3 text-left">Points</th>
-                            <th className="px-4 py-3 text-left">Type</th>
-                            <th className="px-4 py-3 text-left">Current Balance</th>
-                            <th className="px-4 py-3 text-left">Date</th>
-                            <th className="px-4 py-3 text-left">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {loading ? (
+                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
                             <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    Loading transactions...
-                                </td>
+                                <th className="px-4 py-3 text-left">#</th>
+                                <th className="px-4 py-3 text-left">Customer</th>
+                                <th className="px-4 py-3 text-left">Points</th>
+                                <th className="px-4 py-3 text-left">Type</th>
+                                <th className="px-4 py-3 text-left">Current Balance</th>
+                                <th className="px-4 py-3 text-left">Date</th>
+                                <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
-                        ) : transactions.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    No transactions found
-                                </td>
-                            </tr>
-                        ) : (
-                            transactions.map((transaction, index) => (
-                                <tr
-                                    key={transaction.id}
-                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
-                                    <td className="px-4 py-3">{index + 1}</td>
-                                    <td className="px-4 py-3 font-medium">{transaction.customer.name}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={transaction.type === "EARNED" ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"}>
-                                            {transaction.type === "EARNED" ? "+" : "-"}{transaction.points}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className={getTypeBadge(transaction.type)}>
-                                            {transaction.type}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 font-semibold">
-                                        {transaction.customer.loyaltyPoints} pts
-                                    </td>
-                                    <td className="px-4 py-3 text-xs">
-                                        {new Date(transaction.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-4 py-3 flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setViewTransaction(transaction);
-                                                setIsViewModalOpen(true);
-                                            }}
-                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                            title="View Details"
-                                        >
-                                            <Eye size={18} />
-                                        </button>
+                        </thead>
 
-                                        <button
-                                            onClick={() => handleDeleteTransaction(transaction.id)}
-                                            disabled={deleting === transaction.id}
-                                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
-                                            title="Delete Transaction"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        Loading transactions...
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* ADD TRANSACTION MODAL */}
-            {
-                showAddModal && (
-                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                            <div className="flex justify-between mb-4">
-                                <h2 className="font-semibold text-lg">Add Loyalty Transaction</h2>
-                                <button onClick={() => setShowAddModal(false)}>
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Customer ID *</label>
-                                    <input
-                                        type="text"
-                                        value={addFormData.customerId}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, customerId: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="clxxx..."
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Points *</label>
-                                    <input
-                                        type="number"
-                                        value={addFormData.points}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, points: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="50"
-                                        min="1"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Transaction Type *</label>
-                                    <select
-                                        value={addFormData.type}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, type: e.target.value as "EARNED" | "REDEEMED" })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                            ) : transactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        No transactions found
+                                    </td>
+                                </tr>
+                            ) : (
+                                transactions.map((transaction, index) => (
+                                    <tr
+                                        key={transaction.id}
+                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     >
-                                        {TRANSACTION_TYPES.map((type) => (
-                                            <option key={type} value={type}>
-                                                {type}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        <td className="px-4 py-3">{index + 1}</td>
+                                        <td className="px-4 py-3 font-medium">{transaction.customer.name}</td>
+                                        <td className="px-4 py-3">
+                                            <span className={transaction.type === "EARNED" ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"}>
+                                                {transaction.type === "EARNED" ? "+" : "-"}{transaction.points}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={getTypeBadge(transaction.type)}>
+                                                {transaction.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 font-semibold">
+                                            {transaction.customer.loyaltyPoints} pts
+                                        </td>
+                                        <td className="px-4 py-3 text-xs">
+                                            {new Date(transaction.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-3 flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setViewTransaction(transaction);
+                                                    setIsViewModalOpen(true);
+                                                }}
+                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                title="View Details"
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+
+                                            <button
+                                                onClick={() => handleDeleteTransaction(transaction.id)}
+                                                disabled={deleting === transaction.id}
+                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                                title="Delete Transaction"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* ADD TRANSACTION MODAL */}
+                {
+                    showAddModal && (
+                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
+                                <div className="flex justify-between mb-4">
+                                    <h2 className="font-semibold text-lg">Add Loyalty Transaction</h2>
+                                    <button onClick={() => setShowAddModal(false)}>
+                                        <X size={18} />
+                                    </button>
                                 </div>
 
-                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
-                                    <p className="text-blue-800 dark:text-blue-200">
-                                        <b>Note:</b> EARNED adds points, REDEEMED subtracts points from customer balance.
-                                    </p>
-                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Customer ID *</label>
+                                        <input
+                                            type="text"
+                                            value={addFormData.customerId}
+                                            onChange={(e) =>
+                                                setAddFormData({ ...addFormData, customerId: e.target.value })
+                                            }
+                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                            placeholder="clxxx..."
+                                        />
+                                    </div>
 
-                                <button
-                                    onClick={handleAddTransaction}
-                                    disabled={adding}
-                                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
-                                >
-                                    {adding ? "Adding..." : "Add Transaction"}
-                                </button>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Points *</label>
+                                        <input
+                                            type="number"
+                                            value={addFormData.points}
+                                            onChange={(e) =>
+                                                setAddFormData({ ...addFormData, points: e.target.value })
+                                            }
+                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                            placeholder="50"
+                                            min="1"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Transaction Type *</label>
+                                        <select
+                                            value={addFormData.type}
+                                            onChange={(e) =>
+                                                setAddFormData({ ...addFormData, type: e.target.value as "EARNED" | "REDEEMED" })
+                                            }
+                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        >
+                                            {TRANSACTION_TYPES.map((type) => (
+                                                <option key={type} value={type}>
+                                                    {type}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
+                                        <p className="text-blue-800 dark:text-blue-200">
+                                            <b>Note:</b> EARNED adds points, REDEEMED subtracts points from customer balance.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={handleAddTransaction}
+                                        disabled={adding}
+                                        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                    >
+                                        {adding ? "Adding..." : "Add Transaction"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
 
-            {/* VIEW DETAIL MODAL */}
-            <ViewDetailModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                title="Transaction Details"
-                data={viewTransaction}
-                fields={[
-                    { label: "Customer", render: (data: any) => data?.customer?.name },
-                    { label: "Points", render: (data: any) => `${data?.type === "EARNED" ? "+" : "-"}${data?.points}` },
-                    { label: "Type", render: (data: any) => <span className={getTypeBadge(data?.type)}>{data?.type}</span> },
-                    { label: "Current Balance", render: (data: any) => `${data?.customer?.loyaltyPoints} points` },
-                    { label: "Transaction Date", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
-                    { label: "Transaction ID", key: "id" },
-                ]}
-            />
-        </div>
+                {/* VIEW DETAIL MODAL */}
+                <ViewDetailModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    title="Transaction Details"
+                    data={viewTransaction}
+                    fields={[
+                        { label: "Customer", render: (data: any) => data?.customer?.name },
+                        { label: "Points", render: (data: any) => `${data?.type === "EARNED" ? "+" : "-"}${data?.points}` },
+                        { label: "Type", render: (data: any) => <span className={getTypeBadge(data?.type)}>{data?.type}</span> },
+                        { label: "Current Balance", render: (data: any) => `${data?.customer?.loyaltyPoints} points` },
+                        { label: "Transaction Date", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                        { label: "Transaction ID", key: "id" },
+                    ]}
+                />
+            </div>
+        </ProtectedRoute>
     );
 }

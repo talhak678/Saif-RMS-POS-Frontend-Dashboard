@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Settings, ChefHat, ShoppingCartIcon, Warehouse, Bike, Motorbike, TicketPercent, Computer } from "lucide-react";
 import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
+import { useAuth } from "@/services/permission.service";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -25,7 +26,8 @@ type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  permission?: string;
+  subItems?: { name: string; permission?: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
 const navItems: NavItem[] = [
@@ -33,8 +35,8 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [
-      { name: "Overview", path: "/", pro: false },
-      { name: "Reports", path: "/reports-dashboard", pro: true },
+      { name: "Overview", path: "/overview-dashboard", pro: false, permission: "dashboard-overview" },
+      { name: "Reports", path: "/reports-dashboard", pro: true, permission: "dashboard-reports" },
     ],
     path: "/",
   },
@@ -42,84 +44,91 @@ const navItems: NavItem[] = [
     icon: <ListIcon className="w-5 h-5" />,
     name: "Customers & Orders",
     subItems: [
-      { name: "Incoming Orders", path: "/incoming-orders", pro: false },
-      { name: "Customers", path: "/customers", pro: false },
-      { name: "Orders History", path: "/orders", pro: false },
+      { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "delivery" },
+      { name: "Customers", path: "/customers", pro: false, permission: "customers" },
+      { name: "Orders History", path: "/orders", pro: false, permission: "delivery" },
     ],
   },
   {
     icon: <Computer className="w-5 h-5" />,
     name: "Point of Sale (POS)",
+    permission: "pos",
     subItems: [
-      { name: "Menu", path: "/pos", pro: false },
-      { name: "Reservations", path: "/reservations", pro: false },
-      { name: "Table Services", path: "/table-services", pro: false },
+      { name: "Menu", path: "/pos", pro: false, permission: "pos" },
+      { name: "Reservations", path: "/reservations", pro: false, permission: "pos" },
+      { name: "Table Services", path: "/table-services", pro: false, permission: "pos" },
     ],
   },
   {
     icon: <ChefHat className="w-5 h-5" />,
     name: "Restaurant & Config",
+    permission: "restaurant",
     subItems: [
-      { name: "Restaurants", path: "/restaurants", pro: false },
-      { name: "Branches", path: "/branches", pro: false },
+      { name: "Restaurants", path: "/restaurants", pro: false, permission: "restaurant" },
+      { name: "Branches", path: "/branches", pro: false, permission: "restaurant" },
     ],
   },
   {
     icon: <Motorbike className="w-5 h-5" />,
     name: "Delivery & Support",
+    permission: "delivery",
     subItems: [
-      { name: "Riders", path: "/riders", pro: false },
+      { name: "Riders", path: "/riders", pro: false, permission: "delivery" },
     ],
   },
   {
     icon: <ShoppingCartIcon className="w-5 h-5" />,
     name: "Menu & Categories",
+    permission: "menu",
     subItems: [
-      { name: "Categories", path: "/categories", pro: false },
-      { name: "Menu", path: "/items", pro: false },
+      { name: "Categories", path: "/categories", pro: false, permission: "menu" },
+      { name: "Menu", path: "/items", pro: false, permission: "menu" },
     ],
   },
   {
     icon: <Warehouse className="w-5 h-5" />,
     name: "Inventory & Recipes",
+    permission: "inventory",
     subItems: [
-      { name: "Ingredients", path: "/ingredients", pro: false },
-      { name: "Stock", path: "/stock", pro: false },
-      { name: "Recipes", path: "/recipes", pro: false },
+      { name: "Ingredients", path: "/ingredients", pro: false, permission: "inventory" },
+      { name: "Stock", path: "/stock", pro: false, permission: "inventory" },
+      { name: "Recipes", path: "/recipes", pro: false, permission: "inventory" },
     ],
   },
   {
     icon: <TicketPercent className="w-5 h-5" />,
     name: "Marketing & Loyalty",
+    permission: "discount",
     subItems: [
-      { name: "Discounts", path: "/discounts", pro: false },
-      { name: "Reviews", path: "/reviews", pro: false },
-      { name: "Loyalty", path: "/loyalty", pro: false },
+      { name: "Discounts", path: "/discounts", pro: false, permission: "marketing" },
+      { name: "Reviews", path: "/reviews", pro: false, permission: "marketing" },
+      { name: "Loyalty", path: "/loyalty", pro: false, permission: "marketing" },
     ],
   },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
-      { name: "Users", path: "/users", pro: false },
-      { name: "Roles", path: "/role", pro: false },
+      { name: "Users", path: "/users", pro: false, permission: "users" },
+      { name: "Roles", path: "/role", pro: false, permission: "roles" },
     ],
   },
   {
     icon: <PageIcon />,
     name: "CMS & Website",
+    permission: "cms",
     subItems: [
-      { name: "Page Sections", path: "/cms", pro: false },
-      { name: "Banners", path: "/cms/banners", pro: false },
-      { name: "FAQs", path: "/cms/faqs", pro: false },
+      { name: "Page Sections", path: "/cms", pro: false, permission: "cms" },
+      { name: "Banners", path: "/cms/banners", pro: false, permission: "cms" },
+      { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms" },
     ],
   },
   {
     icon: <Settings className="w-5 h-5" />,
     name: "Settings",
     path: "/settings",
+    permission: "settings",
   },
-
   // {
   //   icon: <CalenderIcon />,
   //   name: "Calendar",
@@ -139,15 +148,6 @@ const navItems: NavItem[] = [
   // {
   //   name: "Tables",
   //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
   // },
 ];
 
@@ -176,10 +176,34 @@ const othersItems: NavItem[] = [
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { permissions, loadingUser } = useAuth();
   const pathname = usePathname();
 
+  // Helper function to check if a permission exists
+  const hasPermission = useCallback((permission?: string) => {
+    if (!permission) return true; // Items without permission field are public (usually none here but just in case)
+    return permissions?.some(p => p.action === permission);
+  }, [permissions]);
+
+  // Filter items based on permissions
+  const filteredNavItems = useMemo(() => {
+    return navItems.map(item => {
+      // If item has subItems, filter them first
+      if (item.subItems) {
+        const filteredSubItems = item.subItems.filter(sub => hasPermission(sub.permission));
+        // If no subitems are visible and the item itself has no direct permission required, hide it
+        if (filteredSubItems.length === 0 && !hasPermission(item.permission)) {
+          return null;
+        }
+        return { ...item, subItems: filteredSubItems };
+      }
+      // If no subItems, just check direct permission
+      return hasPermission(item.permission) ? item : null;
+    }).filter(Boolean) as (NavItem & { permission?: string })[];
+  }, [hasPermission]);
+
   const renderMenuItems = (
-    navItems: NavItem[],
+    navItems: (NavItem & { permission?: string })[],
     menuType: "main" | "others"
   ) => (
     <ul className="flex flex-col gap-4">
@@ -421,7 +445,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+              {renderMenuItems(filteredNavItems, "main")}
             </div>
 
             {/* <div className="">

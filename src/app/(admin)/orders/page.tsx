@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, X, Star } from "lucide-react";
+import { Eye, X, Star, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { ProtectedRoute } from "@/services/protected-route";
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -183,302 +184,308 @@ export default function OrdersPage() {
     </div>
   );
 
+  // Helper functions for modals
+  const openViewModal = (order: any) => {
+    setViewOrder(order);
+    setIsViewModalOpen(true);
+    if (order.riderId) {
+      fetchRiderDetails(order.riderId);
+    } else {
+      setAssignedRider(null);
+    }
+  };
+
+  const openStatusModal = (order: any) => {
+    setSelectedOrder(order);
+    setNewStatus(order.status);
+    setSelectedRiderId("");
+    setStatusModal(true);
+  };
+
   return (
-    <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-          Orders
-        </h1>
+    <ProtectedRoute module="incoming">
+      <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+        <div className="flex justify-between items-center mb-5">
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+            Orders
+          </h1>
 
-        {/* STATUS FILTER */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="p-2 rounded border dark:bg-gray-800 dark:border-gray-700"
-        >
-          <option value="ALL">All Orders</option>
-          {ORDER_STATUSES.map((st) => (
-            <option key={st} value={st}>
-              {st}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* STATUS FILTER */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="p-2 rounded border dark:bg-gray-800 dark:border-gray-700"
+          >
+            <option value="ALL">All Orders</option>
+            {ORDER_STATUSES.map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100 dark:bg-gray-700">
-            <tr>
-              <th className="px-4 py-3 text-left">#</th>
-              <th className="px-4 py-3">Order</th>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Total</th>
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
+        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
-                <td colSpan={8} className="py-10 text-center">
-                  Loading orders...
-                </td>
+                <th className="px-4 py-3 text-left">#</th>
+                <th className="px-4 py-3">Order</th>
+                <th className="px-4 py-3">Customer</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Total</th>
+                <th className="px-4 py-3">Time</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
-            ) : orders.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="py-10 text-center">
-                  No orders found
-                </td>
-              </tr>
-            ) : (
-              orders.map((order: any, index: number) => (
-                <tr
-                  key={order.id}
-                  className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <td className="px-4 py-3">{index + 1}</td>
-                  <td className="px-4 py-3 font-medium">
-                    #{order.orderNo}
-                  </td>
-                  <td className="px-4 py-3">
-                    {order.customer
-                      ? (
-                        <span>
-                          {order.customer.name}
-                          {order.source && order.source !== "WEBSITE" && (
-                            <span className="ml-1 text-blue-600 dark:text-blue-400 text-xs font-medium">({order.source})</span>
-                          )}
-                        </span>
-                      )
-                      : order.source === "POS"
-                        ? <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">POS</span>
-                        : <span className="text-gray-400 text-xs">—</span>
-                    }
-                  </td>
-                  <td className="px-4 py-3">{order.type}</td>
-                  <td className="px-4 py-3">
-                    <span className={getStatusBadge(order.status)}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-semibold">
-                    Rs. {order.total}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 flex gap-2">
-                    <button
-                      onClick={() => {
-                        setViewOrder(order);
-                        setIsViewModalOpen(true);
-                        // Fetch rider details if order has riderId
-                        if (order.riderId) {
-                          fetchRiderDetails(order.riderId);
-                        } else {
-                          setAssignedRider(null);
-                        }
-                      }}
-                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                    >
-                      <Eye size={18} />
-                    </button>
+            </thead>
 
-                    <button
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setNewStatus(order.status);
-                        setSelectedRiderId("");
-                        setStatusModal(true);
-                      }}
-                      className="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Change Status
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const firstMenuItem = order.items?.[0]?.menuItemId || "";
-                        router.push(`/reviews?orderId=${order.id}&menuItemId=${firstMenuItem}`);
-                      }}
-                      className="p-2 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded text-yellow-600 dark:text-yellow-400"
-                      title="Add Review"
-                    >
-                      <Star size={18} />
-                    </button>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="py-10 text-center">
+                    Loading orders...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-10 text-center">
+                    No orders found
+                  </td>
+                </tr>
+              ) : (
+                orders.map((order: any, index: number) => (
+                  <tr
+                    key={order.id}
+                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-4 py-3">{index + 1}</td>
+                    <td className="px-4 py-3 font-medium">
+                      #{order.orderNo}
+                    </td>
+                    <td className="px-4 py-3">
+                      {order.customer
+                        ? (
+                          <span>
+                            {order.customer.name}
+                            {order.source && order.source !== "WEBSITE" && (
+                              <span className="ml-1 text-blue-600 dark:text-blue-400 text-xs font-medium">({order.source})</span>
+                            )}
+                          </span>
+                        )
+                        : order.source === "POS"
+                          ? <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">POS</span>
+                          : <span className="text-gray-400 text-xs">—</span>
+                      }
+                    </td>
+                    <td className="px-4 py-3">{order.type}</td>
+                    <td className="px-4 py-3">
+                      <span className={getStatusBadge(order.status)}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-semibold">
+                      Rs. {order.total}
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {new Date(order.createdAt).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 flex gap-2">
+                      <button
+                        onClick={() => openViewModal(order)}
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                      >
+                        <Eye size={18} />
+                      </button>
 
-      {/* VIEW ORDER MODAL */}
-      <ViewDetailModal
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        title={`Order Details #${viewOrder?.orderNo || ""}`}
-        data={viewOrder}
-        fields={[
-          {
-            label: "Customer Name",
-            render: (data: any) => {
-              if (!data?.customer) {
-                return data?.source === "POS"
-                  ? <span className="text-blue-600 font-semibold">POS Order</span>
-                  : <span className="text-gray-400">—</span>;
-              }
-              return (
-                <span>
-                  {data.customer.name}
-                  {data.source && data.source !== "WEBSITE" && (
-                    <span className="ml-1 text-blue-600 text-xs font-medium">({data.source})</span>
-                  )}
-                </span>
-              );
-            },
-          },
-          {
-            label: "Source",
-            render: (data: any) => data?.source || "—",
-          },
-          {
-            label: "Phone Number",
-            render: (data: any) => data?.customer?.phone,
-          },
-          {
-            label: "Order Type",
-            key: "type",
-          },
-          {
-            label: "Branch",
-            render: (data: any) => data?.branch?.name,
-          },
-          {
-            label: "Status",
-            render: (data: any) => (
-              <span className={getStatusBadge(data?.status || "")}>
-                {data?.status}
-              </span>
-            ),
-          },
-          {
-            label: "Payment",
-            render: (data: any) => (
-              <span>
-                {data?.payment?.method} ({data?.payment?.status})
-              </span>
-            ),
-          },
-          {
-            label: "Placed At",
-            render: (data: any) =>
-              data?.createdAt
-                ? new Date(data.createdAt).toLocaleString()
-                : "N/A",
-          },
-          {
-            label: "Assigned Rider",
-            render: (data: any) => {
-              if (!data?.riderId) return <span className="text-gray-500">No rider assigned</span>;
-              if (loadingRiderDetails) return <span className="text-gray-500">Loading...</span>;
-              if (!assignedRider) return <span className="text-gray-500">N/A</span>;
-              return (
-                <div className="space-y-1">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{assignedRider.name}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{assignedRider.phone}</div>
-                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${assignedRider.status === "AVAILABLE"
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    : assignedRider.status === "BUSY"
-                      ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-                    }`}>
-                    {assignedRider.status}
+                      <button
+                        onClick={() => openStatusModal(order)}
+                        className="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Change Status
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const firstMenuItem = order.items?.[0]?.menuItemId || "";
+                          router.push(`/reviews?orderId=${order.id}&menuItemId=${firstMenuItem}`);
+                        }}
+                        className="p-2 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded text-yellow-600 dark:text-yellow-400"
+                        title="Add Review"
+                      >
+                        <Star size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* VIEW ORDER MODAL */}
+        <ViewDetailModal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          title={`Order Details #${viewOrder?.orderNo || ""}`}
+          data={viewOrder}
+          fields={[
+            {
+              label: "Customer Name",
+              render: (data: any) => {
+                if (!data?.customer) {
+                  return data?.source === "POS"
+                    ? <span className="text-blue-600 font-semibold">POS Order</span>
+                    : <span className="text-gray-400">—</span>;
+                }
+                return (
+                  <span>
+                    {data.customer.name}
+                    {data.source && data.source !== "WEBSITE" && (
+                      <span className="ml-1 text-blue-600 text-xs font-medium">({data.source})</span>
+                    )}
                   </span>
-                </div>
-              );
+                );
+              },
             },
-          },
-          {
-            label: "Order Items",
-            fullWidth: true,
-            render: renderOrderItems,
-          },
-        ]}
-      />
+            {
+              label: "Source",
+              render: (data: any) => data?.source || "—",
+            },
+            {
+              label: "Phone Number",
+              render: (data: any) => data?.customer?.phone,
+            },
+            {
+              label: "Order Type",
+              key: "type",
+            },
+            {
+              label: "Branch",
+              render: (data: any) => data?.branch?.name,
+            },
+            {
+              label: "Status",
+              render: (data: any) => (
+                <span className={getStatusBadge(data?.status || "")}>
+                  {data?.status}
+                </span>
+              ),
+            },
+            {
+              label: "Payment",
+              render: (data: any) => (
+                <span>
+                  {data?.payment?.method} ({data?.payment?.status})
+                </span>
+              ),
+            },
+            {
+              label: "Placed At",
+              render: (data: any) =>
+                data?.createdAt
+                  ? new Date(data.createdAt).toLocaleString()
+                  : "N/A",
+            },
+            {
+              label: "Assigned Rider",
+              render: (data: any) => {
+                if (!data?.riderId) return <span className="text-gray-500">No rider assigned</span>;
+                if (loadingRiderDetails) return <span className="text-gray-500">Loading...</span>;
+                if (!assignedRider) return <span className="text-gray-500">N/A</span>;
+                return (
+                  <div className="space-y-1">
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{assignedRider.name}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{assignedRider.phone}</div>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${assignedRider.status === "AVAILABLE"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : assignedRider.status === "BUSY"
+                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                      }`}>
+                      {assignedRider.status}
+                    </span>
+                  </div>
+                );
+              },
+            },
+            {
+              label: "Order Items",
+              fullWidth: true,
+              render: renderOrderItems,
+            },
+          ]}
+        />
 
-      {/* STATUS MODAL */}
-      {statusModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
-            <div className="flex justify-between mb-4">
-              <h2 className="font-semibold">
-                Change Order Status
-              </h2>
-              <button onClick={() => setStatusModal(false)}>
-                <X size={18} />
+        {/* STATUS MODAL */}
+        {statusModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
+              <div className="flex justify-between mb-4">
+                <h2 className="font-semibold">
+                  Change Order Status
+                </h2>
+                <button onClick={() => setStatusModal(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <select
+                value={newStatus}
+                onChange={(e) => {
+                  const status = e.target.value;
+                  setNewStatus(status);
+                  // Fetch riders when OUT_FOR_DELIVERY is selected
+                  if (status === "OUT_FOR_DELIVERY") {
+                    fetchAvailableRiders();
+                  }
+                }}
+                className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
+              >
+                {ORDER_STATUSES.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </select>
+
+              {/* Rider Selection - Only show when OUT_FOR_DELIVERY */}
+              {newStatus === "OUT_FOR_DELIVERY" && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">
+                    Assign Rider *
+                  </label>
+                  {loadingRiders ? (
+                    <div className="text-sm text-gray-500">Loading riders...</div>
+                  ) : (
+                    <select
+                      value={selectedRiderId}
+                      onChange={(e) => setSelectedRiderId(e.target.value)}
+                      className="w-full p-2 border rounded dark:bg-gray-700"
+                      required
+                    >
+                      <option value="">Select a rider</option>
+                      {availableRiders.map((rider) => (
+                        <option key={rider.id} value={rider.id}>
+                          {rider.name} - {rider.phone}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+
+              <button
+                onClick={handleStatusUpdate}
+                disabled={updating}
+                className="w-full bg-green-600 text-white py-2 rounded"
+              >
+                {updating ? "Updating..." : "Update Status"}
               </button>
             </div>
-
-            <select
-              value={newStatus}
-              onChange={(e) => {
-                const status = e.target.value;
-                setNewStatus(status);
-                // Fetch riders when OUT_FOR_DELIVERY is selected
-                if (status === "OUT_FOR_DELIVERY") {
-                  fetchAvailableRiders();
-                }
-              }}
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            >
-              {ORDER_STATUSES.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-
-            {/* Rider Selection - Only show when OUT_FOR_DELIVERY */}
-            {newStatus === "OUT_FOR_DELIVERY" && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Assign Rider *
-                </label>
-                {loadingRiders ? (
-                  <div className="text-sm text-gray-500">Loading riders...</div>
-                ) : (
-                  <select
-                    value={selectedRiderId}
-                    onChange={(e) => setSelectedRiderId(e.target.value)}
-                    className="w-full p-2 border rounded dark:bg-gray-700"
-                    required
-                  >
-                    <option value="">Select a rider</option>
-                    {availableRiders.map((rider) => (
-                      <option key={rider.id} value={rider.id}>
-                        {rider.name} - {rider.phone}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            )}
-
-            <button
-              onClick={handleStatusUpdate}
-              disabled={updating}
-              className="w-full bg-green-600 text-white py-2 rounded"
-            >
-              {updating ? "Updating..." : "Update Status"}
-            </button>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

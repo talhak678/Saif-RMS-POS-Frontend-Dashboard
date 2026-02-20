@@ -12,59 +12,47 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, module, component }) => {
-    const { user, permissions } = useAuth()
+    const { user, permissions, loadingUser } = useAuth();
+    const router = useRouter();
     const [hasAccess, setHasAccess] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter()
+    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        const checkLoginStatus = async () => {
-            try {
-                if (module) {
-                    if (permissions && permissions.length > 0) {
-                        const access = permissions.find((item: iPermission) => item.action === module);
-                        if (!access) {
-                            setHasAccess(false);
-                            setLoading(false);
-                            if (!component) {
-                                router.push("/not-found", { scroll: true });
-                            }
-                        }
-                        else {
-                            setHasAccess(true);
-                            setLoading(false);
-                        }
-                    }
-                }
+        if (loadingUser) return;
 
-                else {
-                    setHasAccess(true);
-                    setLoading(false);
-                }
+        // if (!user) {
+        //     router.push("/signin");
+        //     return;
+        // }
 
-            } catch (error) {
-                setLoading(false);
-                if (module) {
-                    router.push("/not-found", { scroll: true });
+        if (module) {
+            const hasModuleAccess = permissions?.some((perm: iPermission) => perm.action === module);
+            if (!hasModuleAccess) {
+                setHasAccess(false);
+                if (!component) {
+                    router.push("/not-found");
                 }
-                else {
-                    router.push("/signin", { scroll: true });
-                }
+            } else {
+                setHasAccess(true);
             }
-        };
+        } else {
+            setHasAccess(true);
+        }
+        setChecking(false);
+    }, [user, permissions, module, router, loadingUser, component]);
 
-        checkLoginStatus();
-    }, [router, permissions]);
-
-    if (loading) {
+    if (loadingUser || checking) {
         return (
-            <div className={`min-h-screen flex items-center justify-center`}>
-                <Loader size={'12'} />
+            <div className="min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader size="12" />
+                    <p className="text-sm font-medium text-gray-500 animate-pulse">Verifying credentials...</p>
+                </div>
             </div>
         );
     }
 
-    return user && hasAccess ? children : null;
+    return hasAccess ? <>{children}</> : null;
 };
 
 interface getModules {

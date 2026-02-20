@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { Eye, Edit, Trash2, Plus, X } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
+import { ProtectedRoute } from "@/services/protected-route";
 
 const getStatusBadge = (isActive: boolean, expiresAt: string) => {
     const base = "px-2 py-1 rounded text-xs font-medium";
@@ -200,347 +201,349 @@ export default function DiscountsPage() {
     };
 
     return (
-        <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
-            <div className="flex justify-between items-center mb-5">
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                    Discount Codes
-                </h1>
+        <ProtectedRoute module="menu">
+            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+                <div className="flex justify-between items-center mb-5">
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+                        Discount Codes
+                    </h1>
 
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    <Plus size={18} />
-                    Add Discount
-                </button>
-            </div>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        <Plus size={18} />
+                        Add Discount
+                    </button>
+                </div>
 
-            <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
-                        <tr>
-                            <th className="px-4 py-3 text-left">#</th>
-                            <th className="px-4 py-3 text-left">Code</th>
-                            <th className="px-4 py-3 text-left">Type</th>
-                            <th className="px-4 py-3 text-left">Value</th>
-                            <th className="px-4 py-3 text-left">Status</th>
-                            <th className="px-4 py-3 text-left">Expires</th>
-                            <th className="px-4 py-3 text-left">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {loading ? (
+                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
                             <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    Loading discounts...
-                                </td>
+                                <th className="px-4 py-3 text-left">#</th>
+                                <th className="px-4 py-3 text-left">Code</th>
+                                <th className="px-4 py-3 text-left">Type</th>
+                                <th className="px-4 py-3 text-left">Value</th>
+                                <th className="px-4 py-3 text-left">Status</th>
+                                <th className="px-4 py-3 text-left">Expires</th>
+                                <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
-                        ) : discounts.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    No discounts found
-                                </td>
-                            </tr>
-                        ) : (
-                            discounts.map((discount, index) => (
-                                <>
-                                    {/* MAIN ROW */}
-                                    <tr
-                                        key={discount.id}
-                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">{index + 1}</td>
-                                        <td className="px-4 py-3 font-medium">{discount.code}</td>
-                                        <td className="px-4 py-3">
-                                            {discount.percentage ? "Percentage" : "Fixed Amount"}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {discount.percentage ? `${discount.percentage}%` : `Rs. ${discount.amount}`}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={getStatusBadge(discount.isActive, discount.expiresAt)}>
-                                                {getStatusText(discount.isActive, discount.expiresAt)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-xs">
-                                            {new Date(discount.expiresAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-4 py-3 flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setViewDiscount(discount);
-                                                    setIsViewModalOpen(true);
-                                                }}
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                        </thead>
 
-                                            <button
-                                                onClick={() => openEditModal(discount)}
-                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                                title="Edit Discount"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        Loading discounts...
+                                    </td>
+                                </tr>
+                            ) : discounts.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        No discounts found
+                                    </td>
+                                </tr>
+                            ) : (
+                                discounts.map((discount, index) => (
+                                    <>
+                                        {/* MAIN ROW */}
+                                        <tr
+                                            key={discount.id}
+                                            className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            <td className="px-4 py-3">{index + 1}</td>
+                                            <td className="px-4 py-3 font-medium">{discount.code}</td>
+                                            <td className="px-4 py-3">
+                                                {discount.percentage ? "Percentage" : "Fixed Amount"}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {discount.percentage ? `${discount.percentage}%` : `Rs. ${discount.amount}`}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={getStatusBadge(discount.isActive, discount.expiresAt)}>
+                                                    {getStatusText(discount.isActive, discount.expiresAt)}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-xs">
+                                                {new Date(discount.expiresAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-4 py-3 flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setViewDiscount(discount);
+                                                        setIsViewModalOpen(true);
+                                                    }}
+                                                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                    title="View Details"
+                                                >
+                                                    <Eye size={18} />
+                                                </button>
 
-                                            <button
-                                                onClick={() => handleDeleteDiscount(discount.id)}
-                                                disabled={deleting === discount.id}
-                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
-                                                title="Delete Discount"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
+                                                <button
+                                                    onClick={() => openEditModal(discount)}
+                                                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                    title="Edit Discount"
+                                                >
+                                                    <Edit size={18} />
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleDeleteDiscount(discount.id)}
+                                                    disabled={deleting === discount.id}
+                                                    className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                                    title="Delete Discount"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
 
 
-                                </>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                                    </>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-            {/* ADD DISCOUNT MODAL */}
-            {showAddModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="font-semibold text-lg">Add New Discount</h2>
-                            <button onClick={() => setShowAddModal(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Code</label>
-                                <input
-                                    type="text"
-                                    value={addFormData.code}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, code: e.target.value.toUpperCase() })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="NEWUSER50"
-                                />
+                {/* ADD DISCOUNT MODAL */}
+                {showAddModal && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
+                            <div className="flex justify-between mb-4">
+                                <h2 className="font-semibold text-lg">Add New Discount</h2>
+                                <button onClick={() => setShowAddModal(false)}>
+                                    <X size={18} />
+                                </button>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Discount Type</label>
-                                <div className="flex gap-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            value="percentage"
-                                            checked={addFormData.discountType === "percentage"}
-                                            onChange={(e) =>
-                                                setAddFormData({ ...addFormData, discountType: "percentage" })
-                                            }
-                                            className="mr-2"
-                                        />
-                                        Percentage
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Code</label>
+                                    <input
+                                        type="text"
+                                        value={addFormData.code}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, code: e.target.value.toUpperCase() })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="NEWUSER50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Discount Type</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                value="percentage"
+                                                checked={addFormData.discountType === "percentage"}
+                                                onChange={(e) =>
+                                                    setAddFormData({ ...addFormData, discountType: "percentage" })
+                                                }
+                                                className="mr-2"
+                                            />
+                                            Percentage
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                value="amount"
+                                                checked={addFormData.discountType === "amount"}
+                                                onChange={(e) =>
+                                                    setAddFormData({ ...addFormData, discountType: "amount" })
+                                                }
+                                                className="mr-2"
+                                            />
+                                            Fixed Amount
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        {addFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
                                     </label>
+                                    <input
+                                        type="number"
+                                        value={addFormData.value}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, value: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder={addFormData.discountType === "percentage" ? "50" : "200"}
+                                        min="0"
+                                        max={addFormData.discountType === "percentage" ? "100" : undefined}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Expiration Date</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={addFormData.expiresAt}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, expiresAt: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                </div>
+
+                                <div>
                                     <label className="flex items-center">
                                         <input
-                                            type="radio"
-                                            value="amount"
-                                            checked={addFormData.discountType === "amount"}
+                                            type="checkbox"
+                                            checked={addFormData.isActive}
                                             onChange={(e) =>
-                                                setAddFormData({ ...addFormData, discountType: "amount" })
+                                                setAddFormData({ ...addFormData, isActive: e.target.checked })
                                             }
                                             className="mr-2"
                                         />
-                                        Fixed Amount
+                                        Active
                                     </label>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    {addFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
-                                </label>
-                                <input
-                                    type="number"
-                                    value={addFormData.value}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, value: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder={addFormData.discountType === "percentage" ? "50" : "200"}
-                                    min="0"
-                                    max={addFormData.discountType === "percentage" ? "100" : undefined}
-                                />
+                                <button
+                                    onClick={handleAddDiscount}
+                                    disabled={adding}
+                                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                >
+                                    {adding ? "Adding..." : "Add Discount"}
+                                </button>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                <input
-                                    type="datetime-local"
-                                    value={addFormData.expiresAt}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, expiresAt: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={addFormData.isActive}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, isActive: e.target.checked })
-                                        }
-                                        className="mr-2"
-                                    />
-                                    Active
-                                </label>
-                            </div>
-
-                            <button
-                                onClick={handleAddDiscount}
-                                disabled={adding}
-                                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
-                            >
-                                {adding ? "Adding..." : "Add Discount"}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* EDIT DISCOUNT MODAL */}
-            {showEditModal && selectedDiscount && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="font-semibold text-lg">Edit Discount</h2>
-                            <button onClick={() => setShowEditModal(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Code</label>
-                                <input
-                                    type="text"
-                                    value={editFormData.code}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, code: e.target.value.toUpperCase() })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="NEWUSER50"
-                                />
+                {/* EDIT DISCOUNT MODAL */}
+                {showEditModal && selectedDiscount && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
+                            <div className="flex justify-between mb-4">
+                                <h2 className="font-semibold text-lg">Edit Discount</h2>
+                                <button onClick={() => setShowEditModal(false)}>
+                                    <X size={18} />
+                                </button>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Discount Type</label>
-                                <div className="flex gap-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            value="percentage"
-                                            checked={editFormData.discountType === "percentage"}
-                                            onChange={(e) =>
-                                                setEditFormData({ ...editFormData, discountType: "percentage" })
-                                            }
-                                            className="mr-2"
-                                        />
-                                        Percentage
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Code</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.code}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, code: e.target.value.toUpperCase() })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="NEWUSER50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Discount Type</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                value="percentage"
+                                                checked={editFormData.discountType === "percentage"}
+                                                onChange={(e) =>
+                                                    setEditFormData({ ...editFormData, discountType: "percentage" })
+                                                }
+                                                className="mr-2"
+                                            />
+                                            Percentage
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                value="amount"
+                                                checked={editFormData.discountType === "amount"}
+                                                onChange={(e) =>
+                                                    setEditFormData({ ...editFormData, discountType: "amount" })
+                                                }
+                                                className="mr-2"
+                                            />
+                                            Fixed Amount
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        {editFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
                                     </label>
+                                    <input
+                                        type="number"
+                                        value={editFormData.value}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, value: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder={editFormData.discountType === "percentage" ? "50" : "200"}
+                                        min="0"
+                                        max={editFormData.discountType === "percentage" ? "100" : undefined}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Expiration Date</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={editFormData.expiresAt}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, expiresAt: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                </div>
+
+                                <div>
                                     <label className="flex items-center">
                                         <input
-                                            type="radio"
-                                            value="amount"
-                                            checked={editFormData.discountType === "amount"}
+                                            type="checkbox"
+                                            checked={editFormData.isActive}
                                             onChange={(e) =>
-                                                setEditFormData({ ...editFormData, discountType: "amount" })
+                                                setEditFormData({ ...editFormData, isActive: e.target.checked })
                                             }
                                             className="mr-2"
                                         />
-                                        Fixed Amount
+                                        Active
                                     </label>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    {editFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
-                                </label>
-                                <input
-                                    type="number"
-                                    value={editFormData.value}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, value: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder={editFormData.discountType === "percentage" ? "50" : "200"}
-                                    min="0"
-                                    max={editFormData.discountType === "percentage" ? "100" : undefined}
-                                />
+                                <button
+                                    onClick={handleEditDiscount}
+                                    disabled={updating}
+                                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    {updating ? "Updating..." : "Update Discount"}
+                                </button>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                <input
-                                    type="datetime-local"
-                                    value={editFormData.expiresAt}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, expiresAt: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={editFormData.isActive}
-                                        onChange={(e) =>
-                                            setEditFormData({ ...editFormData, isActive: e.target.checked })
-                                        }
-                                        className="mr-2"
-                                    />
-                                    Active
-                                </label>
-                            </div>
-
-                            <button
-                                onClick={handleEditDiscount}
-                                disabled={updating}
-                                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                {updating ? "Updating..." : "Update Discount"}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* VIEW DETAIL MODAL */}
-            <ViewDetailModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                title="Discount Details"
-                data={viewDiscount}
-                fields={[
-                    { label: "Code", key: "code" },
-                    { label: "Type", render: (data: any) => data?.percentage ? "Percentage" : "Fixed Amount" },
-                    { label: "Value", render: (data: any) => data?.percentage ? `${data.percentage}%` : `Rs. ${data.amount}` },
-                    { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.isActive, data?.expiresAt)}>{getStatusText(data?.isActive, data?.expiresAt)}</span> },
-                    { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
-                    { label: "Expires", render: (data: any) => new Date(data?.expiresAt).toLocaleDateString() },
-                    { label: "ID", key: "id" },
-                ]}
-            />
-        </div>
+                {/* VIEW DETAIL MODAL */}
+                <ViewDetailModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    title="Discount Details"
+                    data={viewDiscount}
+                    fields={[
+                        { label: "Code", key: "code" },
+                        { label: "Type", render: (data: any) => data?.percentage ? "Percentage" : "Fixed Amount" },
+                        { label: "Value", render: (data: any) => data?.percentage ? `${data.percentage}%` : `Rs. ${data.amount}` },
+                        { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.isActive, data?.expiresAt)}>{getStatusText(data?.isActive, data?.expiresAt)}</span> },
+                        { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                        { label: "Expires", render: (data: any) => new Date(data?.expiresAt).toLocaleDateString() },
+                        { label: "ID", key: "id" },
+                    ]}
+                />
+            </div>
+        </ProtectedRoute>
     );
 }

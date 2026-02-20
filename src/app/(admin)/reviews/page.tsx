@@ -6,6 +6,7 @@ import api from "@/services/api";
 import { Eye, Edit, Trash2, Plus, X, Star } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
+import { ProtectedRoute } from "@/services/protected-route";
 
 const StarRating = ({ rating, interactive = false, onChange }: { rating: number; interactive?: boolean; onChange?: (rating: number) => void }) => {
     return (
@@ -204,265 +205,268 @@ export default function ReviewsPage() {
     };
 
     return (
-        <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
-            <div className="flex justify-between items-center mb-5">
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                    Customer Reviews
-                </h1>
+        <ProtectedRoute module="marketing">
 
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    <Plus size={18} />
-                    Add Review
-                </button>
-            </div>
+            <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
+                <div className="flex justify-between items-center mb-5">
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+                        Customer Reviews
+                    </h1>
 
-            <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
-                        <tr>
-                            <th className="px-4 py-3 text-left">#</th>
-                            <th className="px-4 py-3 text-left">Customer</th>
-                            <th className="px-4 py-3 text-left">Rating</th>
-                            <th className="px-4 py-3 text-left">Menu Item</th>
-                            <th className="px-4 py-3 text-left">Order</th>
-                            <th className="px-4 py-3 text-left">AI Enhanced</th>
-                            <th className="px-4 py-3 text-left">Actions</th>
-                        </tr>
-                    </thead>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        <Plus size={18} />
+                        Add Review
+                    </button>
+                </div>
 
-                    <tbody>
-                        {loading ? (
+                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
                             <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    Loading reviews...
-                                </td>
+                                <th className="px-4 py-3 text-left">#</th>
+                                <th className="px-4 py-3 text-left">Customer</th>
+                                <th className="px-4 py-3 text-left">Rating</th>
+                                <th className="px-4 py-3 text-left">Menu Item</th>
+                                <th className="px-4 py-3 text-left">Order</th>
+                                <th className="px-4 py-3 text-left">AI Enhanced</th>
+                                <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
-                        ) : reviews.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className="py-10 text-center">
-                                    No reviews found
-                                </td>
-                            </tr>
-                        ) : (
-                            reviews.map((review, index) => (
-                                <tr
-                                    key={review.id}
-                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
-                                    <td className="px-4 py-3">{index + 1}</td>
-                                    <td className="px-4 py-3 font-medium">{review.order.customer.name}</td>
-                                    <td className="px-4 py-3">
-                                        <StarRating rating={review.rating} />
-                                    </td>
-                                    <td className="px-4 py-3">{review.menuItem?.name || "N/A"}</td>
-                                    <td className="px-4 py-3">#{review.order.orderNo}</td>
-                                    <td className="px-4 py-3">
-                                        {review.aiEnhanced && (
-                                            <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                AI Enhanced
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setViewReview(review);
-                                                setIsViewModalOpen(true);
-                                            }}
-                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                            title="View Details"
-                                        >
-                                            <Eye size={18} />
-                                        </button>
+                        </thead>
 
-                                        <button
-                                            onClick={() => openEditModal(review)}
-                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                            title="Edit Review"
-                                        >
-                                            <Edit size={18} />
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleDeleteReview(review.id)}
-                                            disabled={deleting === review.id}
-                                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
-                                            title="Delete Review"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        Loading reviews...
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : reviews.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-10 text-center">
+                                        No reviews found
+                                    </td>
+                                </tr>
+                            ) : (
+                                reviews.map((review, index) => (
+                                    <tr
+                                        key={review.id}
+                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    >
+                                        <td className="px-4 py-3">{index + 1}</td>
+                                        <td className="px-4 py-3 font-medium">{review.order.customer.name}</td>
+                                        <td className="px-4 py-3">
+                                            <StarRating rating={review.rating} />
+                                        </td>
+                                        <td className="px-4 py-3">{review.menuItem?.name || "N/A"}</td>
+                                        <td className="px-4 py-3">#{review.order.orderNo}</td>
+                                        <td className="px-4 py-3">
+                                            {review.aiEnhanced && (
+                                                <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                    AI Enhanced
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setViewReview(review);
+                                                    setIsViewModalOpen(true);
+                                                }}
+                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                title="View Details"
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+
+                                            <button
+                                                onClick={() => openEditModal(review)}
+                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                title="Edit Review"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+
+                                            <button
+                                                onClick={() => handleDeleteReview(review.id)}
+                                                disabled={deleting === review.id}
+                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                                title="Delete Review"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* ADD REVIEW MODAL */}
+                {showAddModal && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
+                            <div className="flex justify-between mb-4">
+                                <h2 className="font-semibold text-lg">Add New Review</h2>
+                                <button onClick={() => setShowAddModal(false)}>
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Rating</label>
+                                    <StarRating
+                                        rating={addFormData.rating}
+                                        interactive
+                                        onChange={(rating) => setAddFormData({ ...addFormData, rating })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Comment</label>
+                                    <textarea
+                                        value={addFormData.comment}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, comment: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="Amazing food and service!"
+                                        rows={3}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Order ID *</label>
+                                    <input
+                                        type="text"
+                                        value={addFormData.orderId}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, orderId: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="clxxx..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Menu Item ID (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={addFormData.menuItemId}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, menuItemId: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="clxxx..."
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handleAddReview}
+                                    disabled={adding}
+                                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                >
+                                    {adding ? "Adding..." : "Add Review"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* EDIT REVIEW MODAL */}
+                {showEditModal && selectedReview && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
+                            <div className="flex justify-between mb-4">
+                                <h2 className="font-semibold text-lg">Edit Review</h2>
+                                <button onClick={() => setShowEditModal(false)}>
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Rating</label>
+                                    <StarRating
+                                        rating={editFormData.rating}
+                                        interactive
+                                        onChange={(rating) => setEditFormData({ ...editFormData, rating })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Comment</label>
+                                    <textarea
+                                        value={editFormData.comment}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, comment: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="Amazing food and service!"
+                                        rows={3}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Order ID *</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.orderId}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, orderId: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="clxxx..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Menu Item ID (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.menuItemId}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, menuItemId: e.target.value })
+                                        }
+                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                        placeholder="clxxx..."
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handleEditReview}
+                                    disabled={updating}
+                                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    {updating ? "Updating..." : "Update Review"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* VIEW DETAIL MODAL */}
+                <ViewDetailModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    title="Review Details"
+                    data={viewReview}
+                    fields={[
+                        { label: "Customer", render: (data: any) => data?.order?.customer?.name },
+                        { label: "Rating", render: (data: any) => <StarRating rating={data?.rating || 0} /> },
+                        { label: "Comment", key: "comment" },
+                        { label: "AI Enhanced", render: (data: any) => data?.aiEnhanced ? "Yes" : "No" },
+                        { label: "Order #", render: (data: any) => `#${data?.order?.orderNo}` },
+                        { label: "Menu Item", render: (data: any) => data?.menuItem?.name || "N/A" },
+                        { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
+                        { label: "ID", key: "id" },
+                    ]}
+                />
             </div>
-
-            {/* ADD REVIEW MODAL */}
-            {showAddModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="font-semibold text-lg">Add New Review</h2>
-                            <button onClick={() => setShowAddModal(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Rating</label>
-                                <StarRating
-                                    rating={addFormData.rating}
-                                    interactive
-                                    onChange={(rating) => setAddFormData({ ...addFormData, rating })}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Comment</label>
-                                <textarea
-                                    value={addFormData.comment}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, comment: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="Amazing food and service!"
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Order ID *</label>
-                                <input
-                                    type="text"
-                                    value={addFormData.orderId}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, orderId: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="clxxx..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Menu Item ID (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={addFormData.menuItemId}
-                                    onChange={(e) =>
-                                        setAddFormData({ ...addFormData, menuItemId: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="clxxx..."
-                                />
-                            </div>
-
-                            <button
-                                onClick={handleAddReview}
-                                disabled={adding}
-                                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
-                            >
-                                {adding ? "Adding..." : "Add Review"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* EDIT REVIEW MODAL */}
-            {showEditModal && selectedReview && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="font-semibold text-lg">Edit Review</h2>
-                            <button onClick={() => setShowEditModal(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Rating</label>
-                                <StarRating
-                                    rating={editFormData.rating}
-                                    interactive
-                                    onChange={(rating) => setEditFormData({ ...editFormData, rating })}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Comment</label>
-                                <textarea
-                                    value={editFormData.comment}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, comment: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="Amazing food and service!"
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Order ID *</label>
-                                <input
-                                    type="text"
-                                    value={editFormData.orderId}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, orderId: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="clxxx..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Menu Item ID (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={editFormData.menuItemId}
-                                    onChange={(e) =>
-                                        setEditFormData({ ...editFormData, menuItemId: e.target.value })
-                                    }
-                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="clxxx..."
-                                />
-                            </div>
-
-                            <button
-                                onClick={handleEditReview}
-                                disabled={updating}
-                                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                {updating ? "Updating..." : "Update Review"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* VIEW DETAIL MODAL */}
-            <ViewDetailModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                title="Review Details"
-                data={viewReview}
-                fields={[
-                    { label: "Customer", render: (data: any) => data?.order?.customer?.name },
-                    { label: "Rating", render: (data: any) => <StarRating rating={data?.rating || 0} /> },
-                    { label: "Comment", key: "comment" },
-                    { label: "AI Enhanced", render: (data: any) => data?.aiEnhanced ? "Yes" : "No" },
-                    { label: "Order #", render: (data: any) => `#${data?.order?.orderNo}` },
-                    { label: "Menu Item", render: (data: any) => data?.menuItem?.name || "N/A" },
-                    { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
-                    { label: "ID", key: "id" },
-                ]}
-            />
-        </div>
+        </ProtectedRoute>
     );
 }

@@ -24,6 +24,7 @@ import {
     branchesData,
     menuCategoriesData,
 } from "@/data/mockData";
+import { ProtectedRoute } from "@/services/protected-route";
 
 const TABS = [
     "Analytics",
@@ -41,9 +42,10 @@ export default function ReportsDashboard() {
 
 
     return (
-        <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
-            {/* Header */}
-            {/* <div className="mb-6">
+        <ProtectedRoute module="dashboard-reports">
+            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+                {/* Header */}
+                {/* <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                     Reports Dashboard
                 </h1>
@@ -52,44 +54,45 @@ export default function ReportsDashboard() {
                 </p>
             </div> */}
 
-            {/* Top Control Bar */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 mb-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Tab Navigation */}
-                    <div className="flex gap-6 overflow-x-auto pb-2 lg:pb-0">
-                        {TABS.map((tab, index) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(index)}
-                                className={`whitespace-nowrap pb-2 px-1 text-sm font-medium transition-all ${activeTab === index
-                                    ? "text-blue-600 border-b-2 border-blue-600"
-                                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
+                {/* Top Control Bar */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 mb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        {/* Tab Navigation */}
+                        <div className="flex gap-6 overflow-x-auto pb-2 lg:pb-0">
+                            {TABS.map((tab, index) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(index)}
+                                    className={`whitespace-nowrap pb-2 px-1 text-sm font-medium transition-all ${activeTab === index
+                                        ? "text-blue-600 border-b-2 border-blue-600"
+                                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
 
-                    {/* Date Picker & Export */}
-                    {/* <div className="flex gap-3">
+                        {/* Date Picker & Export */}
+                        {/* <div className="flex gap-3">
                         <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <Calendar size={18} />
                             <span className="text-sm">{dateRange}</span>
                         </button>
                     </div> */}
+                    </div>
+                </div>
+
+                {/* Tab Content */}
+                <div className="space-y-6">
+                    {activeTab === 0 && <AnalyticsTab timeRange={timeRange} setTimeRange={setTimeRange} />}
+                    {activeTab === 1 && <OrdersCustomersTab />}
+                    {activeTab === 2 && <InventoryTab />}
+                    {activeTab === 3 && <BranchesTab />}
+                    {activeTab === 4 && <MenuCategoriesTab />}
                 </div>
             </div>
-
-            {/* Tab Content */}
-            <div className="space-y-6">
-                {activeTab === 0 && <AnalyticsTab timeRange={timeRange} setTimeRange={setTimeRange} />}
-                {activeTab === 1 && <OrdersCustomersTab />}
-                {activeTab === 2 && <InventoryTab />}
-                {activeTab === 3 && <BranchesTab />}
-                {activeTab === 4 && <MenuCategoriesTab />}
-            </div>
-        </div>
+        </ProtectedRoute>
     );
 }
 

@@ -15,6 +15,7 @@ import AddRole from "./add-role";
 import EditRole from "./edit-role";
 import DeleteRole from "./delete-role";
 import { Eye, ShieldCheck } from "lucide-react"; // Import Icons
+import { ProtectedRoute } from "@/services/protected-route";
 
 export default function Roles() {
     const [Roles, setRoles] = useState<iRole[]>([]);
@@ -45,9 +46,8 @@ export default function Roles() {
     }, []);
 
     return (
-        <div className="min-h-screen">
-            {/* Header */}
-            <div className="p-2 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+        <ProtectedRoute module="roles">
+            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 <div className="md:flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                         Roles
@@ -215,6 +215,6 @@ export default function Roles() {
                     </Table>
                 </div>
             </div>
-        </div>
+        </ProtectedRoute >
     );
 }

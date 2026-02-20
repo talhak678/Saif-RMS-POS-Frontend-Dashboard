@@ -28,7 +28,7 @@ class RoleService extends BaseService {
 
     public async updateRole(payload: iRole): Promise<iApiResponse> {
         try {
-            const res = await api.put<iApiResponse>(endpoints.editRole, payload)
+            const res = await api.put<iApiResponse>(`${endpoints.editRole}${payload.id}`, payload)
             return res.data
         } catch (e: iAPIErrorRes | any) {
             console.error(e)
@@ -68,7 +68,7 @@ class RoleService extends BaseService {
 
     public async updatePermission(payload: iPermission): Promise<iApiResponse> {
         try {
-            const res = await api.put<iApiResponse>(endpoints.editPermission, payload)
+            const res = await api.put<iApiResponse>(`${endpoints.editPermission}${payload.id}`, payload)
             return res.data
         } catch (e: iAPIErrorRes | any) {
             console.error(e)

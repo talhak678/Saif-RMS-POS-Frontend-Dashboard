@@ -77,7 +77,7 @@ class AuthService extends BaseService {
 
     public async updateUser(payload: iUser): Promise<iApiResponse> {
         try {
-            const res = await api.put<iApiResponse>(endpoints.editUser, payload)
+            const res = await api.put<iApiResponse>(`${endpoints.editUser}${payload.id}`, payload)
             return res.data
         } catch (e: iAPIErrorRes | any) {
             console.error(e)

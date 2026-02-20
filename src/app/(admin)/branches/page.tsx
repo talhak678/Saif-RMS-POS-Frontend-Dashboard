@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
 import { Eye, Trash2, Plus, X } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { ProtectedRoute } from "@/services/protected-route";
 
 function Branch() {
     const searchParams = useSearchParams();
@@ -203,8 +204,10 @@ function Branch() {
 export default function BranchPage() {
     return (
         // 2. Yahan Suspense wrap karein
-        <Suspense fallback={<div className="p-10 text-center">Loading Form...</div>}>
-            <Branch />
-        </Suspense>
+        <ProtectedRoute module="restaurant">
+            <Suspense fallback={<div className="p-10 text-center">Loading Form...</div>}>
+                <Branch />
+            </Suspense>
+        </ProtectedRoute>
     );
 }

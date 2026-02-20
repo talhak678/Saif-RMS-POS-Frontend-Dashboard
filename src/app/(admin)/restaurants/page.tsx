@@ -6,6 +6,7 @@ import { Eye, ExternalLink, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { ProtectedRoute } from "@/services/protected-route";
 
 
 const getStatusBadge = (status: string) => {
@@ -62,164 +63,166 @@ export default function RestaurantsPage() {
     };
 
     return (
-        <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
-            <div className="md:flex gap-1 items-center justify-between mb-6">
+        <ProtectedRoute module="restaurant">
+            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+                <div className="md:flex gap-1 items-center justify-between mb-6">
 
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Restaurants
-                </h1>
-                <br />
-                <Link
-                    href="/restaurants/new"
-                    className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                >
-                    <Plus className="h-4 w-4" />
-                    Add New Restaurant
-                </Link>
-            </div>
-            <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
-                        <tr>
-                            <th className="px-4 py-3 text-left">#</th>
-                            <th className="px-4 py-3">Restaurant</th>
-                            <th className="px-4 py-3">Subscription</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Branches</th>
-                            <th className="px-4 py-3">Users</th>
-                            <th className="px-4 py-3">Created</th>
-                            <th className="px-4 py-3">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {loading ? (
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+                        Restaurants
+                    </h1>
+                    <br />
+                    <Link
+                        href="/restaurants/new"
+                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add New Restaurant
+                    </Link>
+                </div>
+                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
                             <tr>
-                                <td colSpan={8} className="py-10 text-center">
-                                    Loading restaurants...
-                                </td>
+                                <th className="px-4 py-3 text-left">#</th>
+                                <th className="px-4 py-3">Restaurant</th>
+                                <th className="px-4 py-3">Subscription</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Branches</th>
+                                <th className="px-4 py-3">Users</th>
+                                <th className="px-4 py-3">Created</th>
+                                <th className="px-4 py-3">Actions</th>
                             </tr>
-                        ) : restaurants.length === 0 ? (
-                            <tr>
-                                <td colSpan={8} className="py-10 text-center">
-                                    No restaurants found
-                                </td>
-                            </tr>
-                        ) : (
-                            restaurants.map((res: any, index: number) => (
-                                <tr
-                                    key={res.id}
-                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
-                                    <td className="px-4 py-3">{index + 1}</td>
+                        </thead>
 
-                                    <td className="px-4 py-3 font-medium flex items-center gap-3">
-                                        <img
-                                            src={res.logo}
-                                            alt={res.name}
-                                            className="w-10 h-10 rounded object-cover"
-                                        />
-                                        <div>
-                                            <div>{res.name}</div>
-                                            <div className="text-xs text-gray-500">
-                                                {res.slug}
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={getSubscriptionBadge(
-                                                res.subscription
-                                            )}
-                                        >
-                                            {res.subscription}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={getStatusBadge(res.status)}
-                                        >
-                                            {res.status}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-4 py-3">
-                                        {res._count.branches}
-                                    </td>
-
-                                    <td className="px-4 py-3">
-                                        {res._count.users}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-xs">
-                                        {new Date(
-                                            res.createdAt
-                                        ).toLocaleDateString()}
-                                    </td>
-
-                                    <td className="px-4 py-3 flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setViewRestaurant(res);
-                                                setIsViewModalOpen(true);
-                                            }}
-                                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                                        >
-                                            <Eye size={18} />
-                                        </button>
-
-                                        {res._count.branches > 0 && (
-                                            <button
-                                                onClick={() =>
-                                                    router.push(
-                                                        `/branches?restaurantId=${res.id}`
-                                                    )
-                                                }
-                                                className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1"
-                                            >
-                                                View Branches
-                                                <ExternalLink size={12} />
-                                            </button>
-                                        )}
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={8} className="py-10 text-center">
+                                        Loading restaurants...
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : restaurants.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="py-10 text-center">
+                                        No restaurants found
+                                    </td>
+                                </tr>
+                            ) : (
+                                restaurants.map((res: any, index: number) => (
+                                    <tr
+                                        key={res.id}
+                                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    >
+                                        <td className="px-4 py-3">{index + 1}</td>
 
-            {/* VIEW DETAIL MODAL */}
-            <ViewDetailModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                title="Restaurant Details"
-                data={viewRestaurant}
-                fields={[
-                    { label: "Name", key: "name" },
-                    { label: "Description", key: "description", fullWidth: true },
-                    { label: "Slug", key: "slug" },
-                    { label: "Subscription", render: (data: any) => <span className={getSubscriptionBadge(data?.subscription)}>{data?.subscription}</span> },
-                    { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.status)}>{data?.status}</span> },
-                    {
-                        label: "Facebook",
-                        render: (data: any) => data?.facebookUrl ? <a href={data.facebookUrl} target="_blank" className="text-blue-600 underline">Link</a> : 'N/A'
-                    },
-                    {
-                        label: "Instagram",
-                        render: (data: any) => data?.instagramUrl ? <a href={data.instagramUrl} target="_blank" className="text-pink-600 underline">Link</a> : 'N/A'
-                    },
-                    {
-                        label: "TikTok",
-                        render: (data: any) => data?.tiktokUrl ? <a href={data.tiktokUrl} target="_blank" className="underline">Link</a> : 'N/A'
-                    },
-                    { label: "Meta Pixel ID", key: "metaPixelId" },
-                    { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
-                    { label: "Updated At", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
-                ]}
-            />
-        </div>
+                                        <td className="px-4 py-3 font-medium flex items-center gap-3">
+                                            <img
+                                                src={res.logo}
+                                                alt={res.name}
+                                                className="w-10 h-10 rounded object-cover"
+                                            />
+                                            <div>
+                                                <div>{res.name}</div>
+                                                <div className="text-xs text-gray-500">
+                                                    {res.slug}
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            <span
+                                                className={getSubscriptionBadge(
+                                                    res.subscription
+                                                )}
+                                            >
+                                                {res.subscription}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            <span
+                                                className={getStatusBadge(res.status)}
+                                            >
+                                                {res.status}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            {res._count.branches}
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            {res._count.users}
+                                        </td>
+
+                                        <td className="px-4 py-3 text-xs">
+                                            {new Date(
+                                                res.createdAt
+                                            ).toLocaleDateString()}
+                                        </td>
+
+                                        <td className="px-4 py-3 flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setViewRestaurant(res);
+                                                    setIsViewModalOpen(true);
+                                                }}
+                                                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+
+                                            {res._count.branches > 0 && (
+                                                <button
+                                                    onClick={() =>
+                                                        router.push(
+                                                            `/branches?restaurantId=${res.id}`
+                                                        )
+                                                    }
+                                                    className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1"
+                                                >
+                                                    View Branches
+                                                    <ExternalLink size={12} />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* VIEW DETAIL MODAL */}
+                <ViewDetailModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    title="Restaurant Details"
+                    data={viewRestaurant}
+                    fields={[
+                        { label: "Name", key: "name" },
+                        { label: "Description", key: "description", fullWidth: true },
+                        { label: "Slug", key: "slug" },
+                        { label: "Subscription", render: (data: any) => <span className={getSubscriptionBadge(data?.subscription)}>{data?.subscription}</span> },
+                        { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.status)}>{data?.status}</span> },
+                        {
+                            label: "Facebook",
+                            render: (data: any) => data?.facebookUrl ? <a href={data.facebookUrl} target="_blank" className="text-blue-600 underline">Link</a> : 'N/A'
+                        },
+                        {
+                            label: "Instagram",
+                            render: (data: any) => data?.instagramUrl ? <a href={data.instagramUrl} target="_blank" className="text-pink-600 underline">Link</a> : 'N/A'
+                        },
+                        {
+                            label: "TikTok",
+                            render: (data: any) => data?.tiktokUrl ? <a href={data.tiktokUrl} target="_blank" className="underline">Link</a> : 'N/A'
+                        },
+                        { label: "Meta Pixel ID", key: "metaPixelId" },
+                        { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
+                        { label: "Updated At", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
+                    ]}
+                />
+            </div>
+        </ProtectedRoute>
     );
 }
