@@ -376,26 +376,27 @@ const AppSidebar: React.FC = () => {
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <Image
-                src="/images/authentication-images/logo-black.png"
+                src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
                 alt="Logo"
                 width={150}
                 height={40}
-                className="dark:hidden"
+                className="dark:hidden object-contain max-h-12"
               />
               <Image
-                src="/images/authentication-images/logo-white.png"
+                src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
                 alt="Logo"
                 width={150}
                 height={40}
-                className="hidden dark:block"
+                className="hidden dark:block object-contain max-h-12"
               />
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src={user?.restaurant?.logo || "/images/logo/logo-icon.svg"}
               alt="Logo"
               width={32}
               height={32}
+              className="object-contain"
             />
           )}
         </Link>

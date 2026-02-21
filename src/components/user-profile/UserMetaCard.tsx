@@ -7,16 +7,51 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import Image from "next/image";
 import { useAuth } from "@/services/permission.service";
+import api from "@/services/api";
+import ImageUpload from "../common/ImageUpload";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 
 export default function UserMetaCard() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { isOpen, openModal, closeModal } = useModal();
+  const [saving, setSaving] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: "",
+    logo: ""
+  });
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+  React.useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        logo: user.restaurant?.logo || ""
+      });
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    try {
+      setSaving(true);
+      const res = await api.put("/auth/me", formData);
+      if (res.data?.success) {
+        toast.success("Profile updated successfully!");
+        await refreshUser();
+        closeModal();
+      } else {
+        toast.error(res.data?.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -24,8 +59,16 @@ export default function UserMetaCard() {
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              {user?.name ? (
+            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative group">
+              {user?.restaurant?.logo ? (
+                <Image
+                  width={80}
+                  height={80}
+                  src={user.restaurant.logo}
+                  alt="logo"
+                  className="object-cover w-full h-full"
+                />
+              ) : user?.name ? (
                 <div className="flex h-full w-full items-center justify-center bg-brand-500 text-2xl font-bold text-white uppercase">
                   {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
@@ -53,6 +96,9 @@ export default function UserMetaCard() {
               </div>
             </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
+              <Button size="sm" onClick={openModal} variant="outline">
+                Edit
+              </Button>
               <a
                 target="_blank"
                 rel="noreferrer" href='https://www.facebook.com/PimjoHQ' className="flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
@@ -125,6 +171,58 @@ export default function UserMetaCard() {
           </div>
         </div>
       </div>
+      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[500px] p-6 lg:p-10">
+        <div className="flex flex-col gap-6">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            Edit Profile
+          </h4>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Restaurant Logo</Label>
+              <ImageUpload
+                value={formData.logo}
+                onChange={(url) => setFormData({ ...formData, logo: url })}
+                label="Update Logo"
+              />
+            </div>
+
+            <div>
+              <Label>Full Name</Label>
+              <Input
+                value={formData.name}
+                onChange={(value) => setFormData({ ...formData, name: value })}
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <div>
+              <Label>Email (Read-only)</Label>
+              <Input
+                value={user?.email || ""}
+                disabled
+                placeholder="Email address"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <Button size="sm" variant="outline" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }

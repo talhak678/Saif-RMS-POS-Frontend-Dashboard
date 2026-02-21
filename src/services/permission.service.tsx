@@ -8,8 +8,9 @@ interface AuthContextType {
     permissions: iPermission[] | null
     modulesLoaded: boolean;
     setModulesLoaded: (value: boolean) => void;
-    user: iUser | null,
-    loadingUser: boolean,
+    user: iUser | null;
+    loadingUser: boolean;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,7 +18,8 @@ const AuthContext = createContext<AuthContextType>({
     modulesLoaded: false,
     loadingUser: false,
     setModulesLoaded: () => { },
-    user: null
+    user: null,
+    refreshUser: async () => { }
 });
 
 export const AuthProvider = ({ children }: { children: any }) => {
@@ -53,7 +55,7 @@ export const AuthProvider = ({ children }: { children: any }) => {
 
     return (
         <>
-            <AuthContext.Provider value={{ permissions, user, loadingUser, modulesLoaded, setModulesLoaded }}>
+            <AuthContext.Provider value={{ permissions, user, loadingUser, modulesLoaded, setModulesLoaded, refreshUser: getCurrentUser }}>
                 {children}
             </AuthContext.Provider>
         </>
