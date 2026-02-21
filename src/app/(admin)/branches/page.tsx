@@ -3,11 +3,15 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
-import { Eye, Trash2, Plus, X } from "lucide-react";
+import { Eye, Trash2, Plus, X, Edit } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import { useAuth } from "@/services/permission.service";
 
 function Branch() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+
     const searchParams = useSearchParams();
     const router = useRouter();
     const restaurantId = searchParams.get("restaurantId");
@@ -75,19 +79,21 @@ function Branch() {
                     Branches
                 </h1>
 
-                <button
-                    onClick={() =>
-                        router.push(
-                            restaurantId
-                                ? `/branches/add?restaurantId=${restaurantId}`
-                                : "/branches/add"
-                        )
-                    }
-                    className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                >
-                    <Plus size={16} />
-                    Add Branch
-                </button>
+                {isSuperAdmin && (
+                    <button
+                        onClick={() =>
+                            router.push(
+                                restaurantId
+                                    ? `/branches/add?restaurantId=${restaurantId}`
+                                    : "/branches/add"
+                            )
+                        }
+                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    >
+                        <Plus size={16} />
+                        Add Branch
+                    </button>
+                )}
             </div>
 
             {/* TABLE */}
@@ -133,19 +139,32 @@ function Branch() {
                                                 setIsViewModalOpen(true);
                                             }}
                                             className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                                            title="View Details"
                                         >
                                             <Eye size={16} />
                                         </button>
 
-                                        <button
-                                            onClick={() => {
-                                                setSelectedBranch(branch);
-                                                setDeleteModal(true);
-                                            }}
-                                            className="p-2 rounded bg-red-600 text-white"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {isSuperAdmin && (
+                                            <>
+                                                <button
+                                                    onClick={() => router.push(`/branches/edit/${branch.id}`)}
+                                                    className="p-2 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600"
+                                                    title="Edit Branch"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedBranch(branch);
+                                                        setDeleteModal(true);
+                                                    }}
+                                                    className="p-2 rounded bg-red-600 text-white"
+                                                    title="Delete Branch"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))

@@ -1,21 +1,22 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { useAuth } from "@/services/permission.service";
 import { toast } from "sonner";
 
-function AddBranchForm() {
+function EditBranchForm() {
     const { user, loadingUser } = useAuth();
     const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const presetRestaurantId = searchParams.get("restaurantId");
+    const params = useParams();
+    const id = params.id;
 
     const [restaurants, setRestaurants]: any = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     const [form, setForm] = useState({
         name: "",
@@ -25,28 +26,52 @@ function AddBranchForm() {
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
         deliveryOffTime: 0,
-        restaurantId: presetRestaurantId || "",
+        restaurantId: "",
     });
 
     useEffect(() => {
         if (!loadingUser && user && !isSuperAdmin) {
-            toast.error("Access denied. Only Super Admins can add branches.");
+            toast.error("Access denied. Only Super Admins can edit branches.");
             router.push("/branches");
         }
     }, [user, loadingUser, isSuperAdmin, router]);
 
     useEffect(() => {
-        fetchRestaurants();
-    }, []);
+        if (id && isSuperAdmin) {
+            fetchInitialData();
+        }
+    }, [id, isSuperAdmin]);
 
-    const fetchRestaurants = async () => {
+    const fetchInitialData = async () => {
         try {
-            const res = await api.get("/restaurants");
-            if (res.data?.success) {
-                setRestaurants(res.data.data);
+            setLoading(true);
+            const [restRes, branchRes] = await Promise.all([
+                api.get("/restaurants"),
+                api.get(`/branches/${id}`)
+            ]);
+
+            if (restRes.data?.success) {
+                setRestaurants(restRes.data.data);
+            }
+
+            if (branchRes.data?.success) {
+                const data = branchRes.data.data;
+                setForm({
+                    name: data.name || "",
+                    address: data.address || "",
+                    phone: data.phone || "",
+                    deliveryRadius: data.deliveryRadius || 0,
+                    freeDeliveryThreshold: data.freeDeliveryThreshold || 0,
+                    deliveryCharge: data.deliveryCharge || 0,
+                    deliveryOffTime: data.deliveryOffTime || 0,
+                    restaurantId: data.restaurantId || "",
+                });
             }
         } catch (err) {
-            console.error("Fetch restaurants failed", err);
+            console.error("Fetch data failed", err);
+            toast.error("Failed to load branch details");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -78,26 +103,26 @@ function AddBranchForm() {
         }
 
         try {
-            setLoading(true);
-            const res = await api.post("/branches", form);
+            setSaving(true);
+            const res = await api.put(`/branches/${id}`, form);
             if (res.data?.success) {
-                toast.success("Branch created successfully");
+                toast.success("Branch updated successfully");
                 router.push(`/branches?restaurantId=${form.restaurantId}`);
             } else {
-                toast.error(res.data?.message || "Failed to create branch");
+                toast.error(res.data?.message || "Failed to update branch");
             }
         } catch (err) {
-            console.error("Create branch failed", err);
-            toast.error("An error occurred while creating the branch");
+            console.error("Update branch failed", err);
+            toast.error("An error occurred while updating the branch");
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
-    if (loadingUser) {
+    if (loadingUser || (loading && isSuperAdmin)) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-                <div className="text-gray-400">Checking permissions...</div>
+                <Loader2 className="animate-spin text-blue-600" size={48} />
             </div>
         );
     }
@@ -116,7 +141,7 @@ function AddBranchForm() {
                 </button>
 
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
-                    Add Branch
+                    Edit Branch
                 </h1>
             </div>
 
@@ -236,10 +261,11 @@ function AddBranchForm() {
                 <div className="mt-6 flex gap-3">
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition-colors disabled:opacity-50"
+                        disabled={saving}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50"
                     >
-                        {loading ? "Creating..." : "Create Branch"}
+                        {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                        {saving ? "Saving..." : "Save Changes"}
                     </button>
 
                     <button
@@ -255,10 +281,10 @@ function AddBranchForm() {
     );
 }
 
-export default function AddBranchPage() {
+export default function EditBranchPage() {
     return (
         <Suspense fallback={<div className="p-10 text-center text-gray-400 dark:text-gray-500">Loading Form...</div>}>
-            <AddBranchForm />
+            <EditBranchForm />
         </Suspense>
     );
 }

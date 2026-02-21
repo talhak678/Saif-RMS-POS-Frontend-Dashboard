@@ -25,6 +25,7 @@ import {
     menuCategoriesData,
 } from "@/data/mockData";
 import { ProtectedRoute } from "@/services/protected-route";
+import { useAuth } from "@/services/permission.service";
 
 const TABS = [
     "Analytics",
@@ -35,9 +36,16 @@ const TABS = [
 ];
 
 export default function ReportsDashboard() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+
     const [activeTab, setActiveTab] = useState(0);
     const [timeRange, setTimeRange] = useState("daily");
     // const [dateRange, setDateRange] = useState("Jan 27 2026 - Feb 2 2026");
+
+    const filteredTabs = isSuperAdmin
+        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches")
+        : TABS;
 
 
 
@@ -59,18 +67,21 @@ export default function ReportsDashboard() {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         {/* Tab Navigation */}
                         <div className="flex gap-6 overflow-x-auto pb-2 lg:pb-0">
-                            {TABS.map((tab, index) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(index)}
-                                    className={`whitespace-nowrap pb-2 px-1 text-sm font-medium transition-all ${activeTab === index
-                                        ? "text-blue-600 border-b-2 border-blue-600"
-                                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                                        }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
+                            {filteredTabs.map((tab, index) => {
+                                const originalIndex = TABS.indexOf(tab);
+                                return (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(originalIndex)}
+                                        className={`whitespace-nowrap pb-2 px-1 text-sm font-medium transition-all ${activeTab === originalIndex
+                                            ? "text-blue-600 border-b-2 border-blue-600"
+                                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                            }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         {/* Date Picker & Export */}
