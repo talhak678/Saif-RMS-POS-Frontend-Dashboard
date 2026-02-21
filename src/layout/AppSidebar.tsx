@@ -34,6 +34,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
+    permission: "dashboard-dropdown",
     subItems: [
       { name: "Overview", path: "/overview-dashboard", pro: false, permission: "dashboard-overview" },
       { name: "Reports", path: "/reports-dashboard", pro: true, permission: "dashboard-reports" },
@@ -43,6 +44,7 @@ const navItems: NavItem[] = [
   {
     icon: <ListIcon className="w-5 h-5" />,
     name: "Customers & Orders",
+    permission: "customers-orders-dropdown",
     subItems: [
       { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "orders" },
       { name: "Customers", path: "/customers", pro: false, permission: "customers" },
@@ -108,9 +110,10 @@ const navItems: NavItem[] = [
   {
     icon: <PlugInIcon />,
     name: "Authentication",
+    permission: "authentication",
     subItems: [
-      { name: "Users", path: "/users", pro: false, permission: "users" },
-      { name: "Roles", path: "/role", pro: false, permission: "roles" },
+      { name: "Users", path: "/users", pro: false, permission: "authentication" },
+      { name: "Roles", path: "/role", pro: false, permission: "authentication" },
     ],
   },
   {
