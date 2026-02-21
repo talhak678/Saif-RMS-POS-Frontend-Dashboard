@@ -41,11 +41,11 @@ export default function SignInForm() {
         // Save token using AuthService (which handles encryption and cookies)
         const authService = AuthServiceInstance();
         authService.setEncryptedCookie("token", res.data.data.token);
-         console.log("Login successful:", res.data);
+        console.log("Login successful:", res.data);
         router.push("/");
         // Using location replace to ensure clean state and bypass router issues
 
-       
+
       }
     } catch (err: any) {
       console.error("Login Error:", err);
@@ -96,6 +96,7 @@ export default function SignInForm() {
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               {/* Social Buttons (kept as is) */}
+              {/* // id the url is https://rms-pos-super-admin.vercel.app/ then tha social btns not comes */}
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
                   width="20"
