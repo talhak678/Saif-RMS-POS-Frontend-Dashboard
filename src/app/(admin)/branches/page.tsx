@@ -17,6 +17,7 @@ function Branch() {
     const restaurantId = searchParams.get("restaurantId");
 
     const [branches, setBranches]: any = useState([]);
+    const [restaurants, setRestaurants]: any = useState([]);
     const [loading, setLoading] = useState(true);
 
     // --- VIEW DETAILS MODAL ---
@@ -28,31 +29,48 @@ function Branch() {
     const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
+        if (isSuperAdmin) {
+            fetchRestaurants();
+        }
+    }, [isSuperAdmin]);
+
+    useEffect(() => {
         fetchBranches();
     }, [restaurantId]);
+
+    const fetchRestaurants = async () => {
+        try {
+            const res = await api.get("/restaurants");
+            if (res.data?.success) {
+                setRestaurants(res.data.data);
+            }
+        } catch (err) {
+            console.error("Fetch restaurants failed", err);
+        }
+    };
 
     const fetchBranches = async () => {
         try {
             setLoading(true);
-            if (restaurantId) {
-                const res = await api.get(`/restaurants/${restaurantId}`);
-                if (res.data?.success) {
-                    setBranches(res.data.data.branches);
-                }
-
-            } else {
-                const res = await api.get("/branches", {
-                    params: restaurantId ? { restaurantId } : {},
-                });
-                if (res.data?.success) {
-                    setBranches(res.data.data);
-                }
+            const res = await api.get("/branches", {
+                params: restaurantId ? { restaurantId } : {},
+            });
+            if (res.data?.success) {
+                setBranches(res.data.data);
             }
-
         } catch (err) {
             console.error("Fetch branches failed", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = e.target.value;
+        if (id) {
+            router.push(`/branches?restaurantId=${id}`);
+        } else {
+            router.push(`/branches`);
         }
     };
 
@@ -74,26 +92,43 @@ function Branch() {
     return (
         <div className="min-h-screen p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                     Branches
                 </h1>
 
-                {isSuperAdmin && (
-                    <button
-                        onClick={() =>
-                            router.push(
-                                restaurantId
-                                    ? `/branches/add?restaurantId=${restaurantId}`
-                                    : "/branches/add"
-                            )
-                        }
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                    >
-                        <Plus size={16} />
-                        Add Branch
-                    </button>
-                )}
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    {isSuperAdmin && (
+                        <select
+                            value={restaurantId || ""}
+                            onChange={handleRestaurantChange}
+                            className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">All Restaurants</option>
+                            {restaurants.map((res: any) => (
+                                <option key={res.id} value={res.id}>
+                                    {res.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    {isSuperAdmin && (
+                        <button
+                            onClick={() =>
+                                router.push(
+                                    restaurantId
+                                        ? `/branches/add?restaurantId=${restaurantId}`
+                                        : "/branches/add"
+                                )
+                            }
+                            className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        >
+                            <Plus size={16} />
+                            Add Branch
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* TABLE */}

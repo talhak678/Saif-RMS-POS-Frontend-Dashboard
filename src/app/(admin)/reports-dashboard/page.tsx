@@ -44,7 +44,7 @@ export default function ReportsDashboard() {
     // const [dateRange, setDateRange] = useState("Jan 27 2026 - Feb 2 2026");
 
     const filteredTabs = isSuperAdmin
-        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches")
+        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches" || tab === "Orders & Customers")
         : TABS;
 
 
