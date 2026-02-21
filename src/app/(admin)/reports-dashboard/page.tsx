@@ -135,29 +135,89 @@ function AnalyticsTab({ timeRange, setTimeRange }: { timeRange: string; setTimeR
                     </div>
                 </div>
 
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={450}>
                     <ComposedChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" stroke="#6b7280" />
-                        <YAxis yAxisId="left" stroke="#6b7280" />
-                        <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
+                        <defs>
+                            <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
+                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
+                            </linearGradient>
+                            <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
+                                <stop offset="95%" stopColor="#6366F1" stopOpacity={1} />
+                            </linearGradient>
+                            <filter id="shadow" height="200%">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                                <feOffset dx="0" dy="4" result="offsetblur" />
+                                <feComponentTransfer>
+                                    <feFuncA type="linear" slope="0.3" />
+                                </feComponentTransfer>
+                                <feMerge>
+                                    <feMergeNode />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis
+                            dataKey="date"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                            dy={10}
+                        />
+                        <YAxis
+                            yAxisId="left"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                            tickFormatter={(value) => `$${value}`}
+                        />
+                        <YAxis
+                            yAxisId="right"
+                            orientation="right"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                        />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(8px)",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: "12px",
+                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                                padding: "12px",
                             }}
+                            cursor={{ fill: '#F3F4F6' }}
                         />
-                        <Legend />
-                        <Bar yAxisId="left" dataKey="sales" fill="#2563EB" name="Net Sales ($)" radius={[8, 8, 0, 0]} />
+                        <Legend
+                            verticalAlign="top"
+                            align="right"
+                            height={36}
+                            iconType="circle"
+                            formatter={(value) => <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{value}</span>}
+                        />
+                        <Bar
+                            yAxisId="left"
+                            dataKey="sales"
+                            fill="url(#colorSales)"
+                            name="Net Sales ($)"
+                            radius={[6, 6, 0, 0]}
+                            barSize={35}
+                            animationDuration={1500}
+                        />
                         <Line
                             yAxisId="right"
                             type="monotone"
                             dataKey="orders"
-                            stroke="#6366F1"
-                            strokeWidth={3}
+                            stroke="#8B5CF6"
+                            strokeWidth={4}
                             name="Order Count"
-                            dot={{ fill: "#6366F1", r: 5 }}
+                            dot={{ fill: "#8B5CF6", r: 6, strokeWidth: 2, stroke: "#fff" }}
+                            activeDot={{ r: 8, strokeWidth: 0 }}
+                            filter="url(#shadow)"
+                            animationDuration={2000}
                         />
                     </ComposedChart>
                 </ResponsiveContainer>
@@ -306,19 +366,37 @@ function OrdersCustomersTab() {
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
                     Top Customer Locations
                 </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={ordersCustomersData.customerLocations}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="area" stroke="#6b7280" />
-                        <YAxis stroke="#6b7280" />
+                <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={ordersCustomersData.customerLocations} barSize={35}>
+                        <defs>
+                            <linearGradient id="colorLocs" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#6366F1" stopOpacity={1} />
+                                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.8} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis
+                            dataKey="area"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#6B7280", fontSize: 12 }}
+                            dy={10}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#6B7280", fontSize: 12 }}
+                        />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(8px)",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: "12px",
+                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                             }}
                         />
-                        <Bar dataKey="orders" fill="#6366F1" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="orders" fill="url(#colorLocs)" radius={[6, 6, 0, 0]} animationDuration={1500} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -336,18 +414,33 @@ function InventoryTab() {
                     Top Stock Consumption
                 </h2>
                 <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={inventoryData.stockConsumption} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis type="number" stroke="#6b7280" />
-                        <YAxis dataKey="ingredient" type="category" stroke="#6b7280" width={100} />
+                    <BarChart data={inventoryData.stockConsumption} layout="vertical" barSize={25}>
+                        <defs>
+                            <linearGradient id="colorStock" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
+                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
+                        <YAxis
+                            dataKey="ingredient"
+                            type="category"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#6B7280", fontSize: 12 }}
+                            width={100}
+                        />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(8px)",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: "12px",
+                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                             }}
                         />
-                        <Bar dataKey="consumed" fill="#2563EB" radius={[0, 8, 8, 0]} />
+                        <Bar dataKey="consumed" fill="url(#colorStock)" radius={[0, 6, 6, 0]} animationDuration={1500} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -386,20 +479,44 @@ function BranchesTab() {
                 Sales per Branch
             </h2>
             <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={branchesData.salesPerBranch}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="branch" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
+                <BarChart data={branchesData.salesPerBranch} barSize={30}>
+                    <defs>
+                        <linearGradient id="colorBranchSales" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
+                            <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
+                        </linearGradient>
+                        <linearGradient id="colorBranchOrders" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
+                            <stop offset="95%" stopColor="#6366F1" stopOpacity={0.8} />
+                        </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                    <XAxis
+                        dataKey="branch"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                        dy={10}
+                    />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "#fff",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            backdropFilter: "blur(8px)",
+                            border: "1px solid #E5E7EB",
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                         }}
                     />
-                    <Legend />
-                    <Bar dataKey="sales" fill="#2563EB" name="Sales ($)" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="orders" fill="#6366F1" name="Orders" radius={[8, 8, 0, 0]} />
+                    <Legend
+                        verticalAlign="top"
+                        align="right"
+                        height={36}
+                        iconType="circle"
+                        formatter={(value) => <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{value}</span>}
+                    />
+                    <Bar dataKey="sales" fill="url(#colorBranchSales)" name="Sales ($)" radius={[6, 6, 0, 0]} animationDuration={1500} />
+                    <Bar dataKey="orders" fill="url(#colorBranchOrders)" name="Orders" radius={[6, 6, 0, 0]} animationDuration={1500} />
                 </BarChart>
             </ResponsiveContainer>
 
@@ -477,19 +594,34 @@ function MenuCategoriesTab() {
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
                     Top Selling Items
                 </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={menuCategoriesData.topSellingItems.slice(0, 5)} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis type="number" stroke="#6b7280" />
-                        <YAxis dataKey="item" type="category" stroke="#6b7280" width={120} />
+                <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={menuCategoriesData.topSellingItems.slice(0, 5)} layout="vertical" barSize={25}>
+                        <defs>
+                            <linearGradient id="colorItems" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
+                                <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.8} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
+                        <YAxis
+                            dataKey="item"
+                            type="category"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#6B7280", fontSize: 12 }}
+                            width={120}
+                        />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
+                                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(8px)",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: "12px",
+                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                             }}
                         />
-                        <Bar dataKey="sales" fill="#8B5CF6" radius={[0, 8, 8, 0]} />
+                        <Bar dataKey="sales" fill="url(#colorItems)" radius={[0, 6, 6, 0]} animationDuration={1500} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
