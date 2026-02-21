@@ -5,11 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { ArrowLeft, Plus, Trash2, Save, Image as ImageIcon, Layers, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import ImageUpload from "@/components/common/ImageUpload";
 
 function AddItemForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // URL se categoryId uthana (agar mojood ho)
   const preSelectedCategoryId = searchParams.get("categoryId") || "";
 
@@ -131,7 +132,7 @@ function AddItemForm() {
   return (
     <div className="min-h-screen p-4 md:p-8 bg-blend backdrop-blur-1xl dark:bg-gray-900">
       <div className="max-w-screen mx-auto">
-        
+
         {/* Header with Back Button */}
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -146,13 +147,13 @@ function AddItemForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
+
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-semibold mb-4 dark:text-white border-b dark:border-gray-700 pb-2">
               Basic Information
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
-              
+
               {/* Name */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -218,21 +219,13 @@ function AddItemForm() {
                 />
               </div>
 
-              {/* Image URL Input */}
+              {/* Image Upload */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Image URL
-                </label>
-                <div className="relative">
-                    <ImageIcon className="absolute left-3 top-3 text-gray-400" size={18} />
-                    <input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      className="w-full pl-10 p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    />
-                </div>
+                <ImageUpload
+                  label="Item Image"
+                  value={formData.image}
+                  onChange={(url) => setFormData({ ...formData, image: url })}
+                />
               </div>
 
             </div>
@@ -242,7 +235,7 @@ function AddItemForm() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
               <h2 className="text-lg font-semibold dark:text-white flex items-center gap-2">
-                <Layers size={18} className="text-blue-500"/> Variations <span className="text-xs font-normal text-gray-400">(Optional)</span>
+                <Layers size={18} className="text-blue-500" /> Variations <span className="text-xs font-normal text-gray-400">(Optional)</span>
               </h2>
               <button
                 type="button"
@@ -252,7 +245,7 @@ function AddItemForm() {
                 <Plus size={16} /> Add Variation
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {formData.variations.map((item, index) => (
                 <div key={index} className="flex gap-3 items-end animate-in fade-in slide-in-from-top-1">
@@ -267,7 +260,7 @@ function AddItemForm() {
                     />
                   </div>
                   <div className="w-32">
-                     <label className="text-xs text-gray-500 mb-1 block">Price</label>
+                    <label className="text-xs text-gray-500 mb-1 block">Price</label>
                     <input
                       type="number"
                       placeholder="0"
@@ -297,7 +290,7 @@ function AddItemForm() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
               <h2 className="text-lg font-semibold dark:text-white flex items-center gap-2">
-                <PlusCircle size={18} className="text-purple-500"/> Addons <span className="text-xs font-normal text-gray-400">(Optional)</span>
+                <PlusCircle size={18} className="text-purple-500" /> Addons <span className="text-xs font-normal text-gray-400">(Optional)</span>
               </h2>
               <button
                 type="button"
@@ -322,7 +315,7 @@ function AddItemForm() {
                     />
                   </div>
                   <div className="w-32">
-                     <label className="text-xs text-gray-500 mb-1 block">Price</label>
+                    <label className="text-xs text-gray-500 mb-1 block">Price</label>
                     <input
                       type="number"
                       placeholder="0"

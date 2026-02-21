@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { toast } from "react-hot-toast";
 import { Image as ImageIcon, Plus, Trash2, ExternalLink, ToggleRight, ToggleLeft, LayoutList } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
+import ImageUpload from "@/components/common/ImageUpload";
 
 interface Banner {
     id: string;
@@ -135,14 +136,11 @@ export default function BannersPage() {
                                     className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-brand-500"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-400 uppercase ml-2">Image URL</label>
-                                <input
-                                    type="text"
-                                    placeholder="https://example.com/banner.jpg"
+                            <div className="md:col-span-2 space-y-2">
+                                <ImageUpload
+                                    label="Banner Image"
                                     value={newBanner.imageUrl}
-                                    onChange={e => setNewBanner({ ...newBanner, imageUrl: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-brand-500"
+                                    onChange={(url) => setNewBanner({ ...newBanner, imageUrl: url })}
                                 />
                             </div>
                             <div className="space-y-2">

@@ -7,6 +7,7 @@ import { Plus, Edit2, Trash2, Search, X, Image as ImageIcon, FileText, User } fr
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import { ProtectedRoute } from "@/services/protected-route";
+import ImageUpload from "@/components/common/ImageUpload";
 
 type Blog = {
     id: string;
@@ -208,24 +209,24 @@ export default function BlogsPage({ embedded = false }: Props) {
                                             placeholder="Enter blog title"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Author</label>
-                                            <input
-                                                value={currentBlog.author || ""}
-                                                onChange={e => setCurrentBlog({ ...currentBlog, author: e.target.value })}
-                                                className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 py-4 font-bold outline-none transition-all"
-                                                placeholder="Author name"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Image URL</label>
-                                            <input
-                                                value={currentBlog.imageUrl || ""}
-                                                onChange={e => setCurrentBlog({ ...currentBlog, imageUrl: e.target.value })}
-                                                className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 py-4 font-bold outline-none transition-all"
-                                                placeholder="https://..."
-                                            />
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Author</label>
+                                                <input
+                                                    value={currentBlog.author || ""}
+                                                    onChange={e => setCurrentBlog({ ...currentBlog, author: e.target.value })}
+                                                    className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 py-4 font-bold outline-none transition-all"
+                                                    placeholder="Author name"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <ImageUpload
+                                                    label="Blog Featured Image"
+                                                    value={currentBlog.imageUrl || ""}
+                                                    onChange={(url) => setCurrentBlog({ ...currentBlog, imageUrl: url })}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="space-y-2">

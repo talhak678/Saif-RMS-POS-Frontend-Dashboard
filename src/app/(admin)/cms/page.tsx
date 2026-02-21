@@ -7,6 +7,7 @@ import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as Set
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
 import { ProtectedRoute } from "@/services/protected-route";
+import ImageUpload from "@/components/common/ImageUpload";
 
 const DEFAULT_CONFIG = {
     home: {
@@ -667,6 +668,12 @@ export default function CMSPage() {
                                                                                 placeholder="#000000"
                                                                             />
                                                                         </div>
+                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
+                                                                        <ImageUpload
+                                                                            label={field.replace(/([A-Z])/g, ' $1').replace('Url', ' Image')}
+                                                                            value={section.content[field]}
+                                                                            onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
+                                                                        />
                                                                     ) : (
                                                                         <input
                                                                             type="text"

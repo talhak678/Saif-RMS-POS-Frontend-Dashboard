@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { ArrowLeft } from "lucide-react";
+import ImageUpload from "@/components/common/ImageUpload";
 
 const STATUS_OPTIONS = ["PENDING", "ACTIVE", "SUSPENDED"];
 const SUBSCRIPTION_OPTIONS = [
@@ -122,14 +123,12 @@ export default function AddRestaurantPage() {
             />
           </div>
 
-          {/* LOGO */}
-          <div>
-            <label className="text-sm">Logo URL</label>
-            <input
-              name="logo"
+          {/* LOGO UPLOAD */}
+          <div className="md:col-span-2">
+            <ImageUpload
+              label="Restaurant Logo"
               value={form.logo}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border rounded dark:bg-gray-700"
+              onChange={(url) => setForm({ ...form, logo: url })}
             />
           </div>
 

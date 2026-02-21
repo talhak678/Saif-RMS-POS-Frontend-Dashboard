@@ -68,6 +68,14 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    icon: <GridIcon className="w-5 h-5" />,
+    name: "Menu & Categories",
+    subItems: [
+      { name: "Categories", path: "/categories", pro: false, permission: "menu-management:categories" },
+      { name: "Items", path: "/items", pro: false, permission: "menu-management:items" },
+    ],
+  },
+  {
     icon: <Motorbike className="w-5 h-5" />,
     name: "Delivery & Support",
     subItems: [

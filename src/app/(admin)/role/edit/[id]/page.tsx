@@ -127,6 +127,7 @@ function EditRoleForm({ params }: PageProps) {
         'customers-orders': 'Customers & Orders',
         'pos': 'Point of Sale (POS)',
         'restaurant-config': 'Restaurant Config',
+        'menu-management': 'Menu Management',
         'delivery-support': 'Delivery & Support',
         'inventory-recipes': 'Inventory & Recipes',
         'marketing-loyalty': 'Marketing & Loyalty',
