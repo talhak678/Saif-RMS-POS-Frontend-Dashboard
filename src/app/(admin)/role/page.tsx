@@ -66,6 +66,7 @@ function Roles() {
     }, []);
 
     return (
+
         <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
             {/* HEADER */}
             <div className="md:flex items-center justify-between mb-6 gap-4">
@@ -234,7 +235,7 @@ function Roles() {
 
 export default function RolesPage() {
     return (
-        <ProtectedRoute module="roles">
+        <ProtectedRoute module="authentication">
             <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Matrix...</div>}>
                 <Roles />
             </Suspense>
