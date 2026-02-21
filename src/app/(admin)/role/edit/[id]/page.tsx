@@ -269,7 +269,7 @@ function EditRoleForm({ params }: PageProps) {
 
 export default function EditRolePage({ params }: PageProps) {
     return (
-        <ProtectedRoute module="roles">
+        <ProtectedRoute module="authentication">
             <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Configuration...</div>}>
                 <EditRoleForm params={params} />
             </Suspense>

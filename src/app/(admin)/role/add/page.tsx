@@ -224,7 +224,7 @@ function AddRoleForm() {
 }
 export default function AddRolePage() {
     return (
-        <ProtectedRoute module="roles">
+        <ProtectedRoute module="authentication">
             <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Form...</div>}>
                 <AddRoleForm />
             </Suspense>
