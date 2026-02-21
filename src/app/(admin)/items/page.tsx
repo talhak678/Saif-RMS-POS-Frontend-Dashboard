@@ -150,7 +150,7 @@ export default function MenuItemsPage() {
     }
 
     return (
-        <ProtectedRoute module="pos:menu">
+        <ProtectedRoute module="menu-management:items">
             <div className="max-w-[calc(98vw)] lg:max-w-[calc(78vw)] mx-auto p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl my-4">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">

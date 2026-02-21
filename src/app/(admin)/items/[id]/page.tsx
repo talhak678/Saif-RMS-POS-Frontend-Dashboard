@@ -506,10 +506,14 @@ function ItemDetails() {
   );
 }
 
+import { ProtectedRoute } from "@/services/protected-route";
+
 export default function ItemDetailsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center dark:bg-gray-900 text-gray-500">Loading Page...</div>}>
-      <ItemDetails />
-    </Suspense>
+    <ProtectedRoute module="menu-management:items">
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center dark:bg-gray-900 text-gray-500">Loading Page...</div>}>
+        <ItemDetails />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
