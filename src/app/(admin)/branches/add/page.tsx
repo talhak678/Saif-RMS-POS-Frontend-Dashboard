@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 function AddBranchForm() {
     const { user, loadingUser } = useAuth();
-    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+    // const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
     const searchParams = useSearchParams();
     const presetRestaurantId = searchParams.get("restaurantId");
@@ -28,12 +28,12 @@ function AddBranchForm() {
         restaurantId: presetRestaurantId || "",
     });
 
-    useEffect(() => {
-        if (!loadingUser && user && !isSuperAdmin) {
-            toast.error("Access denied. Only Super Admins can add branches.");
-            router.push("/branches");
-        }
-    }, [user, loadingUser, isSuperAdmin, router]);
+    // useEffect(() => {
+    //     if (!loadingUser && user && !isSuperAdmin) {
+    //         toast.error("Access denied. Only Super Admins can add branches.");
+    //         router.push("/branches");
+    //     }
+    // }, [user, loadingUser, isSuperAdmin, router]);
 
     useEffect(() => {
         fetchRestaurants();
@@ -102,7 +102,7 @@ function AddBranchForm() {
         );
     }
 
-    if (!isSuperAdmin) return null;
+    // if (!isSuperAdmin) return null;
 
     return (
         <div className="min-h-screen p-4 dark:bg-gray-900">
