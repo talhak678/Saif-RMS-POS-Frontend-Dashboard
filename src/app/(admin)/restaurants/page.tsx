@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, ExternalLink, Plus } from "lucide-react";
+import { Eye, ExternalLink, Plus, Edit, Trash2, Power } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import { useAuth } from "@/services/permission.service";
+import { toast } from "sonner";
 
 
 const getStatusBadge = (status: string) => {
@@ -29,12 +31,18 @@ const getSubscriptionBadge = (sub: string) => {
 };
 
 export default function RestaurantsPage() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+
     const [restaurants, setRestaurants]: any = useState([]);
     const [loading, setLoading] = useState(true);
 
     // --- VIEW DETAILS MODAL ---
     const [viewRestaurant, setViewRestaurant] = useState<any>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+    const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -62,22 +70,68 @@ export default function RestaurantsPage() {
         }
     };
 
+    const handleStatusToggle = async (restaurant: any) => {
+        try {
+            setTogglingStatus(restaurant.id);
+            const newStatus = restaurant.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+
+            // Per requirement: send all original data along with changed data
+            const payload = {
+                ...restaurant,
+                status: newStatus
+            };
+            delete payload._count;
+
+            const res = await api.put(`/restaurants/${restaurant.id}`, payload);
+            if (res.data?.success) {
+                toast.success(`Restaurant ${newStatus.toLowerCase()} successfully`);
+                fetchRestaurants();
+            } else {
+                toast.error(res.data?.message || "Failed to update status");
+            }
+        } catch (err) {
+            toast.error("Status update failed");
+        } finally {
+            setTogglingStatus(null);
+        }
+    };
+
+    const handleDelete = async (id: string, name: string) => {
+        if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) return;
+
+        try {
+            setDeleting(id);
+            const res = await api.delete(`/restaurants/${id}`);
+            if (res.data?.success) {
+                toast.success("Restaurant deleted successfully");
+                fetchRestaurants();
+            } else {
+                toast.error(res.data?.message || "Failed to delete restaurant");
+            }
+        } catch (err) {
+            toast.error("Delete operation failed");
+        } finally {
+            setDeleting(null);
+        }
+    };
+
     return (
         <ProtectedRoute module="restaurant-config:restaurants">
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 <div className="md:flex gap-1 items-center justify-between mb-6">
 
-                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                         Restaurants
                     </h1>
-                    <br />
-                    <Link
-                        href="/restaurants/new"
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Add New Restaurant
-                    </Link>
+                    {isSuperAdmin && (
+                        <Link
+                            href="/restaurants/new"
+                            className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add New Restaurant
+                        </Link>
+                    )}
                 </div>
                 <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
                     <table className="w-full text-sm">
@@ -161,16 +215,47 @@ export default function RestaurantsPage() {
                                             ).toLocaleDateString()}
                                         </td>
 
-                                        <td className="px-4 py-3 flex gap-2">
+                                        <td className="px-4 py-3 flex items-center gap-2">
                                             <button
                                                 onClick={() => {
                                                     setViewRestaurant(res);
                                                     setIsViewModalOpen(true);
                                                 }}
                                                 className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                                title="View Details"
                                             >
                                                 <Eye size={18} />
                                             </button>
+
+                                            {isSuperAdmin && (
+                                                <>
+                                                    <button
+                                                        onClick={() => router.push(`/restaurants/edit/${res.id}`)}
+                                                        className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 rounded"
+                                                        title="Edit Restaurant"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStatusToggle(res)}
+                                                        disabled={togglingStatus === res.id}
+                                                        className={`p-2 rounded ${res.status === 'ACTIVE'
+                                                            ? 'text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+                                                            : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'}`}
+                                                        title={res.status === 'ACTIVE' ? "Suspend Restaurant" : "Activate Restaurant"}
+                                                    >
+                                                        <Power size={18} className={togglingStatus === res.id ? 'animate-spin' : ''} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(res.id, res.name)}
+                                                        disabled={deleting === res.id}
+                                                        className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded"
+                                                        title="Delete Restaurant"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </>
+                                            )}
 
                                             {res._count.branches > 0 && (
                                                 <button
@@ -179,7 +264,7 @@ export default function RestaurantsPage() {
                                                             `/branches?restaurantId=${res.id}`
                                                         )
                                                     }
-                                                    className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1"
+                                                    className="text-xs px-3 py-1 rounded bg-blue-600 text-white flex items-center gap-1 h-9"
                                                 >
                                                     View Branches
                                                     <ExternalLink size={12} />

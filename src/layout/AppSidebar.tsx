@@ -153,34 +153,53 @@ const AppSidebar: React.FC = () => {
   const { permissions, loadingUser, user } = useAuth();
   const pathname = usePathname();
 
+  const isSuperAdmin = useMemo(() => user?.role?.name === 'SUPER_ADMIN', [user]);
+
   // Helper function to check if a permission exists
   const hasPermission = useCallback((permission?: string) => {
+    // if (isSuperAdmin) return true;
     if (!permission) return true; // Items without permission field are public (usually none here but just in case)
     return permissions?.some(p => p.action === permission);
-  }, [permissions]);
+  }, [permissions, isSuperAdmin]);
 
   // Filter items based on permissions
   const filteredNavItems = useMemo(() => {
     return navItems.map(item => {
+      let currentItem = { ...item };
+
+      // Super Admin special naming
+      if (isSuperAdmin) {
+        if (currentItem.name === "Restaurant Config") {
+          currentItem.name = "Restaurant and Subscriptions";
+        }
+      }
+
       // If item has subItems, filter them first
-      if (item.subItems) {
-        const filteredSubItems = item.subItems.filter(sub => hasPermission(sub.permission));
+      if (currentItem.subItems) {
+        const filteredSubItems = currentItem.subItems
+          .map(sub => {
+            if (isSuperAdmin && sub.name === "Reports" && sub.path === "/reports-dashboard") {
+              return { ...sub, name: "Restaurant Reports" };
+            }
+            return sub;
+          })
+          .filter(sub => hasPermission(sub.permission));
 
         // Parent should be visible if:
         // 1. It has at least one accessible sub-item
         // 2. OR it has a direct permission which is granted (for cases like "Settings")
-        const canShowParent = filteredSubItems.length > 0 || (item.permission && hasPermission(item.permission));
+        const canShowParent = filteredSubItems.length > 0 || (currentItem.permission && hasPermission(currentItem.permission));
 
         if (!canShowParent) {
           return null;
         }
-        return { ...item, subItems: filteredSubItems };
+        return { ...currentItem, subItems: filteredSubItems };
       }
       // If no subItems, just check direct permission
       // If no permission specified, it's public
-      return !item.permission || hasPermission(item.permission) ? item : null;
+      return !currentItem.permission || hasPermission(currentItem.permission) ? currentItem : null;
     }).filter(Boolean) as (NavItem & { permission?: string })[];
-  }, [hasPermission]);
+  }, [hasPermission, isSuperAdmin]);
 
   const renderMenuItems = (
     navItems: (NavItem & { permission?: string })[],

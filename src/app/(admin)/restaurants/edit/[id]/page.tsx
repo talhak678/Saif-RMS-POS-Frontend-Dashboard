@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import ImageUpload from "@/components/common/ImageUpload";
 import { useAuth } from "@/services/permission.service";
 import { toast } from "sonner";
@@ -16,10 +16,12 @@ const SUBSCRIPTION_OPTIONS = [
     "ENTERPRISE",
 ];
 
-export default function AddRestaurantPage() {
+export default function EditRestaurantPage() {
     const { user, loadingUser } = useAuth();
     const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
+    const params = useParams();
+    const id = params.id;
 
     const [form, setForm] = useState({
         name: "",
@@ -34,15 +36,51 @@ export default function AddRestaurantPage() {
         metaPixelId: "",
     });
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
         if (!loadingUser && user && !isSuperAdmin) {
-            toast.error("Access denied. Only Super Admins can add restaurants.");
+            toast.error("Access denied. Only Super Admins can edit restaurants.");
             router.push("/restaurants");
         }
     }, [user, loadingUser, isSuperAdmin, router]);
+
+    useEffect(() => {
+        if (id && isSuperAdmin) {
+            fetchRestaurant();
+        }
+    }, [id, isSuperAdmin]);
+
+    const fetchRestaurant = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get(`/restaurants/${id}`);
+            if (res.data?.success) {
+                const data = res.data.data;
+                setForm({
+                    name: data.name || "",
+                    slug: data.slug || "",
+                    logo: data.logo || "",
+                    description: data.description || "",
+                    status: data.status || "PENDING",
+                    subscription: data.subscription || "FREE",
+                    facebookUrl: data.facebookUrl || "",
+                    instagramUrl: data.instagramUrl || "",
+                    tiktokUrl: data.tiktokUrl || "",
+                    metaPixelId: data.metaPixelId || "",
+                });
+            } else {
+                setError("Restaurant not found");
+            }
+        } catch (err) {
+            console.error("Fetch restaurant failed", err);
+            setError("Failed to fetch restaurant details");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -62,37 +100,35 @@ export default function AddRestaurantPage() {
         e.preventDefault();
         const validationError = validate();
         if (validationError) {
-            setError(validationError);
+            toast.error(validationError);
             return;
         }
 
         try {
-            setLoading(true);
-            setError("");
-
-            const res = await api.post("/restaurants", {
+            setSaving(true);
+            // Requirement: send all data along with changes
+            const res = await api.put(`/restaurants/${id}`, {
                 ...form,
             });
 
             if (res.data?.success) {
-                toast.success("Restaurant created successfully");
+                toast.success("Restaurant updated successfully");
                 router.push("/restaurants");
             } else {
-                toast.error(res.data?.message || "Failed to create restaurant");
+                toast.error(res.data?.message || "Failed to update restaurant");
             }
         } catch (err: any) {
-            console.error("Create restaurant failed", err);
-            setError("Failed to create restaurant");
-            toast.error("Failed to create restaurant");
+            console.error("Update restaurant failed", err);
+            toast.error("An error occurred while updating the restaurant");
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
-    if (loadingUser) {
+    if (loadingUser || (loading && isSuperAdmin)) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-                <div className="text-gray-400">Checking permissions...</div>
+                <Loader2 className="animate-spin text-blue-600" size={48} />
             </div>
         );
     }
@@ -111,7 +147,7 @@ export default function AddRestaurantPage() {
                 </button>
 
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
-                    Add Restaurant
+                    Edit Restaurant
                 </h1>
             </div>
 
@@ -255,10 +291,11 @@ export default function AddRestaurantPage() {
                 <div className="mt-6 flex gap-3">
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition-colors disabled:opacity-50"
+                        disabled={saving}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50"
                     >
-                        {loading ? "Creating..." : "Create Restaurant"}
+                        {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                        {saving ? "Saving..." : "Save Changes"}
                     </button>
 
                     <button
