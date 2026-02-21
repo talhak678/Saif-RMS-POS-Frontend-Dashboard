@@ -83,6 +83,28 @@ function AddRoleForm() {
     useEffect(() => {
         fetchPermissions();
     }, []);
+    // Mapping for user-friendly module names
+    const moduleNameMap: Record<string, string> = {
+        'dashboard': 'Dashboard',
+        'customers-orders': 'Customers & Orders',
+        'pos': 'Point of Sale (POS)',
+        'restaurant-config': 'Restaurant Config',
+        'delivery-support': 'Delivery & Support',
+        'inventory-recipes': 'Inventory & Recipes',
+        'marketing-loyalty': 'Marketing & Loyalty',
+        'authentication': 'Authentication',
+        'cms-website': 'CMS & Website',
+        'settings': 'Settings'
+    };
+
+    const formatGroupName = (group: string) => moduleNameMap[group] || group.replace(/-/g, ' ');
+
+    const formatPermissionLabel = (action: string) => {
+        if (!action.includes(':')) return action;
+        const label = action.split(':')[1].replace(/-/g, ' ');
+        return label.charAt(0).toUpperCase() + label.slice(1);
+    };
+
     // Grouping permissions by module
     const groupedPermissions = permissions.reduce((acc, perm) => {
         const group = perm.action.split(':')[0] || 'Other';
@@ -90,6 +112,14 @@ function AddRoleForm() {
         acc[group].push(perm);
         return acc;
     }, {} as Record<string, iPermission[]>);
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader size="12" />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen p-4 dark:bg-gray-900/50">
             {/* HEADER */}
@@ -141,54 +171,47 @@ function AddRoleForm() {
                             {RoleForm.permissions.length === permissions.length ? 'Deselect All' : 'Select All Access'}
                         </button>
                     </div>
-                    {loading ? (
-                        <div className="py-20 flex flex-col items-center gap-3">
-                            <Loader />
-                            <p className="text-sm text-gray-500 font-bold animate-pulse uppercase">Synchronizing Matrix...</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-10">
-                            {Object.entries(groupedPermissions).map(([group, groupPerms]) => (
-                                <div key={group} className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-brand-500"></div>
-                                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.15em]">
-                                            {group} Module
-                                        </h3>
-                                        <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700"></div>
-                                    </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {groupPerms.map((perm) => {
-                                            const isChecked = RoleForm.permissions.some((p) => p.id === perm.id);
-                                            return (
-                                                <label
-                                                    key={perm.id}
-                                                    className={`flex items-center gap-3 p-4 rounded-xl border transition-all cursor-pointer select-none ${isChecked
-                                                        ? 'bg-brand-500/5 border-brand-500/30'
-                                                        : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 hover:border-brand-500/40'
-                                                        }`}
-                                                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Object.entries(groupedPermissions).map(([group, groupPerms]) => (
+                            <div key={group} className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 space-y-4">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                                    <div className="h-5 w-1 bg-brand-500 rounded-full"></div>
+                                    <h3 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">
+                                        {formatGroupName(group)}
+                                    </h3>
+                                </div>
+
+                                <div className="space-y-2">
+                                    {groupPerms.map((perm) => {
+                                        const isChecked = RoleForm.permissions.some((p) => p.id === perm.id);
+                                        return (
+                                            <label
+                                                key={perm.id}
+                                                className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer select-none group ${isChecked
+                                                    ? 'bg-brand-500/10'
+                                                    : 'hover:bg-brand-500/5'
+                                                    }`}
+                                            >
+                                                <div className="relative flex items-center">
                                                     <input
                                                         type="checkbox"
                                                         checked={isChecked}
                                                         onChange={(e) => handlePermissionChange(perm, e.target.checked)}
-                                                        className="w-5 h-5 accent-brand-500 rounded border-gray-300 dark:border-gray-600"
+                                                        className="w-5 h-5 accent-brand-500 rounded border-gray-300 dark:border-gray-600 transition-all"
                                                     />
-                                                    <div>
-                                                        <span className={`text-[11px] font-black uppercase tracking-tight block ${isChecked ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'
-                                                            }`}>
-                                                            {perm.action.includes(':') ? perm.action.split(':')[1].replace(/-/g, ' ') : perm.action}
-                                                        </span>
-                                                    </div>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
+                                                </div>
+                                                <span className={`text-xs font-semibold ${isChecked ? 'text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
+                                                    }`}>
+                                                    {formatPermissionLabel(perm.action)}
+                                                </span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
                 {/* ACTION BUTTONS */}
                 <div className="flex gap-4">
@@ -224,7 +247,7 @@ function AddRoleForm() {
 }
 export default function AddRolePage() {
     return (
-        <ProtectedRoute module="authentication">
+        <ProtectedRoute module="authentication:roles">
             <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Form...</div>}>
                 <AddRoleForm />
             </Suspense>

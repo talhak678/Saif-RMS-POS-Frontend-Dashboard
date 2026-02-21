@@ -62,7 +62,7 @@ export default function CategoriesPage() {
     };
 
     return (
-        <ProtectedRoute module="menu">
+        <ProtectedRoute module="pos:menu">
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 {/* HEADER */}
                 <div className="md:flex gap-1 items-center justify-between mb-6">

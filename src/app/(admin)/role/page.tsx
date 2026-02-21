@@ -1,4 +1,4 @@
-"use client";
+    "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
@@ -235,7 +235,7 @@ function Roles() {
 
 export default function RolesPage() {
     return (
-        <ProtectedRoute module="authentication">
+        <ProtectedRoute module="authentication:roles">
             <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Matrix...</div>}>
                 <Roles />
             </Suspense>

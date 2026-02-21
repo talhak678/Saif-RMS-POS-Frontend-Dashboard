@@ -154,7 +154,7 @@ export default function StocksPage() {
   };
 
   return (
-    <ProtectedRoute module="inventory">
+    <ProtectedRoute module="inventory-recipes:stock">
       <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
 
         {/* HEADER & CONTROLS */}

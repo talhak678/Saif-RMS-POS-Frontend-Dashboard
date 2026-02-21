@@ -227,7 +227,7 @@ export default function ReservationsPage() {
 
     // ── UI ─────────────────────────────────────────────────────
     return (
-        <ProtectedRoute module="pos">
+        <ProtectedRoute module="pos:reservations">
             <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
 
                 {/* Header */}

@@ -425,7 +425,7 @@ export default function IncomingOrdersPage() {
     );
 
     return (
-        <ProtectedRoute module="orders">
+        <ProtectedRoute module="customers-orders:incoming-orders">
             <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
 
                 {/* Page Header */}

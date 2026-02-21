@@ -105,7 +105,7 @@ export default function RecipesPage() {
   }
 
   return (
-    <ProtectedRoute module="inventory">
+    <ProtectedRoute module="inventory-recipes:recipes">
       <div className="min-h-screen p-4 md:p-8 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
 
         {/* HEADER */}

@@ -205,7 +205,7 @@ export default function ReviewsPage() {
     };
 
     return (
-        <ProtectedRoute module="marketing">
+        <ProtectedRoute module="marketing-loyalty:reviews">
 
             <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200">
                 <div className="flex justify-between items-center mb-5">

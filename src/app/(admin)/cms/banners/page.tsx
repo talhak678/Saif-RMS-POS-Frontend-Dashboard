@@ -81,7 +81,7 @@ export default function BannersPage() {
     if (loading) return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
 
     return (
-        <ProtectedRoute module="cms">
+        <ProtectedRoute module="cms-website:banners">
 
             <div className="max-w-6xl mx-auto pb-20">
                 <div className="flex justify-between items-center mb-10">

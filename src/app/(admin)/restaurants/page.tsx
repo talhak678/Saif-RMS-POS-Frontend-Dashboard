@@ -63,7 +63,7 @@ export default function RestaurantsPage() {
     };
 
     return (
-        <ProtectedRoute module="restaurant">
+        <ProtectedRoute module="restaurant-config:restaurants">
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 <div className="md:flex gap-1 items-center justify-between mb-6">
 

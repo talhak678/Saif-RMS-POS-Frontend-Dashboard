@@ -204,7 +204,7 @@ function Branch() {
 export default function BranchPage() {
     return (
         // 2. Yahan Suspense wrap karein
-        <ProtectedRoute module="restaurant">
+        <ProtectedRoute module="restaurant-config:branches">
             <Suspense fallback={<div className="p-10 text-center">Loading Form...</div>}>
                 <Branch />
             </Suspense>

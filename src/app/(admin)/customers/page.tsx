@@ -34,7 +34,7 @@ export default function CustomersPage() {
   }, []);
 
   return (
-    <ProtectedRoute module="customers">
+    <ProtectedRoute module="customers-orders:customers">
 
       <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
         <div className="flex justify-between items-center mb-5">

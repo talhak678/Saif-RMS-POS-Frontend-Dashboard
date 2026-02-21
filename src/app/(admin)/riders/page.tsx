@@ -158,7 +158,7 @@ export default function RidersPage() {
     };
 
     return (
-        <ProtectedRoute module="delivery">
+        <ProtectedRoute module="delivery-support:riders">
             <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
                 <div className="flex justify-between items-start mb-6">
                     <div>

@@ -34,124 +34,87 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    permission: "dashboard-dropdown",
+    permission: "dashboard", // Parent permission (optional, we check children mostly)
     subItems: [
-      { name: "Overview", path: "/overview-dashboard", pro: false, permission: "dashboard-overview" },
-      { name: "Reports", path: "/reports-dashboard", pro: true, permission: "dashboard-reports" },
+      { name: "Overview", path: "/overview-dashboard", pro: false, permission: "dashboard:overview" },
+      { name: "Reports", path: "/reports-dashboard", pro: true, permission: "dashboard:reports" },
     ],
     path: "/",
   },
   {
     icon: <ListIcon className="w-5 h-5" />,
     name: "Customers & Orders",
-    permission: "customers-orders-dropdown",
     subItems: [
-      { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "orders" },
-      { name: "Customers", path: "/customers", pro: false, permission: "customers" },
-      { name: "Orders History", path: "/orders", pro: false, permission: "orders" },
+      { name: "Incoming Orders", path: "/incoming-orders", pro: false, permission: "customers-orders:incoming-orders" },
+      { name: "Customers", path: "/customers", pro: false, permission: "customers-orders:customers" },
+      { name: "Orders History", path: "/orders", pro: false, permission: "customers-orders:orders-history" },
     ],
   },
   {
     icon: <Computer className="w-5 h-5" />,
     name: "Point of Sale (POS)",
-    permission: "pos",
     subItems: [
-      { name: "Menu", path: "/pos", pro: false, permission: "pos" },
-      { name: "Reservations", path: "/reservations", pro: false, permission: "pos" },
-      { name: "Table Services", path: "/table-services", pro: false, permission: "pos" },
+      { name: "Menu", path: "/pos", pro: false, permission: "pos:menu" },
+      { name: "Reservations", path: "/reservations", pro: false, permission: "pos:reservations" },
+      { name: "Table Services", path: "/table-services", pro: false, permission: "pos:table-services" },
     ],
   },
   {
     icon: <ChefHat className="w-5 h-5" />,
-    name: "Restaurant & Config",
-    permission: "restaurant",
+    name: "Restaurant Config",
     subItems: [
-      { name: "Restaurants", path: "/restaurants", pro: false, permission: "restaurant" },
-      { name: "Branches", path: "/branches", pro: false, permission: "restaurant" },
+      { name: "Restaurants", path: "/restaurants", pro: false, permission: "restaurant-config:restaurants" },
+      { name: "Branches", path: "/branches", pro: false, permission: "restaurant-config:branches" },
     ],
   },
   {
     icon: <Motorbike className="w-5 h-5" />,
     name: "Delivery & Support",
-    permission: "delivery",
     subItems: [
-      { name: "Riders", path: "/riders", pro: false, permission: "delivery" },
-    ],
-  },
-  {
-    icon: <ShoppingCartIcon className="w-5 h-5" />,
-    name: "Menu & Categories",
-    permission: "menu",
-    subItems: [
-      { name: "Categories", path: "/categories", pro: false, permission: "menu" },
-      { name: "Menu", path: "/items", pro: false, permission: "menu" },
+      { name: "Riders", path: "/riders", pro: false, permission: "delivery-support:riders" },
     ],
   },
   {
     icon: <Warehouse className="w-5 h-5" />,
     name: "Inventory & Recipes",
-    permission: "inventory",
     subItems: [
-      { name: "Ingredients", path: "/ingredients", pro: false, permission: "inventory" },
-      { name: "Stock", path: "/stock", pro: false, permission: "inventory" },
-      { name: "Recipes", path: "/recipes", pro: false, permission: "inventory" },
+      { name: "Ingredients", path: "/ingredients", pro: false, permission: "inventory-recipes:ingredients" },
+      { name: "Stock", path: "/stock", pro: false, permission: "inventory-recipes:stock" },
+      { name: "Recipes", path: "/recipes", pro: false, permission: "inventory-recipes:recipes" },
     ],
   },
   {
     icon: <TicketPercent className="w-5 h-5" />,
     name: "Marketing & Loyalty",
-    permission: "marketing",
     subItems: [
-      { name: "Discounts", path: "/discounts", pro: false, permission: "marketing" },
-      { name: "Reviews", path: "/reviews", pro: false, permission: "marketing" },
-      { name: "Loyalty", path: "/loyalty", pro: false, permission: "marketing" },
+      { name: "Discounts", path: "/discounts", pro: false, permission: "marketing-loyalty:discounts" },
+      { name: "Reviews", path: "/reviews", pro: false, permission: "marketing-loyalty:reviews" },
+      { name: "Loyalty", path: "/loyalty", pro: false, permission: "marketing-loyalty:loyalty" },
     ],
   },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
-    permission: "authentication",
     subItems: [
-      { name: "Users", path: "/users", pro: false, permission: "authentication" },
-      { name: "Roles", path: "/role", pro: false, permission: "authentication" },
+      { name: "Users", path: "/users", pro: false, permission: "authentication:users" },
+      { name: "Roles", path: "/role", pro: false, permission: "authentication:roles" },
     ],
   },
   {
     icon: <PageIcon />,
     name: "CMS & Website",
-    permission: "cms",
     subItems: [
-      { name: "Page Sections", path: "/cms", pro: false, permission: "cms" },
-      { name: "Banners", path: "/cms/banners", pro: false, permission: "cms" },
-      { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms" },
+      { name: "Page Sections", path: "/cms", pro: false, permission: "cms-website:page-sections" },
+      { name: "Banners", path: "/cms/banners", pro: false, permission: "cms-website:banners" },
+      { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms-website:faqs" },
     ],
   },
   {
     icon: <Settings className="w-5 h-5" />,
     name: "Settings",
     path: "/settings",
-    permission: "settings",
+    permission: "settings:all",
   },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
-
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  // },
 ];
 
 const othersItems: NavItem[] = [
@@ -194,14 +157,20 @@ const AppSidebar: React.FC = () => {
       // If item has subItems, filter them first
       if (item.subItems) {
         const filteredSubItems = item.subItems.filter(sub => hasPermission(sub.permission));
-        // If no subitems are visible and the item itself has no direct permission required, hide it
-        if (filteredSubItems.length === 0 && !hasPermission(item.permission)) {
+
+        // Parent should be visible if:
+        // 1. It has at least one accessible sub-item
+        // 2. OR it has a direct permission which is granted (for cases like "Settings")
+        const canShowParent = filteredSubItems.length > 0 || (item.permission && hasPermission(item.permission));
+
+        if (!canShowParent) {
           return null;
         }
         return { ...item, subItems: filteredSubItems };
       }
       // If no subItems, just check direct permission
-      return hasPermission(item.permission) ? item : null;
+      // If no permission specified, it's public
+      return !item.permission || hasPermission(item.permission) ? item : null;
     }).filter(Boolean) as (NavItem & { permission?: string })[];
   }, [hasPermission]);
 

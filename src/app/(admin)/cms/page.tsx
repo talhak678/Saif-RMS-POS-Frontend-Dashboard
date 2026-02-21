@@ -426,7 +426,7 @@ export default function CMSPage() {
     const pages = Object.keys(config);
 
     return (
-        <ProtectedRoute module="cms">
+        <ProtectedRoute module="cms-website:page-sections">
             <div className="max-w-7xl mx-auto pb-10">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 px-4">

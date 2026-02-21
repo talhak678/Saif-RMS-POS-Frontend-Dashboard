@@ -88,7 +88,7 @@ export default function FaqsPage({ embedded = false }: Props) {
     if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
 
     return (
-        <ProtectedRoute module="cms">
+        <ProtectedRoute module="cms-website:faqs">
 
             <div className="space-y-8">
                 {!embedded && (

@@ -52,7 +52,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <ProtectedRoute module="settings">
+        <ProtectedRoute module="settings:all">
             <div className="min-h-screen p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
 
                 {/* --- NEW HEADER UI (Transparent/Glassy Style) --- */}
