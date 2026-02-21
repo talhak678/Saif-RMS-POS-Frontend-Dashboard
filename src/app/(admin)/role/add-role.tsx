@@ -45,7 +45,11 @@ const AddRole = ({ onAction }: { onAction?: () => void }) => {
         }
         setSavingRole(true);
         try {
-            const res = await permServ.addRole(RoleForm);
+            const payload = {
+                name: RoleForm.name,
+                permissionIds: RoleForm.permissions.map((p) => p.id),
+            };
+            const res = await permServ.addRole(payload as any);
             if (res.success) {
                 toast.success("Role added successfully!");
                 onAction?.();

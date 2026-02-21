@@ -45,7 +45,11 @@ function AddRoleForm() {
         }
         try {
             setSaving(true);
-            const res = await roleServ.addRole(RoleForm);
+            const payload = {
+                name: RoleForm.name,
+                permissionIds: RoleForm.permissions.map((p) => p.id),
+            };
+            const res = await roleServ.addRole(payload as any);
             if (res.success) {
                 toast.success("Role created successfully!");
                 router.push("/role");

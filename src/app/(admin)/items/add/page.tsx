@@ -370,15 +370,19 @@ function AddItemForm() {
   );
 }
 
+import { ProtectedRoute } from "@/services/protected-route";
+
 // Suspense Wrapper for Search Params
 export default function AddItemPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-        <div className="text-gray-500 animate-pulse">Loading Form...</div>
-      </div>
-    }>
-      <AddItemForm />
-    </Suspense>
+    <ProtectedRoute module="menu-management:items">
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
+          <div className="text-gray-500 animate-pulse">Loading Form...</div>
+        </div>
+      }>
+        <AddItemForm />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
