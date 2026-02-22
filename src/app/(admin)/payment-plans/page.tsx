@@ -88,23 +88,26 @@ export default function PaymentPlansPage() {
                     </h1>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         {isSuperAdmin && (
-                            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg px-3 py-1.5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <Filter size={16} className="text-gray-400" />
-                                <select
-                                    value={selectedRestaurantId}
-                                    onChange={handleRestaurantChange}
-                                    className="bg-transparent text-sm focus:outline-none dark:text-gray-200"
-                                >
-                                    <option value="">All Restaurants</option>
-                                    {restaurants.map((res) => (
-                                        <option key={res.id} value={res.id}>
-                                            {res.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <>
+                                <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg px-3 py-1.5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                                    <Filter size={16} className="text-gray-400" />
+                                    <select
+                                        value={selectedRestaurantId}
+                                        onChange={handleRestaurantChange}
+                                        className="bg-transparent text-sm focus:outline-none dark:text-gray-200"
+                                    >
+                                        <option value="">All Restaurants</option>
+                                        {restaurants.map((res) => (
+                                            <option key={res.id} value={res.id}>
+                                                {res.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <AddPlan onAction={fetchPrices} />
+
+                            </>
                         )}
-                        <AddPlan onAction={fetchPrices} />
                     </div>
                 </div>
 
@@ -118,7 +121,9 @@ export default function PaymentPlansPage() {
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Billing Cycle</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Restaurant</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+                                {isSuperAdmin && (
+                                    <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+                                )}
                             </tr>
                         </thead>
 
@@ -156,26 +161,28 @@ export default function PaymentPlansPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${price.isActive
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                                 }`}>
                                                 {price.isActive ? "ACTIVE" : "INACTIVE"}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <EditPlan onAction={fetchPrices} priceData={price} />
-                                                <button
-                                                    onClick={() => handleDelete(price.id)}
-                                                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                    title="Delete"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
+                                        {isSuperAdmin && (
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <EditPlan onAction={fetchPrices} priceData={price} />
+                                                    <button
+                                                        onClick={() => handleDelete(price.id)}
+                                                        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))
                             )}
