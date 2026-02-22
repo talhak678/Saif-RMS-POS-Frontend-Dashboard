@@ -22,9 +22,9 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // getting url 
-  const url = usePathname();
-  const issuperadmin = url.includes("super-admin");
+
+  const isSuperAdmin = process.env.NEXT_PUBLIC_IS_SUPER_ADMIN_ONLY === 'true';
+
 
   // 4. Handle Login Function
   const handleLogin = async (e: React.FormEvent) => {
@@ -98,7 +98,7 @@ export default function SignInForm() {
             </p>
           </div>
           <div>
-            {!issuperadmin && (
+            {!isSuperAdmin && (
               <>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
                   {/* Social Buttons (kept as is) */}
