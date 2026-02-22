@@ -70,7 +70,7 @@ export default function StripeTestPage() {
         }
         try {
             setLoading(true);
-            const res = await api.post("/payments/stripe/create-intent", {
+            const res = await api.post("/stripe-intent", {
                 orderId,
                 amount,
             });
