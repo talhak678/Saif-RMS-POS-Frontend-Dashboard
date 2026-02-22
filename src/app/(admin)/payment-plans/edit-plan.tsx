@@ -76,7 +76,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
             // sync form state if priceData changes
             setForm({
                 plan: priceData.plan,
-                price: priceData.price,
+                price: Number(priceData.price),
                 billingCycle: priceData.billingCycle,
                 restaurantId: priceData.restaurantId,
                 isActive: priceData.isActive,
