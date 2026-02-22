@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Settings, ChefHat, ShoppingCartIcon, Warehouse, Bike, Motorbike, TicketPercent, Computer } from "lucide-react";
-import { ShoppingCart, Users, ShieldCheck, Shield } from "lucide-react";
+import { ShoppingCart, Users, ShieldCheck, Shield, CircleDollarSign } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/services/permission.service";
 import {
@@ -106,6 +106,13 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Users", path: "/users", pro: false, permission: "authentication:users" },
       { name: "Roles", path: "/role", pro: false, permission: "authentication:roles" },
+    ],
+  },
+  {
+    icon: <CircleDollarSign className="w-5 h-5" />,
+    name: "Financials",
+    subItems: [
+      { name: "Payments", path: "/payments", pro: false, permission: "dashboard:payments" },
     ],
   },
   {

@@ -1,35 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+    ResponsiveContainer,
     ComposedChart,
-    Bar,
     Line,
+    Bar,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     Legend,
-    ResponsiveContainer,
     PieChart,
     Pie,
     Cell,
     BarChart,
 } from "recharts";
-import { Calendar, Download, TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users } from "lucide-react";
-import {
-    analyticsData,
-    ordersCustomersData,
-    inventoryData,
-    branchesData,
-    menuCategoriesData,
-} from "@/data/mockData";
+import { Download, Calendar } from "lucide-react";
+import api from "@/services/api";
+import { toast } from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
 
 const TABS = [
     "Analytics",
-    "Orders & Customers",
+    "Order & Customers",
     "Inventory",
     "Restaurant & Branches",
     "Menu & Categories",
@@ -41,41 +36,66 @@ export default function ReportsDashboard() {
 
     const [activeTab, setActiveTab] = useState(0);
     const [timeRange, setTimeRange] = useState("daily");
-    // const [dateRange, setDateRange] = useState("Jan 27 2026 - Feb 2 2026");
+    const [loading, setLoading] = useState(true);
+    const [reportData, setReportData] = useState<any>(null);
+
+    const fetchReports = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get("/reports");
+            if (res.data.success) {
+                setReportData(res.data.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch reports:", error);
+            toast.error("Failed to load reports data");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReports();
+    }, []);
+
+    const handleDownload = async () => {
+        toast.success("Preparing download...");
+    };
 
     const filteredTabs = isSuperAdmin
         ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches")
         : TABS;
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                    <p className="text-gray-500 font-medium">Loading reports...</p>
+                </div>
+            </div>
+        );
+    }
 
+    if (!reportData) return null;
 
     return (
         <ProtectedRoute module="dashboard:reports">
-            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
-                {/* Header */}
-                {/* <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                    Reports Dashboard
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Comprehensive analytics and insights for your restaurant
-                </p>
-            </div> */}
-
-                {/* Top Control Bar */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 mb-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        {/* Tab Navigation */}
-                        <div className="flex gap-6 overflow-x-auto pb-2 lg:pb-0">
-                            {filteredTabs.map((tab, index) => {
+            <div className="min-h-screen bg-white dark:bg-gray-900">
+                {/* Minimal Tab Navigation */}
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                    <div className="max-w-[1400px] mx-auto px-6">
+                        <div className="flex gap-10 overflow-x-auto scrollbar-hide pt-4">
+                            {filteredTabs.map((tab) => {
                                 const originalIndex = TABS.indexOf(tab);
+                                const isSelected = activeTab === originalIndex;
                                 return (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(originalIndex)}
-                                        className={`whitespace-nowrap pb-2 px-1 text-sm font-medium transition-all ${activeTab === originalIndex
+                                        className={`pb-4 text-sm font-bold transition-all relative ${isSelected
                                             ? "text-blue-600 border-b-2 border-blue-600"
-                                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                            : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                                             }`}
                                     >
                                         {tab}
@@ -83,24 +103,33 @@ export default function ReportsDashboard() {
                                 );
                             })}
                         </div>
-
-                        {/* Date Picker & Export */}
-                        {/* <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <Calendar size={18} />
-                            <span className="text-sm">{dateRange}</span>
-                        </button>
-                    </div> */}
                     </div>
                 </div>
 
-                {/* Tab Content */}
-                <div className="space-y-6">
-                    {activeTab === 0 && <AnalyticsTab timeRange={timeRange} setTimeRange={setTimeRange} />}
-                    {activeTab === 1 && <OrdersCustomersTab />}
-                    {activeTab === 2 && <InventoryTab />}
-                    {activeTab === 3 && <BranchesTab />}
-                    {activeTab === 4 && <MenuCategoriesTab />}
+                <div className="max-w-[1400px] mx-auto px-6 py-8">
+                    {/* Simplified Filter Bar */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                            <Calendar size={16} className="text-gray-400" />
+                            <span className="text-xs font-bold text-gray-500 tracking-tight">Jan 27 2026 - Feb 2 2026</span>
+                        </div>
+
+                        <button
+                            onClick={handleDownload}
+                            className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-widest"
+                        >
+                            <Download size={16} />
+                            Export
+                        </button>
+                    </div>
+
+                    <div className="animate-in fade-in duration-300">
+                        {activeTab === 0 && <AnalyticsTab data={reportData} timeRange={timeRange} setTimeRange={setTimeRange} />}
+                        {activeTab === 1 && <OrdersCustomersTab data={reportData.ordersCustomers} />}
+                        {activeTab === 2 && <InventoryTab data={reportData.inventory} />}
+                        {activeTab === 3 && <BranchesTab data={reportData.branches} />}
+                        {activeTab === 4 && <MenuCategoriesTab data={reportData.menuCategories} />}
+                    </div>
                 </div>
             </div>
         </ProtectedRoute>
@@ -108,361 +137,209 @@ export default function ReportsDashboard() {
 }
 
 // Tab 1: Analytics
-function AnalyticsTab({ timeRange, setTimeRange }: { timeRange: string; setTimeRange: (range: string) => void }) {
-    const data = analyticsData.salesTrend[timeRange as keyof typeof analyticsData.salesTrend];
+function AnalyticsTab({ data, timeRange, setTimeRange }: { data: any; timeRange: string; setTimeRange: (range: string) => void }) {
+    const chartData = data.salesTrend[timeRange] || data.salesTrend.daily;
 
     return (
-        <>
-            {/* Sales Trend Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-0">
-                        Sales Trend
-                    </h2>
-                    <div className="flex gap-2">
+        <div className="space-y-12">
+            <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 gap-4">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">Sales trend</h2>
+
+                    <div className="bg-gray-100 dark:bg-gray-900 p-1 rounded-xl flex gap-1 border border-gray-200 dark:border-gray-800">
                         {["daily", "weekly", "monthly"].map((range) => (
                             <button
                                 key={range}
                                 onClick={() => setTimeRange(range)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${timeRange === range
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                className={`px-5 py-1.5 rounded-md text-xs font-bold transition-all duration-200 ${timeRange === range
+                                    ? "bg-white dark:bg-gray-700 text-blue-600"
+                                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                                     }`}
                             >
-                                {range.charAt(0).toUpperCase() + range.slice(1)}
+                                {range === 'daily' ? 'Days' : range === 'weekly' ? 'Weeks' : 'Months'}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <ResponsiveContainer width="100%" height={450}>
-                    <ComposedChart data={data}>
-                        <defs>
-                            <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
-                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
-                            </linearGradient>
-                            <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
-                                <stop offset="95%" stopColor="#6366F1" stopOpacity={1} />
-                            </linearGradient>
-                            <filter id="shadow" height="200%">
-                                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                                <feOffset dx="0" dy="4" result="offsetblur" />
-                                <feComponentTransfer>
-                                    <feFuncA type="linear" slope="0.3" />
-                                </feComponentTransfer>
-                                <feMerge>
-                                    <feMergeNode />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        <XAxis
-                            dataKey="date"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#6B7280', fontSize: 12 }}
-                            dy={10}
-                        />
-                        <YAxis
-                            yAxisId="left"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#6B7280', fontSize: 12 }}
-                            tickFormatter={(value) => `$${value}`}
-                        />
-                        <YAxis
-                            yAxisId="right"
-                            orientation="right"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#6B7280', fontSize: 12 }}
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "12px",
-                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                                padding: "12px",
-                            }}
-                            cursor={{ fill: '#F3F4F6' }}
-                        />
-                        <Legend
-                            verticalAlign="top"
-                            align="right"
-                            height={36}
-                            iconType="circle"
-                            formatter={(value) => <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{value}</span>}
-                        />
-                        <Bar
-                            yAxisId="left"
-                            dataKey="sales"
-                            fill="url(#colorSales)"
-                            name="Net Sales ($)"
-                            radius={[6, 6, 0, 0]}
-                            barSize={35}
-                            animationDuration={1500}
-                        />
-                        <Line
-                            yAxisId="right"
-                            type="monotone"
-                            dataKey="orders"
-                            stroke="#8B5CF6"
-                            strokeWidth={4}
-                            name="Order Count"
-                            dot={{ fill: "#8B5CF6", r: 6, strokeWidth: 2, stroke: "#fff" }}
-                            activeDot={{ r: 8, strokeWidth: 0 }}
-                            filter="url(#shadow)"
-                            animationDuration={2000}
-                        />
-                    </ComposedChart>
-                </ResponsiveContainer>
+                <div className="h-[450px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
+                            <XAxis
+                                dataKey="date"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
+                                dy={15}
+                            />
+                            <YAxis
+                                yAxisId="left"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }}
+                                tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}`}
+                                width={50}
+                            />
+                            <YAxis
+                                yAxisId="right"
+                                orientation="right"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }}
+                                width={50}
+                            />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                                cursor={{ fill: 'transparent' }}
+                            />
+                            <Legend
+                                verticalAlign="bottom"
+                                align="left"
+                                iconType="circle"
+                                wrapperStyle={{ paddingTop: '40px' }}
+                            />
+                            <Bar
+                                yAxisId="left"
+                                dataKey="sales"
+                                fill="#3B82F6"
+                                name="Net sales ($)"
+                                radius={[6, 6, 0, 0]}
+                                barSize={60}
+                            />
+                            <Line
+                                yAxisId="right"
+                                type="monotone"
+                                dataKey="orders"
+                                stroke="#7F8C9E"
+                                strokeWidth={2}
+                                name="Order count"
+                                dot={{ fill: "#7F8C9E", r: 4 }}
+                            />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
-            {/* Summary Cards */}
+            {/* Bottom Cards - Matching Reference */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Payments Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                            <DollarSign className="text-blue-600" size={24} />
-                        </div>
-                        <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
-                            <TrendingUp size={16} />
-                            {analyticsData.summary.payments.change}%
-                        </div>
-                    </div>
-                    <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Total Payments</h3>
-                    <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-                        ${analyticsData.summary.payments.total.toLocaleString()}
-                    </p>
-                    <div className="mt-4 space-y-2">
-                        {analyticsData.summary.payments.breakdown.map((item) => (
-                            <div key={item.method} className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">{item.method}</span>
-                                <span className="font-medium text-gray-800 dark:text-gray-200">{item.percentage}%</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Revenue Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                            <TrendingUp className="text-purple-500" size={24} />
-                        </div>
-                        <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
-                            <TrendingUp size={16} />
-                            {analyticsData.summary.revenue.change}%
-                        </div>
-                    </div>
-                    <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Total Revenue</h3>
-                    <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-                        ${analyticsData.summary.revenue.total.toLocaleString()}
-                    </p>
-                    <div className="mt-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Net Profit</span>
-                            <span className="font-medium text-green-600 dark:text-green-400">
-                                ${analyticsData.summary.revenue.netProfit.toLocaleString()}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Tips Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                            <ShoppingCart className="text-blue-500" size={24} />
-                        </div>
-                        <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
-                            <TrendingUp size={16} />
-                            {analyticsData.summary.tips.change}%
-                        </div>
-                    </div>
-                    <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Total Tips</h3>
-                    <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-                        ${analyticsData.summary.tips.total.toLocaleString()}
-                    </p>
-                    <div className="mt-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Avg per Order</span>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">
-                                ${analyticsData.summary.tips.averagePerOrder}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                <StatCard
+                    title="Payments ($)"
+                    value={data.summary.payments.total.toLocaleString()}
+                    change={data.summary.payments.change}
+                    itemLabel="Amount"
+                />
+                <StatCard
+                    title="Revenue ($)"
+                    value={data.summary.revenue.total.toLocaleString()}
+                    change={data.summary.revenue.change}
+                    itemLabel="Amount"
+                />
+                <StatCard
+                    title="Tips ($)"
+                    value={data.summary.tips.total.toLocaleString()}
+                    change={data.summary.tips.change}
+                    itemLabel="Amount"
+                />
             </div>
-        </>
+        </div>
+    );
+}
+
+function StatCard({ title, value, change, itemLabel }: any) {
+    return (
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-8">
+                {title}
+                <div className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-[10px] text-gray-400">i</div>
+            </h3>
+            <div className="flex justify-between items-center text-sm font-medium text-gray-400 mb-2">
+                <span>{itemLabel}</span>
+                <span>Change</span>
+            </div>
+            <div className="flex justify-between items-center">
+                <span className="text-3xl font-bold text-gray-900 dark:text-white">${value}</span>
+                <span className={`text-sm font-bold ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
+                </span>
+            </div>
+        </div>
     );
 }
 
 // Tab 2: Orders & Customers
-function OrdersCustomersTab() {
+function OrdersCustomersTab({ data }: { data: any }) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Order Source Pie Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Order Source
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                        <Pie
-                            data={ordersCustomersData.orderSource}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, value }) => `${name}: ${value}%`}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                        >
-                            {ordersCustomersData.orderSource.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                        </Pie>
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Order Source</h3>
+                <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={data.orderSource}
+                                innerRadius={80}
+                                outerRadius={110}
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {data.orderSource.map((entry: any, index: number) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend iconType="circle" />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
-            {/* Customer Type Donut Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Customer Type
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                        <Pie
-                            data={ordersCustomersData.customerType}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, value }) => `${name}: ${value}%`}
-                            innerRadius={60}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                        >
-                            {ordersCustomersData.customerType.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                        </Pie>
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
-
-            {/* Customer Locations Bar Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 lg:col-span-2">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Top Customer Locations
-                </h2>
-                <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={ordersCustomersData.customerLocations} barSize={35}>
-                        <defs>
-                            <linearGradient id="colorLocs" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6366F1" stopOpacity={1} />
-                                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.8} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        <XAxis
-                            dataKey="area"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#6B7280", fontSize: 12 }}
-                            dy={10}
-                        />
-                        <YAxis
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#6B7280", fontSize: 12 }}
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "12px",
-                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                            }}
-                        />
-                        <Bar dataKey="orders" fill="url(#colorLocs)" radius={[6, 6, 0, 0]} animationDuration={1500} />
-                    </BarChart>
-                </ResponsiveContainer>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Top Locations</h3>
+                <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data.customerLocations}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="area" axisLine={false} tickLine={false} />
+                            <YAxis axisLine={false} tickLine={false} />
+                            <Tooltip />
+                            <Bar dataKey="orders" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={40} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
         </div>
     );
 }
 
 // Tab 3: Inventory
-function InventoryTab() {
+function InventoryTab({ data }: { data: any }) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Stock Consumption */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Top Stock Consumption
-                </h2>
-                <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={inventoryData.stockConsumption} layout="vertical" barSize={25}>
-                        <defs>
-                            <linearGradient id="colorStock" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
-                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
-                        <YAxis
-                            dataKey="ingredient"
-                            type="category"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#6B7280", fontSize: 12 }}
-                            width={100}
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "12px",
-                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                            }}
-                        />
-                        <Bar dataKey="consumed" fill="url(#colorStock)" radius={[0, 6, 6, 0]} animationDuration={1500} />
-                    </BarChart>
-                </ResponsiveContainer>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Stock Usage</h3>
+                <div className="h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data.stockConsumption} layout="vertical">
+                            <XAxis type="number" hide />
+                            <YAxis dataKey="ingredient" type="category" axisLine={false} tickLine={false} width={120} />
+                            <Tooltip />
+                            <Bar dataKey="consumed" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={25} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
-            {/* Recipe Popularity */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Recipe Popularity
-                </h2>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Recipe Popularity</h3>
                 <div className="space-y-4">
-                    {inventoryData.recipePopularity.map((recipe, index) => (
-                        <div key={recipe.recipe} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
-                                    {index + 1}
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-800 dark:text-gray-200">{recipe.recipe}</p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{recipe.orders} orders</p>
-                                </div>
+                    {data.recipePopularity.map((recipe: any, index: number) => (
+                        <div key={recipe.recipe} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                            <div className="flex items-center gap-4">
+                                <span className="font-bold text-gray-400">#{index + 1}</span>
+                                <span className="font-bold">{recipe.recipe}</span>
                             </div>
-                            <p className="text-lg font-semibold text-blue-600">${recipe.revenue}</p>
+                            <span className="font-bold text-blue-600">${recipe.revenue.toLocaleString()}</span>
                         </div>
                     ))}
                 </div>
@@ -471,159 +348,58 @@ function InventoryTab() {
     );
 }
 
-// Tab 4: Restaurant & Branches
-function BranchesTab() {
+// Tab 4: Branches
+function BranchesTab({ data }: { data: any }) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                Sales per Branch
-            </h2>
-            <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={branchesData.salesPerBranch} barSize={30}>
-                    <defs>
-                        <linearGradient id="colorBranchSales" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={1} />
-                            <stop offset="95%" stopColor="#2563EB" stopOpacity={0.8} />
-                        </linearGradient>
-                        <linearGradient id="colorBranchOrders" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
-                            <stop offset="95%" stopColor="#6366F1" stopOpacity={0.8} />
-                        </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis
-                        dataKey="branch"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: "#6B7280", fontSize: 12 }}
-                        dy={10}
-                    />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            backdropFilter: "blur(8px)",
-                            border: "1px solid #E5E7EB",
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                        }}
-                    />
-                    <Legend
-                        verticalAlign="top"
-                        align="right"
-                        height={36}
-                        iconType="circle"
-                        formatter={(value) => <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{value}</span>}
-                    />
-                    <Bar dataKey="sales" fill="url(#colorBranchSales)" name="Sales ($)" radius={[6, 6, 0, 0]} animationDuration={1500} />
-                    <Bar dataKey="orders" fill="url(#colorBranchOrders)" name="Orders" radius={[6, 6, 0, 0]} animationDuration={1500} />
-                </BarChart>
-            </ResponsiveContainer>
-
-            {/* Branch Details */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {branchesData.salesPerBranch.map((branch) => (
-                    <div key={branch.branch} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                        <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">{branch.branch}</h3>
-                        <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Sales:</span>
-                                <span className="font-medium text-gray-800 dark:text-gray-200">${branch.sales.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Orders:</span>
-                                <span className="font-medium text-gray-800 dark:text-gray-200">{branch.orders}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Growth:</span>
-                                <span className={`font-medium ${branch.growth >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                    {branch.growth >= 0 ? "+" : ""}{branch.growth}%
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-// Tab 5: Menu & Categories
-function MenuCategoriesTab() {
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Sales by Category Pie Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Sales by Category
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                        <Pie
-                            data={menuCategoriesData.salesByCategory}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={(props: any) => `${props.category}: ${props.value}%`}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                        >
-                            {menuCategoriesData.salesByCategory.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                        </Pie>
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold mb-8">Branch Comparison</h3>
+            <div className="h-[450px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.salesPerBranch}>
+                        <XAxis dataKey="branch" />
+                        <YAxis />
                         <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-                <div className="mt-4 space-y-2">
-                    {menuCategoriesData.salesByCategory.map((cat) => (
-                        <div key={cat.category} className="flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                                <span className="text-gray-700 dark:text-gray-300">{cat.category}</span>
-                            </div>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">${cat.sales.toLocaleString()}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Top Selling Items */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-                    Top Selling Items
-                </h2>
-                <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={menuCategoriesData.topSellingItems.slice(0, 5)} layout="vertical" barSize={25}>
-                        <defs>
-                            <linearGradient id="colorItems" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={1} />
-                                <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.8} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#6B7280", fontSize: 12 }} />
-                        <YAxis
-                            dataKey="item"
-                            type="category"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#6B7280", fontSize: 12 }}
-                            width={120}
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "12px",
-                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                            }}
-                        />
-                        <Bar dataKey="sales" fill="url(#colorItems)" radius={[0, 6, 6, 0]} animationDuration={1500} />
+                        <Legend />
+                        <Bar dataKey="sales" name="Sales ($)" fill="#3B82F6" barSize={35} />
+                        <Bar dataKey="orders" name="Orders" fill="#7F8C9E" barSize={35} />
                     </BarChart>
                 </ResponsiveContainer>
+            </div>
+        </div>
+    );
+}
+
+// Tab 5: Menu 
+function MenuCategoriesTab({ data }: { data: any }) {
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Category Revenue</h3>
+                <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={data.salesByCategory} dataKey="value" innerRadius={80} outerRadius={110} paddingAngle={5}>
+                                {data.salesByCategory.map((entry: any, index: number) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold mb-8">Top Items</h3>
+                <div className="space-y-4">
+                    {data.topSellingItems.map((item: any, index: number) => (
+                        <div key={item.item} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span className="font-bold">{item.item}</span>
+                            <span className="font-bold text-green-500">${item.sales.toLocaleString()}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
