@@ -26,7 +26,7 @@ const BILLING_CYCLE_OPTIONS = [
 const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: any }) => {
     const [form, setForm] = useState({
         plan: priceData.plan,
-        price: priceData.price,
+        price: Number(priceData.price),
         billingCycle: priceData.billingCycle,
         restaurantId: priceData.restaurantId,
         isActive: priceData.isActive,
