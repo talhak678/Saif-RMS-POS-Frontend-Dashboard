@@ -9,10 +9,15 @@ import { Modal } from "@/components/ui/modal";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
 import Label from "@/components/form/Label";
+import { useAuth } from "@/services/permission.service";
+import api from "@/services/api";
+import Button from "@/components/ui/button/Button";
 import { RoleServiceInstance } from "@/services/role.service";
-import { Button } from "@/components/ui/button/Button";
 
 const AddUser = ({ onAction }: { onAction?: () => void }) => {
+    const { user: currentUser } = useAuth();
+    const isSuperAdmin = currentUser?.role?.name === "SUPER_ADMIN";
+
     const [UserForm, setUserForm] = useState<iUser>({
         name: "",
         email: "",
@@ -21,9 +26,11 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
         restaurantId: "",
     });
     const [roles, setRoles] = useState<iRole[]>([]);
+    const [restaurants, setRestaurants] = useState<any[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [savingUser, setSavingUser] = useState<boolean>(false);
     const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
+    const [loadingRestaurants, setLoadingRestaurants] = useState<boolean>(false);
     const [errors, setErrors] = useState<Partial<Record<keyof iUser, any>>>({});
 
     const baseServ = BaseServiceInstance();
@@ -42,6 +49,20 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
             console.error("Failed to fetch roles", error);
         } finally {
             setLoadingRoles(false);
+        }
+    };
+
+    const fetchRestaurants = async () => {
+        try {
+            setLoadingRestaurants(true);
+            const res = await api.get("/restaurants");
+            if (res.data?.success) {
+                setRestaurants(res.data.data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch restaurants", error);
+        } finally {
+            setLoadingRestaurants(false);
         }
     };
 
@@ -90,8 +111,11 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
     useEffect(() => {
         if (modal) {
             fetchRoles();
+            if (isSuperAdmin) {
+                fetchRestaurants();
+            }
         }
-    }, [modal]);
+    }, [modal, isSuperAdmin]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserForm({ ...UserForm, [e.target.name]: e.target.value });
@@ -134,6 +158,27 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
                     <div className="p-6">
                         <form id="add-user-form" onSubmit={saveUser} className="space-y-5">
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                {isSuperAdmin && (
+                                    <div className="col-span-2 flex flex-col">
+                                        <Label>Restaurant *</Label>
+                                        <Select
+                                            options={restaurants.map((res) => ({
+                                                label: res.name,
+                                                value: res.id,
+                                            }))}
+                                            placeholder={loadingRestaurants ? "Loading restaurants..." : "Select restaurant"}
+                                            onChange={(val) => {
+                                                setUserForm({ ...UserForm, restaurantId: val })
+                                                if (errors.restaurantId) setErrors({ ...errors, restaurantId: undefined })
+                                            }}
+                                            defaultValue={UserForm.restaurantId}
+                                            required
+                                            disabled={savingUser || loadingRestaurants}
+                                            className="w-full"
+                                        />
+                                        {errors.restaurantId && <span className="text-xs text-red-500 mt-1">{errors.restaurantId}</span>}
+                                    </div>
+                                )}
                                 <div className="col-span-2">
                                     <Input
                                         label="Full Name"
