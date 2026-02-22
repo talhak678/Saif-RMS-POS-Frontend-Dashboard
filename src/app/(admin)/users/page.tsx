@@ -10,6 +10,7 @@ import EditUser from "./edit-user";
 import DeleteUser from "./delete-user";
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
+import { iUser } from "@/types/auth.types";
 
 // Helper for consistent badge style
 const getRoleBadge = (role: string) => {
