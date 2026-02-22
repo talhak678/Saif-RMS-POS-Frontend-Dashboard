@@ -207,9 +207,9 @@ function AddBranchForm() {
 
                     {/* DELIVERY OFF TIME */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time (minutes)</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time</label>
                         <input
-                            type="date"
+                            type="time"
                             name="deliveryOffTime"
                             value={form.deliveryOffTime}
                             onChange={handleChange}
