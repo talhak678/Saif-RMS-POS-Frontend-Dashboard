@@ -155,7 +155,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                                         label="Price ($) *"
                                         name="price"
                                         type="number"
-                                        step="0.01"
+                                        step={0.01}
                                         value={form.price}
                                         onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
                                         placeholder="0.00"
