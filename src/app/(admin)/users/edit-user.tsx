@@ -12,7 +12,13 @@ import Label from "@/components/form/Label";
 import { RoleServiceInstance } from "@/services/role.service";
 import { Button } from "@/components/ui/button/Button";
 
+import { useAuth } from "@/services/permission.service";
+import api from "@/services/api";
+
 const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) => {
+    const { user: currentUser } = useAuth();
+    const isSuperAdmin = currentUser?.role?.name === "SUPER_ADMIN";
+
     const [UserForm, setUserForm] = useState<iUser>({
         name: "",
         email: "",
@@ -21,9 +27,11 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
         restaurantId: "",
     });
     const [roles, setRoles] = useState<iRole[]>([]);
+    const [restaurants, setRestaurants] = useState<any[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [savingUser, setSavingUser] = useState<boolean>(false);
     const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
+    const [loadingRestaurants, setLoadingRestaurants] = useState<boolean>(false);
     const [errors, setErrors] = useState<Partial<Record<keyof iUser, any>>>({});
 
     const authServ = AuthServiceInstance();
@@ -39,6 +47,20 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
             console.error("Failed to fetch roles", error);
         } finally {
             setLoadingRoles(false);
+        }
+    };
+
+    const fetchRestaurants = async () => {
+        try {
+            setLoadingRestaurants(true);
+            const res = await api.get("/restaurants");
+            if (res.data?.success) {
+                setRestaurants(res.data.data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch restaurants", error);
+        } finally {
+            setLoadingRestaurants(false);
         }
     };
 
@@ -99,6 +121,9 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
     useEffect(() => {
         if (modal) {
             fetchRoles();
+            if (isSuperAdmin) {
+                fetchRestaurants();
+            }
             setUserForm({
                 ...user,
                 password: "",
@@ -107,7 +132,7 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
             });
             setErrors({});
         }
-    }, [modal, user]);
+    }, [modal, user, isSuperAdmin]);
 
     return (
         <>
@@ -195,6 +220,29 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
                                     />
                                     {errors.password && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.password}</p>}
                                 </div>
+
+                                {isSuperAdmin && (
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+                                            Assigned Restaurant
+                                        </label>
+                                        <select
+                                            value={UserForm.restaurantId}
+                                            onChange={(e) => {
+                                                setUserForm({ ...UserForm, restaurantId: e.target.value });
+                                                if (errors.restaurantId) setErrors({ ...errors, restaurantId: undefined });
+                                            }}
+                                            className={`w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-900/50 border ${errors.restaurantId ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-gray-200 appearance-none`}
+                                            disabled={savingUser || loadingRestaurants}
+                                        >
+                                            <option value="">{loadingRestaurants ? "Loading restaurants..." : "Select a restaurant"}</option>
+                                            {restaurants.map((res) => (
+                                                <option key={res.id} value={res.id}>{res.name}</option>
+                                            ))}
+                                        </select>
+                                        {errors.restaurantId && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.restaurantId}</p>}
+                                    </div>
+                                )}
 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">

@@ -8,6 +8,8 @@ import { ProtectedRoute } from "@/services/protected-route";
 import AddUser from "./add-user";
 import EditUser from "./edit-user";
 import DeleteUser from "./delete-user";
+import { useAuth } from "@/services/permission.service";
+import api from "@/services/api";
 import { iUser } from "@/types/auth.types";
 
 // Helper for consistent badge style
@@ -19,16 +21,21 @@ const getRoleBadge = (role: string) => {
 };
 
 export default function UsersPage() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role?.name === "SUPER_ADMIN";
+
     const [users, setUsers] = useState<iUser[]>([]);
+    const [restaurants, setRestaurants] = useState<any[]>([]);
+    const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
     const authServ = AuthServiceInstance();
 
     const [openUserId, setOpenUserId] = useState<string | null>(null);
 
-    const fetchUsers = async () => {
+    const fetchUsers = async (restaurantId?: string) => {
         try {
             setLoading(true);
-            const res = await authServ.getUsers();
+            const res = await authServ.getUsers(restaurantId || selectedRestaurantId);
             if (res?.success) {
                 setUsers(res?.data || []);
             } else {
@@ -41,18 +48,54 @@ export default function UsersPage() {
         }
     };
 
+    const fetchRestaurants = async () => {
+        try {
+            const res = await api.get("/restaurants");
+            if (res.data?.success) {
+                setRestaurants(res.data.data);
+            }
+        } catch (err) {
+            console.error("Fetch restaurants failed", err);
+        }
+    };
+
     useEffect(() => {
+        if (isSuperAdmin) {
+            fetchRestaurants();
+        }
         fetchUsers();
-    }, []);
+    }, [isSuperAdmin]);
+
+    const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = e.target.value;
+        setSelectedRestaurantId(id);
+        fetchUsers(id);
+    };
 
     return (
         <ProtectedRoute module="authentication:users">
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
-                <div className="flex justify-between items-center mb-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                         Users
                     </h1>
-                    <AddUser onAction={fetchUsers} />
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        {isSuperAdmin && (
+                            <select
+                                value={selectedRestaurantId}
+                                onChange={handleRestaurantChange}
+                                className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">All Restaurants</option>
+                                {restaurants.map((res) => (
+                                    <option key={res.id} value={res.id}>
+                                        {res.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                        <AddUser onAction={fetchUsers} />
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">

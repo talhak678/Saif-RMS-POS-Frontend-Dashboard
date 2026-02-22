@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 function AddBranchForm() {
     const { user, loadingUser } = useAuth();
-    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+    // const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
     const searchParams = useSearchParams();
     const presetRestaurantId = searchParams.get("restaurantId");
@@ -24,16 +24,16 @@ function AddBranchForm() {
         deliveryRadius: 0,
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
-        deliveryOffTime: 0,
+        deliveryOffTime: '',
         restaurantId: presetRestaurantId || "",
     });
 
-    useEffect(() => {
-        if (!loadingUser && user && !isSuperAdmin) {
-            toast.error("Access denied. Only Super Admins can add branches.");
-            router.push("/branches");
-        }
-    }, [user, loadingUser, isSuperAdmin, router]);
+    // useEffect(() => {
+    //     if (!loadingUser && user && !isSuperAdmin) {
+    //         toast.error("Access denied. Only Super Admins can add branches.");
+    //         router.push("/branches");
+    //     }
+    // }, [user, loadingUser, isSuperAdmin, router]);
 
     useEffect(() => {
         fetchRestaurants();
@@ -57,7 +57,6 @@ function AddBranchForm() {
             "deliveryRadius",
             "freeDeliveryThreshold",
             "deliveryCharge",
-            "deliveryOffTime",
         ];
 
         setForm((prev) => ({
@@ -102,7 +101,7 @@ function AddBranchForm() {
         );
     }
 
-    if (!isSuperAdmin) return null;
+    // if (!isSuperAdmin) return null;
 
     return (
         <div className="min-h-screen p-4 dark:bg-gray-900">
@@ -208,9 +207,9 @@ function AddBranchForm() {
 
                     {/* DELIVERY OFF TIME */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time (minutes)</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time</label>
                         <input
-                            type="number"
+                            type="time"
                             name="deliveryOffTime"
                             value={form.deliveryOffTime}
                             onChange={handleChange}

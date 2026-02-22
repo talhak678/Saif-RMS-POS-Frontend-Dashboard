@@ -25,7 +25,7 @@ function EditBranchForm() {
         deliveryRadius: 0,
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
-        deliveryOffTime: 0,
+        deliveryOffTime: '',
         restaurantId: "",
     });
 
@@ -63,7 +63,7 @@ function EditBranchForm() {
                     deliveryRadius: data.deliveryRadius || 0,
                     freeDeliveryThreshold: data.freeDeliveryThreshold || 0,
                     deliveryCharge: data.deliveryCharge || 0,
-                    deliveryOffTime: data.deliveryOffTime || 0,
+                    deliveryOffTime: data.deliveryOffTime || '',
                     restaurantId: data.restaurantId || "",
                 });
             }
@@ -82,7 +82,6 @@ function EditBranchForm() {
             "deliveryRadius",
             "freeDeliveryThreshold",
             "deliveryCharge",
-            "deliveryOffTime",
         ];
 
         setForm((prev) => ({
@@ -233,9 +232,9 @@ function EditBranchForm() {
 
                     {/* DELIVERY OFF TIME */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time (minutes)</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time</label>
                         <input
-                            type="number"
+                            type="time"
                             name="deliveryOffTime"
                             value={form.deliveryOffTime}
                             onChange={handleChange}

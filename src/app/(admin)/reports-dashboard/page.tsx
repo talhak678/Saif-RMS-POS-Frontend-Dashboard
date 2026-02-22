@@ -63,7 +63,7 @@ export default function ReportsDashboard() {
     };
 
     const filteredTabs = isSuperAdmin
-        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches")
+        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches" || tab === "Orders & Customers")
         : TABS;
 
     if (loading) {

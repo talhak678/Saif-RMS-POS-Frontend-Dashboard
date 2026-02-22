@@ -22,4 +22,10 @@ export const endpoints = {
     editPermission: '/permissions/',
     deletePermission: '/permissions/',
     getPermissionById: '/permissions/',
+
+    getSubscriptionPrices: '/subscription-prices',
+    addSubscriptionPrice: '/subscription-prices',
+    editSubscriptionPrice: '/subscription-prices/',
+    deleteSubscriptionPrice: '/subscription-prices/',
+    getSubscriptionPriceById: '/subscription-prices/',
 }
