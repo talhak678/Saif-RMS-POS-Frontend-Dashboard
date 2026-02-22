@@ -24,7 +24,7 @@ function AddBranchForm() {
         deliveryRadius: 0,
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
-        deliveryOffTime: 0,
+        deliveryOffTime: '',
         restaurantId: presetRestaurantId || "",
     });
 
@@ -57,7 +57,6 @@ function AddBranchForm() {
             "deliveryRadius",
             "freeDeliveryThreshold",
             "deliveryCharge",
-            "deliveryOffTime",
         ];
 
         setForm((prev) => ({
@@ -210,7 +209,7 @@ function AddBranchForm() {
                     <div>
                         <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time (minutes)</label>
                         <input
-                            type="number"
+                            type="date"
                             name="deliveryOffTime"
                             value={form.deliveryOffTime}
                             onChange={handleChange}
