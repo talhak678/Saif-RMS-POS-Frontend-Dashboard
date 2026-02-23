@@ -110,7 +110,7 @@ export default function ReportsDashboard() {
         );
     }
 
-    if (!reportData) return null;
+    // if (!reportData) return null;
 
 
     return (
