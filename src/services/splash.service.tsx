@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./permission.service";
 import { useModules } from "./modules.service";
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
@@ -39,7 +39,7 @@ const SplashService: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (loading) {
         return (
             <div className={`min-h-screen flex items-center justify-center`}>
-                <Loader size={'12'} />
+                <Loader size="md" />
             </div>
         );
     }

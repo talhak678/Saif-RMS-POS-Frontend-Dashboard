@@ -364,7 +364,7 @@ function ItemDetails() {
                       className="w-full text-right font-bold p-2 border rounded mt-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   ) : (
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">Rs. {item.price}</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">$ {item.price}</p>
                   )}
                 </div>
               </div>
@@ -408,7 +408,7 @@ function ItemDetails() {
                       ) : (
                         <>
                           <span className="font-medium text-gray-700 dark:text-gray-200">{v.name}</span>
-                          <span className="font-bold text-gray-900 dark:text-white">Rs. {v.price}</span>
+                          <span className="font-bold text-gray-900 dark:text-white">$ {v.price}</span>
                         </>
                       )}
                     </div>
@@ -455,7 +455,7 @@ function ItemDetails() {
                       ) : (
                         <>
                           <span className="font-medium text-gray-700 dark:text-gray-200">{addon.name}</span>
-                          <span className="font-bold text-gray-900 dark:text-white">+ Rs. {addon.price}</span>
+                          <span className="font-bold text-gray-900 dark:text-white">+ $ {addon.price}</span>
                         </>
                       )}
                     </div>

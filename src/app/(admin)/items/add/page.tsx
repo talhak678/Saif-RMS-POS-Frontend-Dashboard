@@ -193,7 +193,7 @@ function AddItemForm() {
               {/* Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Base Price (Rs.) *
+                  Base Price ($) *
                 </label>
                 <input
                   required
@@ -220,7 +220,7 @@ function AddItemForm() {
               </div>
 
               {/* Image Upload */}
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <ImageUpload
                   label="Item Image"
                   value={formData.image}
@@ -260,7 +260,7 @@ function AddItemForm() {
                     />
                   </div>
                   <div className="w-32">
-                    <label className="text-xs text-gray-500 mb-1 block">Price</label>
+                    <label className="text-xs text-gray-500 mb-1 block">Price ($)</label>
                     <input
                       type="number"
                       placeholder="0"
@@ -315,7 +315,7 @@ function AddItemForm() {
                     />
                   </div>
                   <div className="w-32">
-                    <label className="text-xs text-gray-500 mb-1 block">Price</label>
+                    <label className="text-xs text-gray-500 mb-1 block">Price ($)</label>
                     <input
                       type="number"
                       placeholder="0"

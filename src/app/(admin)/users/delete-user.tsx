@@ -6,6 +6,7 @@ import { iRole, iUser, UserSchema } from '@/types/auth.types'
 import { toast } from 'sonner'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button/Button'
+import Loader from '@/components/common/Loader'
 
 const DeleteUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) => {
     const [modal, setModal] = useState<boolean>(false);
@@ -69,7 +70,7 @@ const DeleteUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) 
                         >
                             {deleting ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <Loader size="sm" showText={false} className="space-y-0" />
                                     Deleting...
                                 </>
                             ) : "Yes, Delete User"}

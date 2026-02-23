@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 export default function IngredientsPage() {
     const [ingredients, setIngredients] = useState<any[]>([]);
@@ -143,8 +144,8 @@ export default function IngredientsPage() {
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="py-10 text-center text-gray-500">
-                                        Loading ingredients...
+                                    <td colSpan={7} className="py-20 text-center text-gray-500">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : ingredients.length === 0 ? (
@@ -273,9 +274,9 @@ export default function IngredientsPage() {
                                     <button
                                         type="submit"
                                         disabled={formLoading}
-                                        className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none"
+                                        className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none min-w-[140px]"
                                     >
-                                        {formLoading ? "Saving..." : <><Save size={16} /> Save Ingredient</>}
+                                        {formLoading ? <Loader size="sm" className="space-y-0" /> : <><Save size={16} /> Save Ingredient</>}
                                     </button>
                                 </div>
                             </form>
@@ -305,9 +306,9 @@ export default function IngredientsPage() {
                                 <button
                                     onClick={handleDelete}
                                     disabled={deleteLoading}
-                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
+                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 flex items-center justify-center"
                                 >
-                                    {deleteLoading ? "Deleting..." : "Delete"}
+                                    {deleteLoading ? <Loader size="sm" className="space-y-0" /> : "Delete"}
                                 </button>
                             </div>
                         </div>

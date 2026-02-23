@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 import { RoleServiceInstance } from "@/services/role.service";
 import { iPermission, iRole } from "@/types/auth.types";
 import { ProtectedRoute } from "@/services/protected-route";
@@ -155,7 +155,7 @@ function EditRoleForm({ params }: PageProps) {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader size="12" />
+                <Loader size="md" />
             </div>
         );
     }
@@ -266,7 +266,7 @@ function EditRoleForm({ params }: PageProps) {
                     >
                         {saving ? (
                             <>
-                                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <Loader size="sm" showText={false} className="space-y-0" />
                                 Saving Changes...
                             </>
                         ) : (

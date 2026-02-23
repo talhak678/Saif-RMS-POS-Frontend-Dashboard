@@ -6,6 +6,7 @@ import { Plus, ChevronDown, ChevronRight, ImageOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 // Interface
 interface MenuItem {
@@ -144,7 +145,7 @@ export default function MenuItemsPage() {
     if (loading) {
         return (
             <div className="min-h-screen p-6 flex items-center justify-center dark:bg-gray-900">
-                <div className="text-gray-500">Loading menu items...</div>
+                <Loader size="md" />
             </div>
         );
     }
@@ -259,7 +260,7 @@ export default function MenuItemsPage() {
                                                                     {item.name}
                                                                 </h3>
                                                                 <p className="text-brand-600 dark:text-brand-400 font-black text-lg">
-                                                                    Rs. {item.price}
+                                                                    $ {item.price}
                                                                 </p>
                                                             </div>
 

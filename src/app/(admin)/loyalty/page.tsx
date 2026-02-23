@@ -7,6 +7,7 @@ import { Eye, Trash2, Plus, X, Search } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const TRANSACTION_TYPES = ["EARNED", "REDEEMED"];
 
@@ -212,8 +213,8 @@ export default function LoyaltyPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="py-10 text-center">
-                                        Loading transactions...
+                                    <td colSpan={7} className="py-20 text-center">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : transactions.length === 0 ? (
@@ -261,10 +262,10 @@ export default function LoyaltyPage() {
                                             <button
                                                 onClick={() => handleDeleteTransaction(transaction.id)}
                                                 disabled={deleting === transaction.id}
-                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400 flex items-center justify-center"
                                                 title="Delete Transaction"
                                             >
-                                                <Trash2 size={18} />
+                                                {deleting === transaction.id ? <Loader size="sm" className="space-y-0" /> : <Trash2 size={18} />}
                                             </button>
                                         </td>
                                     </tr>
@@ -340,9 +341,9 @@ export default function LoyaltyPage() {
                                     <button
                                         onClick={handleAddTransaction}
                                         disabled={adding}
-                                        className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
+                                        className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
                                     >
-                                        {adding ? "Adding..." : "Add Transaction"}
+                                        {adding ? <Loader size="sm" className="space-y-0" /> : "Add Transaction"}
                                     </button>
                                 </div>
                             </div>

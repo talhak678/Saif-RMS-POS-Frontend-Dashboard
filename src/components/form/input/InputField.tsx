@@ -1,5 +1,5 @@
 "use client";
-import Loader from '@/components/ui/spinner';
+import Loader from '@/components/common/Loader';
 import { File } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
@@ -153,7 +153,7 @@ export const FileInput = ({ className = '', type = 'file', loading = false, ...p
                 accept="image/*"
             />
             <div className='justify-items-center text-gray-700 dark:text-gray-300'>
-                {loading ? <Loader /> : <File className='text-7xl font-semibold' />}
+                {loading ? <Loader size="sm" showText={false} className="space-y-0" /> : <File className='text-7xl font-semibold' />}
                 <p className='text-2xl font-medium '>Drag, drop or click to upload images</p>
             </div>
         </div>

@@ -10,7 +10,7 @@ import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import ImageUpload from "../common/ImageUpload";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 
 
 export default function UserMetaCard() {
@@ -213,7 +213,7 @@ export default function UserMetaCard() {
             <Button size="sm" onClick={handleSave} disabled={saving}>
               {saving ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader size="sm" showText={false} className="space-y-0" />
                   Saving...
                 </span>
               ) : (

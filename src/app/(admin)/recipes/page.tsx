@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 // Types
 interface RecipeItem {
@@ -96,10 +97,7 @@ export default function RecipesPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-        <div className="flex flex-col items-center gap-3">
-          <ChefHat className="w-10 h-10 text-brand-500 animate-bounce" />
-          <span className="text-gray-500">Preparing Recipes...</span>
-        </div>
+        <Loader size="md" />
       </div>
     );
   }
@@ -234,9 +232,9 @@ export default function RecipesPage() {
                 <button
                   onClick={handleDelete}
                   disabled={deleteLoading}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-md shadow-red-200 dark:shadow-none"
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-md shadow-red-200 dark:shadow-none flex justify-center items-center"
                 >
-                  {deleteLoading ? "Removing..." : "Remove"}
+                  {deleteLoading ? <Loader size="sm" className="space-y-0" /> : "Remove"}
                 </button>
               </div>
             </div>

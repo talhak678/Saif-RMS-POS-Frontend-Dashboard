@@ -7,6 +7,7 @@ import { Plus, Edit2, Trash2, Search, X, Image as ImageIcon, FileText, User } fr
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
 
 type Blog = {
@@ -87,7 +88,7 @@ export default function BlogsPage({ embedded = false }: Props) {
 
     const filteredBlogs = blogs.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
+    if (loading) return <div className="flex justify-center items-center h-96"><Loader size="md" /></div>;
 
     return (
         <ProtectedRoute module="cms">
@@ -233,41 +234,42 @@ export default function BlogsPage({ embedded = false }: Props) {
                             </form>
                             <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col sm:flex-row justify-end gap-3">
                                 <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                    onClick={() => { setIsModalOpen(false); setCurrentBlog({}); }}
+                                    className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                                 >
                                     Discard
                                 </button>
-                                {!currentBlog.id && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setSaving(true);
-                                            api.post("/cms/blogs", currentBlog).then(res => {
-                                                if (res.data.success) {
-                                                    setBlogs(prev => [res.data.data, ...prev]);
-                                                    toast.success("Blog created successfully");
-                                                    setCurrentBlog({});
-                                                }
-                                            }).catch(error => {
-                                                toast.error(error.response?.data?.message || "Failed to save blog");
-                                            }).finally(() => {
-                                                setSaving(false);
-                                            });
-                                        }}
-                                        disabled={saving}
-                                        className="px-5 py-2 rounded-xl text-sm font-semibold text-brand-500 border border-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors disabled:opacity-50"
-                                    >
-                                        Save & Continue
-                                    </button>
-                                )}
+                                {
+                                    !currentBlog.id && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSaving(true);
+                                                api.post("/cms/blogs", currentBlog).then(res => {
+                                                    if (res.data.success) {
+                                                        setBlogs(prev => [res.data.data, ...prev]);
+                                                        toast.success("Blog created successfully");
+                                                        setCurrentBlog({});
+                                                    }
+                                                }).catch(error => {
+                                                    toast.error(error.response?.data?.message || "Failed to save blog");
+                                                }).finally(() => {
+                                                    setSaving(false);
+                                                });
+                                            }}
+                                            disabled={saving}
+                                            className="px-5 py-2 rounded-xl text-sm font-semibold text-brand-500 border border-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors disabled:opacity-50 flex justify-center items-center"
+                                        >
+                                            {saving ? <Loader size="sm" className="space-y-0" /> : "Save & Continue"}
+                                        </button>
+                                    )
+                                }
                                 <button
                                     onClick={handleSave}
                                     disabled={saving}
-                                    className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50"
+                                    className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
                                 >
-                                    {saving ? "Publishing..." : "Publish Article"}
+                                    {saving ? <Loader size="sm" className="space-y-0" /> : "Publish Article"}
                                 </button>
                             </div>
                         </div>

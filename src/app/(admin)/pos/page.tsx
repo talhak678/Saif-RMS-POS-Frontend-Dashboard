@@ -15,11 +15,11 @@ import {
     MapPin,
     ChevronRight,
     CheckCircle2,
-    Loader2,
 } from "lucide-react";
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 import { loadStripe } from "@stripe/stripe-js";
 import {
     Elements,
@@ -173,7 +173,7 @@ function ItemSelectionModal({
                                             </span>
                                         </div>
                                         <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                            Rs. {parseFloat(v.price)}
+                                            $ {parseFloat(v.price)}
                                         </span>
                                     </button>
                                 ))}
@@ -215,7 +215,7 @@ function ItemSelectionModal({
                                                 </span>
                                             </div>
                                             <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                                + Rs. {parseFloat(addon.price)}
+                                                + $ {parseFloat(addon.price)}
                                             </span>
                                         </button>
                                     );
@@ -230,7 +230,7 @@ function ItemSelectionModal({
                     <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Total Price</p>
                         <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                            Rs. {totalPrice}
+                            $ {totalPrice}
                         </p>
                     </div>
                     <button
@@ -331,20 +331,20 @@ function CustomerDetailsModal({
                                         </span>
                                     </div>
                                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                                        Rs. {(item.unitPrice * item.quantity).toFixed(0)}
+                                        $ {(item.unitPrice * item.quantity).toFixed(0)}
                                     </span>
                                 </div>
                             ))}
                         </div>
                         <div className="border-t border-gray-200 dark:border-gray-600 mt-3 pt-3 space-y-1">
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>Subtotal</span><span>Rs. {subtotal.toFixed(2)}</span>
+                                <span>Subtotal</span><span>$ {subtotal.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>Tax (5%)</span><span>Rs. {tax.toFixed(2)}</span>
+                                <span>Tax (5%)</span><span>$ {tax.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between font-bold text-gray-900 dark:text-gray-100">
-                                <span>Total</span><span>Rs. {total.toFixed(2)}</span>
+                                <span>Total</span><span>$ {total.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                 <span>Payment</span><span>{paymentMethod}</span>
@@ -523,10 +523,10 @@ function CheckoutForm({
                 >
                     {isLoading ? (
                         <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader size="sm" showText={false} className="space-y-0" />
                             Processing...
                         </>
-                    ) : `Pay Rs. ${amount.toFixed(2)}`}
+                    ) : `Pay $ ${amount.toFixed(2)}`}
                 </button>
             </div>
             {message && <div className="text-red-500 text-sm font-medium mt-4 text-center">{message}</div>}
@@ -560,7 +560,7 @@ function StripeModal({
                             <CreditCard className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Amount to pay</p>
-                        <p className="text-3xl font-black text-gray-900 dark:text-gray-100">Rs. {amount.toFixed(2)}</p>
+                        <p className="text-3xl font-black text-gray-900 dark:text-gray-100">$ {amount.toFixed(2)}</p>
                     </div>
                     <Elements stripe={stripePromise} options={{ clientSecret }}>
                         <CheckoutForm
@@ -807,10 +807,8 @@ export default function POSPage() {
                         {/* Category Navigation */}
                         <div className="mb-4 overflow-x-auto flex-shrink-0">
                             {loadingCategories ? (
-                                <div className="flex gap-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <div key={i} className="min-w-[100px] h-20 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
-                                    ))}
+                                <div className="flex gap-2 w-full justify-center py-4">
+                                    <Loader size="sm" />
                                 </div>
                             ) : (
                                 <div className="flex gap-2 pb-2">
@@ -849,17 +847,8 @@ export default function POSPage() {
                         {/* Product Grid */}
                         <div className="flex-1 overflow-y-auto">
                             {loadingItems ? (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {[...Array(8)].map((_, i) => (
-                                        <div key={i} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden animate-pulse">
-                                            <div className="h-40 bg-gray-200 dark:bg-gray-700" />
-                                            <div className="p-3 space-y-2">
-                                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                                                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="flex justify-center items-center py-20">
+                                    <Loader size="md" />
                                 </div>
                             ) : menuItems.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
@@ -907,7 +896,7 @@ export default function POSPage() {
 
                                                     <div className="flex items-center justify-between mb-4 mt-auto">
                                                         <span className="text-lg font-black text-brand-600 dark:text-brand-400">
-                                                            Rs. {price}
+                                                            $ {price}
                                                         </span>
                                                         <div className="flex items-center gap-1.5 opacity-80">
                                                             <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center p-0.5 ${isVeg ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
@@ -1014,10 +1003,10 @@ export default function POSPage() {
                                                     </p>
                                                 )}
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    Rs. {item.unitPrice} × {item.quantity}
+                                                    $ {item.unitPrice} × {item.quantity}
                                                 </p>
                                                 <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                                                    Rs. {(item.unitPrice * item.quantity).toFixed(0)}
+                                                    $ {(item.unitPrice * item.quantity).toFixed(0)}
                                                 </p>
                                             </div>
                                             <div className="flex flex-col gap-1 flex-shrink-0 items-center">
@@ -1048,15 +1037,15 @@ export default function POSPage() {
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Sub Total</span>
-                                    <span>Rs. {subtotal.toFixed(2)}</span>
+                                    <span>$ {subtotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Tax (5%)</span>
-                                    <span>Rs. {tax.toFixed(2)}</span>
+                                    <span>$ {tax.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-base font-bold text-gray-900 dark:text-gray-100 pt-2 border-t border-gray-200 dark:border-gray-700">
                                     <span>Total Amount</span>
-                                    <span>Rs. {total.toFixed(2)}</span>
+                                    <span>$ {total.toFixed(2)}</span>
                                 </div>
                             </div>
 

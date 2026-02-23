@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 interface ImageUploadProps {
     value: string;
@@ -49,7 +50,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
                 toast.success("Image uploaded successfully!");
             } else {
                 console.error("Cloudinary error:", data);
-                toast.error(data.error?.message || "Upload failed. Make sure 'saif_pos_preset' is created as UNSIGNED in Cloudinary.");
+                toast.error(data.error?.message || "Upload failed.");
             }
         } catch (error) {
             console.error("Upload error:", error);
@@ -74,7 +75,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
 
             <div className="relative">
                 {value ? (
-                    <div className="relative h-48 w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg group">
+                    <div className="relative h-40 w-full max-w-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg group">
                         <img
                             src={value}
                             alt="Uploaded"
@@ -102,16 +103,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
                 ) : (
                     <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="h-48 w-full rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative"
+                        className="h-40 w-full max-w-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative"
                     >
                         {loading ? (
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="relative h-12 w-12">
-                                    <Loader2 className="h-12 w-12 text-blue-500 animate-spin absolute inset-0" />
-                                    <div className="h-12 w-12 border-4 border-blue-100 dark:border-blue-900 rounded-full"></div>
-                                </div>
-                                <span className="text-sm font-bold text-gray-500 uppercase tracking-widest animate-pulse">Uploading...</span>
-                            </div>
+                            <Loader size="md" />
                         ) : (
                             <>
                                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-500 group-hover:scale-110 transition-transform duration-300">

@@ -7,6 +7,7 @@ import { Eye, Trash2, Plus, X, Edit } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
+import Loader from "@/components/common/Loader";
 
 function Branch() {
     const { user } = useAuth();
@@ -147,8 +148,8 @@ function Branch() {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={5} className="py-10 text-center">
-                                    Loading branches...
+                                <td colSpan={5} className="py-20 text-center">
+                                    <Loader size="md" />
                                 </td>
                             </tr>
                         ) : (
@@ -247,8 +248,8 @@ function Branch() {
                     { label: "Phone", key: "phone" },
                     { label: "Address", key: "address" },
                     { label: "Delivery Radius", render: (data: any) => `${data?.deliveryRadius || 0} km` },
-                    { label: "Free Delivery Threshold", render: (data: any) => `Rs. ${data?.freeDeliveryThreshold || 0}` },
-                    { label: "Delivery Charge", render: (data: any) => `Rs. ${data?.deliveryCharge || 0}` },
+                    { label: "Free Delivery Threshold", render: (data: any) => `$ ${data?.freeDeliveryThreshold || 0}` },
+                    { label: "Delivery Charge", render: (data: any) => `$ ${data?.deliveryCharge || 0}` },
                     { label: "Delivery Off Time", key: "deliveryOffTime" },
                 ]}
             />
@@ -259,7 +260,7 @@ export default function BranchPage() {
     return (
         // 2. Yahan Suspense wrap karein
         <ProtectedRoute module="restaurant-config:branches">
-            <Suspense fallback={<div className="p-10 text-center">Loading Form...</div>}>
+            <Suspense fallback={<div className="p-20 flex justify-center"><Loader size="md" /></div>}>
                 <Branch />
             </Suspense>
         </ProtectedRoute>

@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { Eye, X, RefreshCw, Clock, ChevronRight, LayoutGrid, List, Bell, BellOff } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const ORDER_STATUSES = [
     "PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY",
@@ -122,7 +123,7 @@ function OrderCard({ order, onChangeStatus, onView }: {
             <div className={`px-4 py-3 border-t ${cfg.border} flex justify-between items-center gap-2`}>
                 <div>
                     <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Total</p>
-                    <p className="text-base font-bold text-gray-900 dark:text-gray-100">Rs. {parseFloat(order.total).toFixed(0)}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-gray-100">$ {parseFloat(order.total).toFixed(0)}</p>
                 </div>
                 <div className="flex gap-1.5">
                     <button
@@ -382,7 +383,7 @@ export default function IncomingOrdersPage() {
                     disabled={loading}
                     className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                    <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                    {loading ? <Loader size="sm" showText={false} className="space-y-0" /> : <RefreshCw className="w-4 h-4" />}
                     Refresh
                 </button>
                 {/* Mute toggle */}
@@ -414,12 +415,12 @@ export default function IncomingOrdersPage() {
                         />
                     )}
                     <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{item.menuItem?.name} × {item.quantity}</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Rs. {parseFloat(item.price) * item.quantity}</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">$ {parseFloat(item.price) * item.quantity}</span>
                 </div>
             ))}
             <div className="flex justify-between pt-2 border-t dark:border-gray-600 font-bold text-base">
                 <span>Total</span>
-                <span>Rs. {order?.total}</span>
+                <span>$ {order?.total}</span>
             </div>
         </div>
     );
@@ -433,7 +434,7 @@ export default function IncomingOrdersPage() {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Incoming Orders</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {loading ? "Loading..." : `${orders.length} orders found`}
+                            {loading ? <Loader size="sm" className="space-y-0" /> : `${orders.length} orders found`}
                         </p>
                     </div>
                     <FiltersBar />
@@ -476,19 +477,8 @@ export default function IncomingOrdersPage() {
                 {/* ── LATEST ORDERS TAB ── */}
                 {activeTab === "latest" && (
                     loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 h-72 animate-pulse">
-                                    <div className="h-16 bg-gray-100 dark:bg-gray-700 rounded-t-2xl" />
-                                    <div className="p-4 space-y-3">
-                                        <div className="flex gap-2">
-                                            {[...Array(3)].map((_, j) => <div key={j} className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl" />)}
-                                        </div>
-                                        <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-2/3" />
-                                        <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <Loader size="md" />
                         </div>
                     ) : latestSix.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -513,7 +503,9 @@ export default function IncomingOrdersPage() {
                 {/* ── ALL ORDERS TAB ── */}
                 {activeTab === "all" && (
                     loading ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 h-64 animate-pulse" />
+                        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <Loader size="md" />
+                        </div>
                     ) : orders.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                             <RefreshCw className="w-12 h-12 mb-3 opacity-30" />
@@ -552,7 +544,7 @@ export default function IncomingOrdersPage() {
                                             <td className="px-4 py-3">
                                                 <span className={getStatusBadge(order.status)}>{STATUS_CONFIG[order.status]?.label || order.status}</span>
                                             </td>
-                                            <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">Rs. {parseFloat(order.total).toFixed(0)}</td>
+                                            <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">$ {parseFloat(order.total).toFixed(0)}</td>
                                             <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                                                 {new Date(order.createdAt).toLocaleString("en-PK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                                             </td>
@@ -616,7 +608,7 @@ export default function IncomingOrdersPage() {
                             label: "Assigned Rider",
                             render: (data: any) => {
                                 if (!data?.riderId) return <span className="text-gray-500">No rider assigned</span>;
-                                if (loadingRiderDetails) return <span className="text-gray-500">Loading...</span>;
+                                if (loadingRiderDetails) return <Loader size="sm" className="space-y-0" />;
                                 if (!assignedRider) return <span className="text-gray-500">N/A</span>;
                                 return (
                                     <div className="space-y-1">
@@ -676,7 +668,7 @@ export default function IncomingOrdersPage() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Assign Rider *</label>
                                         {loadingRiders ? (
-                                            <p className="text-sm text-gray-500">Loading riders...</p>
+                                            <div className="py-2"><Loader size="sm" className="space-y-0" /></div>
                                         ) : (
                                             <select
                                                 value={selectedRiderId}
@@ -704,9 +696,9 @@ export default function IncomingOrdersPage() {
                                 <button
                                     onClick={handleStatusUpdate}
                                     disabled={updating}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none"
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
                                 >
-                                    {updating ? "Updating..." : "Update Status"}
+                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
                                 </button>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ import Select from "@/components/form/Select";
 import Label from "@/components/form/Label";
 import { RoleServiceInstance } from "@/services/role.service";
 import { Button } from "@/components/ui/button/Button";
+import Loader from "@/components/common/Loader";
 
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
@@ -286,7 +287,7 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
                         >
                             {savingUser ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <Loader size="sm" showText={false} className="space-y-0" />
                                     Updating...
                                 </>
                             ) : "Save Changes"}

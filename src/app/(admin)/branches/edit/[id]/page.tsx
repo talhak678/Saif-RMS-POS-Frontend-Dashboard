@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import { useAuth } from "@/services/permission.service";
 import { toast } from "sonner";
 
@@ -121,7 +122,7 @@ function EditBranchForm() {
     if (loadingUser || (loading && isSuperAdmin)) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-                <Loader2 className="animate-spin text-blue-600" size={48} />
+                <Loader size="lg" />
             </div>
         );
     }
@@ -208,7 +209,7 @@ function EditBranchForm() {
 
                     {/* FREE DELIVERY */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Free Delivery Threshold</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Free Delivery Threshold ($)</label>
                         <input
                             type="number"
                             name="freeDeliveryThreshold"
@@ -220,7 +221,7 @@ function EditBranchForm() {
 
                     {/* DELIVERY CHARGE */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Charge</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Delivery Charge ($)</label>
                         <input
                             type="number"
                             name="deliveryCharge"
@@ -263,7 +264,7 @@ function EditBranchForm() {
                         disabled={saving}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50"
                     >
-                        {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                        {saving ? <Loader size="sm" showText={false} className="space-y-0" /> : <Save size={18} />}
                         {saving ? "Saving..." : "Save Changes"}
                     </button>
 

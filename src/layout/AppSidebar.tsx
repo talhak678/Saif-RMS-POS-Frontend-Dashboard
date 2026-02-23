@@ -396,35 +396,32 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`py-8 flex  ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-          }`}
-      >
-        <Link href="/">
+      <div className="py-6 flex justify-center items-center w-full">
+        <Link href="/" className="flex justify-center items-center w-full">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
                 alt="Logo"
-                width={150}
-                height={40}
-                className="dark:hidden object-contain max-h-12"
+                width={200}
+                height={100}
+                className="dark:hidden object-contain max-h-23  w-full mx-auto"
               />
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
                 alt="Logo"
-                width={150}
-                height={40}
-                className="hidden dark:block object-contain max-h-12"
+                width={200}
+                height={100}
+                className="hidden dark:block object-contain max-h-28 w-full mx-auto"
               />
             </>
           ) : (
             <Image
               src={user?.restaurant?.logo || "/images/logo/logo-icon.svg"}
               alt="Logo"
-              width={32}
-              height={32}
-              className="object-contain"
+              width={52}
+              height={50}
+              className="object-contain mx-auto"
             />
           )}
         </Link>

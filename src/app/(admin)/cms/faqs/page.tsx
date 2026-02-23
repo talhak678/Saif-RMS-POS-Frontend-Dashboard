@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { Plus, Edit2, Trash2, Search, X, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { createPortal } from "react-dom";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 type Faq = {
     id: string;
@@ -85,7 +86,7 @@ export default function FaqsPage({ embedded = false }: Props) {
         f.answer.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
+    if (loading) return <div className="flex justify-center items-center h-96"><Loader size="md" /></div>;
 
     return (
         <ProtectedRoute module="cms-website:faqs">
@@ -226,17 +227,17 @@ export default function FaqsPage({ embedded = false }: Props) {
                                                 });
                                             }}
                                             disabled={saving}
-                                            className="px-5 py-2 rounded-xl text-sm font-semibold text-brand-500 border border-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors disabled:opacity-50"
+                                            className="px-5 py-2 rounded-xl text-sm font-semibold text-brand-500 border border-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors disabled:opacity-50 flex justify-center items-center"
                                         >
-                                            Save & Add Another
+                                            {saving ? <Loader size="sm" className="space-y-0" /> : "Save & Add Another"}
                                         </button>
                                     )}
                                     <button
                                         type="submit"
                                         disabled={saving}
-                                        className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50"
+                                        className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
                                     >
-                                        {saving ? "Saving..." : "Save Question"}
+                                        {saving ? <Loader size="sm" className="space-y-0" /> : "Save Question"}
                                     </button>
                                 </div>
                             </form>

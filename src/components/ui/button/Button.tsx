@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import Loader from "../spinner"
+import Loader from "@/components/common/Loader"
 import { cn } from "@/lib/utilts"
 
 const buttonVariants = cva(
@@ -126,7 +126,7 @@ function Button({
       {...props}
     >
       {/* {icon && !props.disabled && <span className="text-base">{icon}</span>} */}
-      {loading && showSpinner && <Loader />}
+      {loading && showSpinner && <Loader size="sm" showText={false} className="space-y-0" />}
       {children}
       {ripples.map(ripple => (
         <span

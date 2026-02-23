@@ -8,6 +8,7 @@ import AddCategoryModal from "./AddCategoryModal";
 import DeleteCategoryModal from "./DeleteCategoryModal";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState<any[]>([]);
@@ -97,8 +98,8 @@ export default function CategoriesPage() {
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="py-10 text-center text-gray-500">
-                                        Loading categories...
+                                    <td colSpan={6} className="py-20 text-center">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : categories.length === 0 ? (

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { iPermission } from "@/types/auth.types";
 import { toast } from "sonner";
 import { RoleServiceInstance } from "@/services/role.service";
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 import { ShieldCheck } from "lucide-react";
 import AddPermission from "./add-permission";
 
@@ -79,8 +79,7 @@ export default function Permissions() {
             {
                 loading ?
                     <div className="flex h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/20">
-                        <Loader />
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading permission architecture...</span>
+                        <Loader size="md" />
                     </div>
                     :
                     permissions.length <= 0

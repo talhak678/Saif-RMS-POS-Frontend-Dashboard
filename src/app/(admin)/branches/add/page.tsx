@@ -183,7 +183,7 @@ function AddBranchForm() {
 
                     {/* FREE DELIVERY */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Free Delivery Threshold</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Free Delivery Threshold ($)</label>
                         <input
                             type="number"
                             name="freeDeliveryThreshold"
@@ -195,7 +195,7 @@ function AddBranchForm() {
 
                     {/* DELIVERY CHARGE */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Charge</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Delivery Charge ($)</label>
                         <input
                             type="number"
                             name="deliveryCharge"

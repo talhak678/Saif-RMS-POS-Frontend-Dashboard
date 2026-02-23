@@ -7,6 +7,7 @@ import {
     Users, LayoutGrid, CheckCircle,
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED"];
 
@@ -182,7 +183,7 @@ export default function TableServicesPage() {
                             Table Services
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {loading ? "Loading..." : `${tables.length} tables total`}
+                            {loading ? <Loader size="sm" className="space-y-0" /> : `${tables.length} tables total`}
                         </p>
                     </div>
 
@@ -244,10 +245,8 @@ export default function TableServicesPage() {
 
                 {/* Content */}
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {[...Array(8)].map((_, i) => (
-                            <div key={i} className="rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 h-36 animate-pulse" />
-                        ))}
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader size="md" />
                     </div>
                 ) : tables.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -405,8 +404,9 @@ export default function TableServicesPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleSave} disabled={saving}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
-                                    {saving ? "Saving..." : editItem ? "Save Changes" : "Add Table"}
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                                >
+                                    {saving ? <Loader size="sm" className="space-y-0" /> : editItem ? "Save Changes" : "Add Table"}
                                 </button>
                             </div>
                         </div>
@@ -422,7 +422,7 @@ export default function TableServicesPage() {
                                 <button onClick={() => setViewItem(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
                             </div>
                             {viewLoading ? (
-                                <div className="p-10 text-center text-gray-400"><RefreshCw className="w-8 h-8 animate-spin mx-auto" /></div>
+                                <div className="p-10 text-center text-gray-400"><Loader size="md" /></div>
                             ) : (
                                 <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
                                     <div className="flex justify-center"><StatusPill status={viewItem.status} /></div>
@@ -513,8 +513,9 @@ export default function TableServicesPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleStatusUpdate} disabled={updatingStatus}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm">
-                                    {updatingStatus ? "Updating..." : "Update Status"}
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm flex justify-center items-center"
+                                >
+                                    {updatingStatus ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
                                 </button>
                             </div>
                         </div>
@@ -540,8 +541,9 @@ export default function TableServicesPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleDelete} disabled={deleting}
-                                    className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
-                                    {deleting ? "Deleting..." : "Yes, Delete"}
+                                    className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                                >
+                                    {deleting ? <Loader size="sm" className="space-y-0" /> : "Yes, Delete"}
                                 </button>
                             </div>
                         </div>

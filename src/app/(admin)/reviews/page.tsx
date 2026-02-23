@@ -7,6 +7,7 @@ import { Eye, Edit, Trash2, Plus, X, Star } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const StarRating = ({ rating, interactive = false, onChange }: { rating: number; interactive?: boolean; onChange?: (rating: number) => void }) => {
     return (
@@ -239,8 +240,8 @@ export default function ReviewsPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="py-10 text-center">
-                                        Loading reviews...
+                                    <td colSpan={7} className="py-20 text-center">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : reviews.length === 0 ? (
@@ -292,10 +293,10 @@ export default function ReviewsPage() {
                                             <button
                                                 onClick={() => handleDeleteReview(review.id)}
                                                 disabled={deleting === review.id}
-                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400"
+                                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400 flex items-center justify-center"
                                                 title="Delete Review"
                                             >
-                                                <Trash2 size={18} />
+                                                {deleting === review.id ? <Loader size="sm" className="space-y-0" /> : <Trash2 size={18} />}
                                             </button>
                                         </td>
                                     </tr>
@@ -368,9 +369,9 @@ export default function ReviewsPage() {
                                 <button
                                     onClick={handleAddReview}
                                     disabled={adding}
-                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
                                 >
-                                    {adding ? "Adding..." : "Add Review"}
+                                    {adding ? <Loader size="sm" className="space-y-0" /> : "Add Review"}
                                 </button>
                             </div>
                         </div>
@@ -440,9 +441,9 @@ export default function ReviewsPage() {
                                 <button
                                     onClick={handleEditReview}
                                     disabled={updating}
-                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
                                 >
-                                    {updating ? "Updating..." : "Update Review"}
+                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Review"}
                                 </button>
                             </div>
                         </div>

@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/modal";
 import Input from "@/components/form/input/InputField";
 import { RoleServiceInstance } from "@/services/role.service";
 import { Button } from "@/components/ui/button/Button";
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 import Checkbox from "@/components/form/input/Checkbox";
 import Label from "@/components/form/Label";
 
@@ -168,8 +168,7 @@ const AddRole = ({ onAction }: { onAction?: () => void }) => {
                                     <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-900/50 dark:border-gray-700">
                                         {permLoading ? (
                                             <div className="flex items-center justify-center p-8 text-gray-500">
-                                                <Loader className="mr-2 h-5 w-5 animate-spin" />
-                                                Loading permissions...
+                                                <Loader size="sm" />
                                             </div>
                                         ) : permissions.length === 0 ? (
                                             <div className="flex items-center justify-center p-8 text-gray-500">

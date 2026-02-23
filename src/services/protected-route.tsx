@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./permission.service";
 import { iPermission } from "@/types/auth.types";
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 import { NavItem, navItems } from "@/lib/data/sidebar-items";
 
 interface ProtectedRouteProps {
@@ -44,10 +44,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, module, compo
     if (loadingUser || checking) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader size="12" />
-                    <p className="text-sm font-medium text-gray-500 animate-pulse">Loading...</p>
-                </div>
+                <Loader size="md" />
             </div>
         );
     }

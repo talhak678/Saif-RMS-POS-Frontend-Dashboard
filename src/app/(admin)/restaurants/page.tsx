@@ -9,6 +9,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 
 const getStatusBadge = (status: string) => {
@@ -151,8 +152,8 @@ export default function RestaurantsPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="py-10 text-center">
-                                        Loading restaurants...
+                                    <td colSpan={8} className="py-20 text-center text-gray-400 font-medium">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : restaurants.length === 0 ? (
@@ -239,12 +240,16 @@ export default function RestaurantsPage() {
                                                     <button
                                                         onClick={() => handleStatusToggle(res)}
                                                         disabled={togglingStatus === res.id}
-                                                        className={`p-2 rounded ${res.status === 'ACTIVE'
+                                                        className={`p-2 rounded flex items-center justify-center ${res.status === 'ACTIVE'
                                                             ? 'text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30'
                                                             : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'}`}
                                                         title={res.status === 'ACTIVE' ? "Suspend Restaurant" : "Activate Restaurant"}
                                                     >
-                                                        <Power size={18} className={togglingStatus === res.id ? 'animate-spin' : ''} />
+                                                        {togglingStatus === res.id ? (
+                                                            <Loader size="sm" className="space-y-0" />
+                                                        ) : (
+                                                            <Power size={18} />
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(res.id, res.name)}

@@ -6,6 +6,7 @@ import { Eye, X, Star, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -173,13 +174,13 @@ export default function OrdersPage() {
             {item.menuItem.name} × {item.quantity}
           </span>
           <span className="font-medium text-gray-900 dark:text-gray-100">
-            Rs. {item.price * item.quantity}
+            $ {item.price * item.quantity}
           </span>
         </div>
       ))}
       <div className="flex justify-between pt-3 mt-1 border-t dark:border-gray-600 font-bold text-lg">
         <span>Total Amount</span>
-        <span>Rs. {order.total}</span>
+        <span>$ {order.total}</span>
       </div>
     </div>
   );
@@ -243,8 +244,8 @@ export default function OrdersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-10 text-center">
-                    Loading orders...
+                  <td colSpan={8} className="py-20 text-center">
+                    <Loader size="md" />
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
@@ -285,7 +286,7 @@ export default function OrdersPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-semibold">
-                      Rs. {order.total}
+                      $ {order.total}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {new Date(order.createdAt).toLocaleString()}

@@ -7,6 +7,7 @@ import {
     Calendar, Users, Phone, Clock, LayoutGrid,
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const RESERVATION_STATUSES = ["BOOKED", "ARRIVED", "COMPLETED", "CANCELLED"];
 
@@ -238,7 +239,7 @@ export default function ReservationsPage() {
                             Reservations
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {loading ? "Loading..." : `${filtered.length} reservations`}
+                            {loading ? <Loader size="sm" className="space-y-0" /> : `${filtered.length} reservations`}
                         </p>
                     </div>
 
@@ -302,14 +303,8 @@ export default function ReservationsPage() {
 
                 {/* Table */}
                 {loading ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="flex gap-4 p-4 border-b dark:border-gray-700 last:border-0 animate-pulse">
-                                <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded flex-1" />
-                                <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-24" />
-                                <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-20" />
-                            </div>
-                        ))}
+                    <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <Loader size="md" />
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -479,8 +474,9 @@ export default function ReservationsPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleSave} disabled={saving}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
-                                    {saving ? "Saving..." : editItem ? "Save Changes" : "Create Reservation"}
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                                >
+                                    {saving ? <Loader size="sm" className="space-y-0" /> : editItem ? "Save Changes" : "Create Reservation"}
                                 </button>
                             </div>
                         </div>
@@ -565,8 +561,9 @@ export default function ReservationsPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleStatusUpdate} disabled={updatingStatus}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm">
-                                    {updatingStatus ? "Updating..." : "Update Status"}
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm flex justify-center items-center"
+                                >
+                                    {updatingStatus ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
                                 </button>
                             </div>
                         </div>
@@ -592,8 +589,9 @@ export default function ReservationsPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleDelete} disabled={deleting}
-                                    className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
-                                    {deleting ? "Deleting..." : "Yes, Delete"}
+                                    className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                                >
+                                    {deleting ? <Loader size="sm" className="space-y-0" /> : "Yes, Delete"}
                                 </button>
                             </div>
                         </div>

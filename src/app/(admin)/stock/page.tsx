@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 export default function StocksPage() {
   // --- MAIN STATES ---
@@ -212,8 +213,8 @@ export default function StocksPage() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-10 text-center text-gray-500">
-                    Loading stocks...
+                  <td colSpan={4} className="py-20 text-center text-gray-500">
+                    <Loader size="md" />
                   </td>
                 </tr>
               ) : stocks.length === 0 ? (
@@ -341,9 +342,9 @@ export default function StocksPage() {
                   <button
                     type="submit"
                     disabled={updateLoading}
-                    className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none"
+                    className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none min-w-[120px]"
                   >
-                    {updateLoading ? "Saving..." : <><Save size={16} /> Save Stock</>}
+                    {updateLoading ? <Loader size="sm" className="space-y-0" /> : <><Save size={16} /> Save Stock</>}
                   </button>
                 </div>
               </form>

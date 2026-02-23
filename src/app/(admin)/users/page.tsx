@@ -11,6 +11,7 @@ import DeleteUser from "./delete-user";
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import { iUser } from "@/types/auth.types";
+import Loader from "@/components/common/Loader";
 
 // Helper for consistent badge style
 const getRoleBadge = (role: string) => {
@@ -114,8 +115,8 @@ export default function UsersPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="py-10 text-center">
-                                        Loading users...
+                                    <td colSpan={6} className="py-20 text-center">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : users.length === 0 ? (

@@ -7,6 +7,7 @@ import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as Set
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
 
 const DEFAULT_CONFIG = {
@@ -422,7 +423,7 @@ export default function CMSPage() {
         });
     };
 
-    if (loading) return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div></div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[400px]"><Loader size="md" /></div>;
 
     const pages = Object.keys(config);
 
@@ -441,9 +442,9 @@ export default function CMSPage() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 font-semibold text-sm shadow-sm"
+                        className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 font-semibold text-sm shadow-sm justify-center min-w-[140px]"
                     >
-                        {saving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Save className="w-4 h-4" />}
+                        {saving ? <Loader size="sm" showText={false} className="space-y-0" /> : <Save className="w-4 h-4" />}
                         {saving ? "Publishing..." : "Publish Changes"}
                     </button>
                 </div>

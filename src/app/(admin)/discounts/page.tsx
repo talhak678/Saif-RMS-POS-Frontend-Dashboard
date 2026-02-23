@@ -6,6 +6,7 @@ import { Eye, Edit, Trash2, Plus, X } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 const getStatusBadge = (isActive: boolean, expiresAt: string) => {
     const base = "px-2 py-1 rounded text-xs font-medium";
@@ -234,8 +235,8 @@ export default function DiscountsPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="py-10 text-center">
-                                        Loading discounts...
+                                    <td colSpan={7} className="py-20 text-center">
+                                        <Loader size="md" />
                                     </td>
                                 </tr>
                             ) : discounts.length === 0 ? (
@@ -258,7 +259,7 @@ export default function DiscountsPage() {
                                                 {discount.percentage ? "Percentage" : "Fixed Amount"}
                                             </td>
                                             <td className="px-4 py-3">
-                                                {discount.percentage ? `${discount.percentage}%` : `Rs. ${discount.amount}`}
+                                                {discount.percentage ? `${discount.percentage}%` : `$ ${discount.amount}`}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={getStatusBadge(discount.isActive, discount.expiresAt)}>
@@ -364,7 +365,7 @@ export default function DiscountsPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
-                                        {addFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
+                                        {addFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
                                     </label>
                                     <input
                                         type="number"
@@ -408,9 +409,9 @@ export default function DiscountsPage() {
                                 <button
                                     onClick={handleAddDiscount}
                                     disabled={adding}
-                                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                    className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-green-100 dark:shadow-none flex justify-center items-center"
                                 >
-                                    {adding ? "Adding..." : "Add Discount"}
+                                    {adding ? <Loader size="sm" className="space-y-0" /> : "Add Discount"}
                                 </button>
                             </div>
                         </div>
@@ -474,7 +475,7 @@ export default function DiscountsPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
-                                        {editFormData.discountType === "percentage" ? "Percentage" : "Amount (Rs.)"}
+                                        {editFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
                                     </label>
                                     <input
                                         type="number"
@@ -518,9 +519,9 @@ export default function DiscountsPage() {
                                 <button
                                     onClick={handleEditDiscount}
                                     disabled={updating}
-                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none mt-2"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none mt-2 flex justify-center items-center"
                                 >
-                                    {updating ? "Updating..." : "Update Discount"}
+                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Discount"}
                                 </button>
                             </div>
                         </div>
@@ -536,7 +537,7 @@ export default function DiscountsPage() {
                     fields={[
                         { label: "Code", key: "code" },
                         { label: "Type", render: (data: any) => data?.percentage ? "Percentage" : "Fixed Amount" },
-                        { label: "Value", render: (data: any) => data?.percentage ? `${data.percentage}%` : `Rs. ${data.amount}` },
+                        { label: "Value", render: (data: any) => data?.percentage ? `${data.percentage}%` : `$ ${data.amount}` },
                         { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.isActive, data?.expiresAt)}>{getStatusText(data?.isActive, data?.expiresAt)}</span> },
                         { label: "Created", render: (data: any) => new Date(data?.createdAt).toLocaleDateString() },
                         { label: "Expires", render: (data: any) => new Date(data?.expiresAt).toLocaleDateString() },

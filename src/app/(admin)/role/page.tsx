@@ -7,7 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
-import Loader from "@/components/ui/spinner";
+import Loader from "@/components/common/Loader";
 import { RoleServiceInstance } from "@/services/role.service";
 import { ProtectedRoute } from "@/services/protected-route";
 import { iRole } from "@/types/auth.types";
@@ -104,10 +104,7 @@ function Roles() {
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={4} className="py-20 text-center">
-                                    <div className="flex flex-col items-center gap-3">
-                                        <Loader />
-                                        <p className="text-gray-500 font-medium">Loading roles matrix...</p>
-                                    </div>
+                                    <Loader size="md" />
                                 </TableCell>
                             </TableRow>
                         ) : roles.length === 0 ? (
@@ -221,9 +218,9 @@ function Roles() {
                             <button
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+                                className="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex justify-center items-center"
                             >
-                                {deleting ? "Deleting..." : "Confirm Delete"}
+                                {deleting ? <Loader size="sm" className="space-y-0" /> : "Confirm Delete"}
                             </button>
                         </div>
                     </div>
@@ -236,7 +233,7 @@ function Roles() {
 export default function RolesPage() {
     return (
         <ProtectedRoute module="authentication:roles">
-            <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading Matrix...</div>}>
+            <Suspense fallback={<div className="p-20 flex justify-center"><Loader size="md" /></div>}>
                 <Roles />
             </Suspense>
         </ProtectedRoute>
