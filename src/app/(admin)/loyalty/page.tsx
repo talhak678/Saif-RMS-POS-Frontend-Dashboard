@@ -187,7 +187,7 @@ export default function LoyaltyPage() {
 
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                         >
                             <Plus size={18} />
                             Add Transaction
@@ -331,8 +331,8 @@ export default function LoyaltyPage() {
                                         </select>
                                     </div>
 
-                                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
-                                        <p className="text-blue-800 dark:text-blue-200">
+                                    <div className="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-lg border border-brand-100 dark:border-brand-800 text-sm">
+                                        <p className="text-brand-700 dark:text-brand-300">
                                             <b>Note:</b> EARNED adds points, REDEEMED subtracts points from customer balance.
                                         </p>
                                     </div>
@@ -340,7 +340,7 @@ export default function LoyaltyPage() {
                                     <button
                                         onClick={handleAddTransaction}
                                         disabled={adding}
-                                        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                        className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                                     >
                                         {adding ? "Adding..." : "Add Transaction"}
                                     </button>

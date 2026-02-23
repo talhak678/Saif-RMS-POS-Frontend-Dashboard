@@ -167,7 +167,7 @@ export default function RidersPage() {
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20"
+                        className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none"
                     >
                         <Plus size={18} />
                         Add Rider
@@ -200,7 +200,7 @@ export default function RidersPage() {
                                         <td className="px-6 py-4 text-gray-400 font-medium">{index + 1}</td>
                                         <td className="px-6 py-4">
                                             <div className="font-bold text-gray-800 dark:text-gray-200">{rider.name}</div>
-                                            <div className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors">{rider.phone}</div>
+                                            <div className="text-xs text-gray-500 group-hover:text-brand-500 transition-colors">{rider.phone}</div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={getStatusBadge(rider.status)}>{rider.status}</span>
@@ -211,7 +211,7 @@ export default function RidersPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => { setViewRider(rider); setIsViewModalOpen(true); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg text-gray-500 transition-colors" title="View"><Eye size={16} /></button>
-                                                <button onClick={() => openEditModal(rider)} className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/40 rounded-lg text-blue-600 transition-colors" title="Edit"><Edit size={16} /></button>
+                                                <button onClick={() => openEditModal(rider)} className="p-2 hover:bg-brand-50 dark:hover:bg-brand-900/40 rounded-lg text-brand-600 transition-colors" title="Edit"><Edit size={16} /></button>
                                                 <button onClick={() => handleDeleteRider(rider.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
@@ -231,10 +231,12 @@ export default function RidersPage() {
                                 <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
                             </div>
                             <div className="p-5 space-y-4">
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={addFormData.name} onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter rider name" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="text" value={addFormData.phone} onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="+92 300 1234567" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={addFormData.status} onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
-                                <button onClick={handleAddRider} disabled={adding} className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 mt-2">{adding ? "Adding..." : "Add Rider"}</button>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={addFormData.name} onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="Enter rider name" /></div>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="text" value={addFormData.phone} onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="+92 300 1234567" /></div>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={addFormData.status} onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+                                <button onClick={handleAddRider} disabled={adding} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide">
+                                    {adding ? "Adding..." : "Add Rider"}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -249,10 +251,12 @@ export default function RidersPage() {
                                 <button onClick={() => setShowEditModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
                             </div>
                             <div className="p-5 space-y-4">
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={editFormData.status} onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
-                                <button onClick={handleEditRider} disabled={updating} className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 mt-2">{updating ? "Updating..." : "Update Rider"}</button>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="text" value={editFormData.phone} onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
+                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={editFormData.status} onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+                                <button onClick={handleEditRider} disabled={updating} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide">
+                                    {updating ? "Updating..." : "Update Rider"}
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -13,7 +13,7 @@ const ORDER_STATUSES = [
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string; cardBg: string }> = {
     PENDING: { label: "Pending", color: "text-yellow-700 dark:text-yellow-300", bg: "bg-yellow-100 dark:bg-yellow-900/30", border: "border-yellow-300 dark:border-yellow-700", dot: "bg-yellow-500", cardBg: "bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-gray-800" },
-    CONFIRMED: { label: "Confirmed", color: "text-blue-700 dark:text-blue-300", bg: "bg-blue-100 dark:bg-blue-900/30", border: "border-blue-300 dark:border-blue-700", dot: "bg-blue-500", cardBg: "bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-800" },
+    CONFIRMED: { label: "Confirmed", color: "text-brand-700 dark:text-brand-300", bg: "bg-brand-50 dark:bg-brand-900/30", border: "border-brand-200 dark:border-brand-700", dot: "bg-brand-500", cardBg: "bg-gradient-to-br from-brand-50/50 to-white dark:from-brand-900/10 dark:to-gray-800" },
     PREPARING: { label: "Preparing", color: "text-purple-700 dark:text-purple-300", bg: "bg-purple-100 dark:bg-purple-900/30", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500", cardBg: "bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/10 dark:to-gray-800" },
     KITCHEN_READY: { label: "Kitchen Ready", color: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-100 dark:bg-indigo-900/30", border: "border-indigo-300 dark:border-indigo-700", dot: "bg-indigo-500", cardBg: "bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/10 dark:to-gray-800" },
     OUT_FOR_DELIVERY: { label: "Out for Delivery", color: "text-orange-700 dark:text-orange-300", bg: "bg-orange-100 dark:bg-orange-900/30", border: "border-orange-300 dark:border-orange-700", dot: "bg-orange-500", cardBg: "bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/10 dark:to-gray-800" },
@@ -364,7 +364,7 @@ export default function IncomingOrdersPage() {
                 <select
                     value={branchFilter}
                     onChange={(e) => setBranchFilter(e.target.value)}
-                    className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 >
                     <option value="ALL">All Branches</option>
                     {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -372,7 +372,7 @@ export default function IncomingOrdersPage() {
                 <select
                     value={statusVal}
                     onChange={(e) => setStatusVal(e.target.value)}
-                    className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 >
                     <option value="ALL">All Statuses</option>
                     {ORDER_STATUSES.map((st) => <option key={st} value={st}>{STATUS_CONFIG[st]?.label || st}</option>)}
@@ -443,30 +443,30 @@ export default function IncomingOrdersPage() {
                 <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-6">
                     <button
                         onClick={() => setActiveTab("latest")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "latest"
-                            ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "latest"
+                            ? "bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm"
                             : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             }`}
                     >
                         <LayoutGrid className="w-4 h-4" />
                         Latest Orders
                         {latestSix.length > 0 && (
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === "latest" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400" : "bg-gray-200 dark:bg-gray-700 text-gray-500"}`}>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === "latest" ? "bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400" : "bg-gray-200 dark:bg-gray-700 text-gray-500"}`}>
                                 {latestSix.length}
                             </span>
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab("all")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "all"
-                            ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "all"
+                            ? "bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm"
                             : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             }`}
                     >
                         <List className="w-4 h-4" />
                         All Orders
                         {orders.length > 0 && (
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === "all" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400" : "bg-gray-200 dark:bg-gray-700 text-gray-500"}`}>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === "all" ? "bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400" : "bg-gray-200 dark:bg-gray-700 text-gray-500"}`}>
                                 {orders.length}
                             </span>
                         )}
@@ -536,14 +536,14 @@ export default function IncomingOrdersPage() {
                                             <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">#{order.orderNo}</td>
                                             <td className="px-4 py-3">
                                                 {order.customer
-                                                    ? <span className="text-gray-700 dark:text-gray-300">
+                                                    ? <span className="text-brand-600 dark:text-brand-400 font-bold">
                                                         {order.customer.name}
                                                         {order.source && order.source !== "WEBSITE" && (
-                                                            <span className="ml-1 text-blue-500 text-[10px] font-bold">({order.source})</span>
+                                                            <span className="ml-1 text-brand-500 text-[10px] font-black uppercase tracking-tight italic">({order.source})</span>
                                                         )}
                                                     </span>
                                                     : order.source === "POS"
-                                                        ? <span className="text-blue-600 dark:text-blue-400 text-xs font-bold">POS</span>
+                                                        ? <span className="text-brand-600 dark:text-brand-400 text-xs font-black uppercase tracking-tight italic">POS</span>
                                                         : <span className="text-gray-400 text-xs">—</span>
                                                 }
                                             </td>
@@ -567,7 +567,7 @@ export default function IncomingOrdersPage() {
                                                     </button>
                                                     <button
                                                         onClick={() => openStatusModal(order)}
-                                                        className="text-xs px-2.5 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-semibold"
+                                                        className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors font-bold shadow-sm shadow-brand-100 dark:shadow-none"
                                                     >
                                                         Status
                                                     </button>
@@ -591,8 +591,8 @@ export default function IncomingOrdersPage() {
                         {
                             label: "Customer",
                             render: (data: any) => {
-                                if (!data?.customer) return data?.source === "POS" ? <span className="text-blue-600 font-semibold">POS Order</span> : <span className="text-gray-400">—</span>;
-                                return <span>{data.customer.name}{data.source && data.source !== "WEBSITE" && <span className="ml-1 text-blue-500 text-xs">({data.source})</span>}</span>;
+                                if (!data?.customer) return data?.source === "POS" ? <span className="text-brand-600 font-bold">POS Order</span> : <span className="text-gray-400">—</span>;
+                                return <span>{data.customer.name}{data.source && data.source !== "WEBSITE" && <span className="ml-1 text-brand-500 text-xs">({data.source})</span>}</span>;
                             },
                         },
                         { label: "Phone", render: (data: any) => data?.customer?.phone || "—" },
@@ -656,7 +656,7 @@ export default function IncomingOrdersPage() {
                                             setNewStatus(e.target.value);
                                             if (e.target.value === "OUT_FOR_DELIVERY") fetchAvailableRiders();
                                         }}
-                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                                     >
                                         {ORDER_STATUSES.map((st) => (
                                             <option key={st} value={st}>{STATUS_CONFIG[st]?.label || st}</option>
@@ -681,7 +681,7 @@ export default function IncomingOrdersPage() {
                                             <select
                                                 value={selectedRiderId}
                                                 onChange={(e) => setSelectedRiderId(e.target.value)}
-                                                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                                                 required
                                             >
                                                 <option value="">Select a rider</option>
@@ -704,7 +704,7 @@ export default function IncomingOrdersPage() {
                                 <button
                                     onClick={handleStatusUpdate}
                                     disabled={updating}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none"
                                 >
                                     {updating ? "Updating..." : "Update Status"}
                                 </button>

@@ -11,9 +11,9 @@ import { ProtectedRoute } from "@/services/protected-route";
 const RESERVATION_STATUSES = ["BOOKED", "ARRIVED", "COMPLETED", "CANCELLED"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
-    BOOKED: { label: "Booked", color: "text-blue-700 dark:text-blue-300", bg: "bg-blue-100 dark:bg-blue-900/30", border: "border-blue-200 dark:border-blue-700", dot: "bg-blue-500" },
+    BOOKED: { label: "Booked", color: "text-brand-700 dark:text-brand-300", bg: "bg-brand-50 dark:bg-brand-900/30", border: "border-brand-200 dark:border-brand-700", dot: "bg-brand-500" },
     ARRIVED: { label: "Arrived", color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/30", border: "border-green-200 dark:border-green-700", dot: "bg-green-500" },
-    COMPLETED: { label: "Completed", color: "text-purple-700 dark:text-purple-300", bg: "bg-purple-100 dark:bg-purple-900/30", border: "border-purple-200 dark:border-purple-700", dot: "bg-purple-500" },
+    COMPLETED: { label: "Completed", color: "text-brand-700 dark:text-brand-300", bg: "bg-brand-50 dark:bg-brand-900/30", border: "border-brand-200 dark:border-brand-700", dot: "bg-brand-500" },
     CANCELLED: { label: "Cancelled", color: "text-red-700 dark:text-red-300", bg: "bg-red-100 dark:bg-red-900/30", border: "border-red-200 dark:border-red-700", dot: "bg-red-500" },
 };
 
@@ -222,7 +222,7 @@ export default function ReservationsPage() {
     // ── DERIVED ────────────────────────────────────────────────
     const filtered = reservations; // server-filtered already
 
-    const inputCls = "w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    const inputCls = "w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
     const labelCls = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5";
 
     // ── UI ─────────────────────────────────────────────────────
@@ -234,7 +234,7 @@ export default function ReservationsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                            <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            <Calendar className="w-6 h-6 text-brand-600 dark:text-brand-400" />
                             Reservations
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -245,14 +245,14 @@ export default function ReservationsPage() {
                     <div className="flex flex-wrap gap-2 items-center">
                         {/* Branch filter */}
                         <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <option value="ALL">All Branches</option>
                             {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                         </select>
 
                         {/* Status filter */}
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <option value="ALL">All Statuses</option>
                             {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
                         </select>
@@ -260,7 +260,7 @@ export default function ReservationsPage() {
                         {/* Table filter (only if branch selected) */}
                         {tables.length > 0 && (
                             <select value={tableFilter} onChange={(e) => setTableFilter(e.target.value)}
-                                className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
                                 <option value="ALL">All Tables</option>
                                 {tables.map(t => <option key={t.id} value={t.id}>Table {t.number} (cap: {t.capacity})</option>)}
                             </select>
@@ -273,7 +273,7 @@ export default function ReservationsPage() {
                         </button>
 
                         <button onClick={openCreate}
-                            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors">
+                            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none">
                             <Plus className="w-4 h-4" />
                             New Reservation
                         </button>
@@ -289,7 +289,7 @@ export default function ReservationsPage() {
                             <button key={st}
                                 onClick={() => setStatusFilter(statusFilter === st ? "ALL" : st)}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${statusFilter === st
-                                    ? `${cfg.bg} ${cfg.color} ${cfg.border} ring-2 ring-offset-1 ring-blue-400`
+                                    ? `${cfg.bg} ${cfg.color} ${cfg.border} ring-2 ring-offset-1 ring-brand-400`
                                     : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                                     }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
@@ -368,7 +368,7 @@ export default function ReservationsPage() {
                                                     Edit
                                                 </button>
                                                 <button onClick={() => { setSelectedItem(r); setNewStatus(r.status); setStatusModal(true); }}
-                                                    className="text-xs px-2.5 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-semibold">
+                                                    className="text-xs px-2.5 py-1 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors font-bold shadow-sm">
                                                     Status
                                                 </button>
                                                 <button onClick={() => { setDeleteTarget(r); setDeleteModal(true); }}
@@ -479,7 +479,7 @@ export default function ReservationsPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleSave} disabled={saving}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
                                     {saving ? "Saving..." : editItem ? "Save Changes" : "Create Reservation"}
                                 </button>
                             </div>
@@ -520,7 +520,7 @@ export default function ReservationsPage() {
                                         Edit
                                     </button>
                                     <button onClick={() => { setViewItem(null); setSelectedItem(viewItem); setNewStatus(viewItem.status); setStatusModal(true); }}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                        className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
                                         Change Status
                                     </button>
                                 </div>
@@ -565,7 +565,7 @@ export default function ReservationsPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleStatusUpdate} disabled={updatingStatus}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm">
                                     {updatingStatus ? "Updating..." : "Update Status"}
                                 </button>
                             </div>

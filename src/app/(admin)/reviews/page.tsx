@@ -215,7 +215,7 @@ export default function ReviewsPage() {
 
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                     >
                         <Plus size={18} />
                         Add Review
@@ -264,7 +264,7 @@ export default function ReviewsPage() {
                                         <td className="px-4 py-3">#{review.order.orderNo}</td>
                                         <td className="px-4 py-3">
                                             {review.aiEnhanced && (
-                                                <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 border border-brand-100 dark:border-brand-800 uppercase tracking-wider">
                                                     AI Enhanced
                                                 </span>
                                             )}
@@ -368,7 +368,7 @@ export default function ReviewsPage() {
                                 <button
                                     onClick={handleAddReview}
                                     disabled={adding}
-                                    className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                                 >
                                     {adding ? "Adding..." : "Add Review"}
                                 </button>
@@ -440,7 +440,7 @@ export default function ReviewsPage() {
                                 <button
                                     onClick={handleEditReview}
                                     disabled={updating}
-                                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                                 >
                                     {updating ? "Updating..." : "Update Review"}
                                 </button>

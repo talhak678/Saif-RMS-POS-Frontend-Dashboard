@@ -161,7 +161,7 @@ export default function StocksPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-              <Package className="text-blue-600" />
+              <Package className="text-brand-600" />
               Stock Management
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -189,7 +189,7 @@ export default function StocksPage() {
             <button
               onClick={openAddModal}
               disabled={!selectedBranchId}
-              className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex items-center gap-2 disabled:opacity-50"
             >
               <Plus size={18} />
               Add Stock
@@ -302,7 +302,7 @@ export default function StocksPage() {
                       required
                       value={ingredientId}
                       onChange={handleIngredientSelect}
-                      className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
                     >
                       <option value="" disabled>Select Ingredient</option>
                       {ingredientsList.map((ing) => (
@@ -326,7 +326,7 @@ export default function StocksPage() {
                     placeholder="e.g. 50"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 text-lg font-bold"
+                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 text-lg font-bold"
                   />
                 </div>
 
@@ -341,7 +341,7 @@ export default function StocksPage() {
                   <button
                     type="submit"
                     disabled={updateLoading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 shadow-md"
+                    className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none"
                   >
                     {updateLoading ? "Saving..." : <><Save size={16} /> Save Stock</>}
                   </button>

@@ -97,7 +97,7 @@ export default function RecipesPage() {
     return (
       <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
         <div className="flex flex-col items-center gap-3">
-          <ChefHat className="w-10 h-10 text-orange-500 animate-bounce" />
+          <ChefHat className="w-10 h-10 text-brand-500 animate-bounce" />
           <span className="text-gray-500">Preparing Recipes...</span>
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function RecipesPage() {
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-              <ChefHat className="text-orange-500 w-8 h-8" />
+              <ChefHat className="text-brand-600 w-8 h-8" />
               Recipe Management
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -121,7 +121,7 @@ export default function RecipesPage() {
           </div>
           <Link
             href="/recipes/add"
-            className="bg-orange-600 text-white px-5 py-2 rounded-full shadow-lg shadow-orange-200 dark:shadow-none flex items-center gap-2 transition-all active:scale-95 "
+            className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex items-center gap-2"
           >
             <Plus size={20} /> Add Recipe Item
           </Link>
@@ -164,7 +164,7 @@ export default function RecipesPage() {
                 <div className="p-5 flex-1">
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Ingredients Required</span>
-                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full font-bold border border-brand-100 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800">
                       {group.ingredients.length} Items
                     </span>
                   </div>
@@ -173,7 +173,7 @@ export default function RecipesPage() {
                     {group.ingredients.map((item) => (
                       <div key={item.id} className="flex justify-between items-center group/row p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <div className="w-8 h-8 rounded-full bg-brand-50 dark:bg-brand-900/40 flex items-center justify-center text-brand-600 dark:text-brand-300">
                             <Scale size={14} />
                           </div>
                           <div>
@@ -202,7 +202,7 @@ export default function RecipesPage() {
                 <div className="p-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <Link
                     href={`/recipes/add?menuItemId=${group.menuItemId}`}
-                    className="flex items-center justify-center gap-2 w-full py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-bold transition-colors"
                   >
                     <Plus size={16} /> Add More Ingredients
                   </Link>

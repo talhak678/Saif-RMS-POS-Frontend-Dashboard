@@ -112,13 +112,13 @@ export default function IngredientsPage() {
                 {/* HEADER */}
                 <div className="md:flex gap-1 items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                        <Package className="text-blue-600" />
+                        <Package className="text-brand-600" />
                         Ingredients Inventory
                     </h1>
 
                     <button
                         onClick={openAddModal}
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex items-center gap-2"
                     >
                         <Plus className="h-4 w-4" />
                         Add New Ingredient
@@ -193,7 +193,7 @@ export default function IngredientsPage() {
                                                     setViewIngredient(ing);
                                                     setIsViewModalOpen(true);
                                                 }}
-                                                className="p-2 rounded transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                                className="p-2 rounded transition-colors bg-brand-50 text-brand-600 hover:bg-brand-100 dark:bg-brand-900/40 dark:text-brand-300 dark:hover:bg-brand-900/60"
                                                 title="View Details"
                                             >
                                                 <Eye size={18} />
@@ -244,7 +244,7 @@ export default function IngredientsPage() {
                                         placeholder="e.g. Tomatoes"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500"
                                     />
                                 </div>
 
@@ -258,7 +258,7 @@ export default function IngredientsPage() {
                                         placeholder="e.g. kg"
                                         value={formData.unit}
                                         onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500"
                                     />
                                 </div>
 
@@ -273,9 +273,9 @@ export default function IngredientsPage() {
                                     <button
                                         type="submit"
                                         disabled={formLoading}
-                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                        className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none"
                                     >
-                                        {formLoading ? "Saving..." : <><Save size={16} /> Save</>}
+                                        {formLoading ? "Saving..." : <><Save size={16} /> Save Ingredient</>}
                                     </button>
                                 </div>
                             </form>
