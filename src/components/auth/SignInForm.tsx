@@ -44,12 +44,9 @@ export default function SignInForm() {
       if (res.data.success) {
         // Save token using AuthService (which handles encryption and cookies)
         const authService = AuthServiceInstance();
-        //if super admin logins then token name is supertoken else token name is token
-        if (isSuperAdmin) {
-          authService.setEncryptedCookie("super_token", res.data.data.token);
-        } else {
-          authService.setEncryptedCookie("normal_token", res.data.data.token);
-        }
+        const tokenKey = authService.getTokenKey();
+        authService.setEncryptedCookie(tokenKey, res.data.data.token);
+
         console.log("Login successful:", res.data);
         router.push("/");
         // Using location replace to ensure clean state and bypass router issues
