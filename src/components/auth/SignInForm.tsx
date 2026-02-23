@@ -46,9 +46,9 @@ export default function SignInForm() {
         const authService = AuthServiceInstance();
         //if super admin logins then token name is supertoken else token name is token
         if (isSuperAdmin) {
-          authService.setEncryptedCookie("supertoken", res.data.data.token);
+          authService.setEncryptedCookie("super_token", res.data.data.token);
         } else {
-          authService.setEncryptedCookie("token", res.data.data.token);
+          authService.setEncryptedCookie("normal_token", res.data.data.token);
         }
         console.log("Login successful:", res.data);
         router.push("/");
