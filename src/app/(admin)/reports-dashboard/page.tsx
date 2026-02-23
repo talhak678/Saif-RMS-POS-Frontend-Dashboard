@@ -36,13 +36,33 @@ export default function ReportsDashboard() {
 
     const [activeTab, setActiveTab] = useState(0);
     const [timeRange, setTimeRange] = useState("daily");
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [reportData, setReportData] = useState<any>(null);
+    const [restaurants, setRestaurants] = useState<any[]>([]);
+    const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
 
-    const fetchReports = async () => {
+    const fetchRestaurants = async () => {
+        try {
+            const res = await api.get("/restaurants");
+            if (res.data?.success) {
+                setRestaurants(res.data.data || []);
+            }
+        } catch (err) {
+            console.error("Fetch restaurants failed", err);
+        }
+    };
+
+    const fetchReports = async (restaurantId?: string) => {
+        const idToUse = restaurantId || selectedRestaurantId;
+
+        // If super admin and no restaurant selected, don't fetch
+        if (isSuperAdmin && !idToUse) return;
+
         try {
             setLoading(true);
-            const res = await api.get("/reports");
+            const res = await api.get("/reports", {
+                params: idToUse ? { restaurantId: idToUse } : {}
+            });
             if (res.data.success) {
                 setReportData(res.data.data);
             }
@@ -55,29 +75,31 @@ export default function ReportsDashboard() {
     };
 
     useEffect(() => {
-        fetchReports();
-    }, []);
+        if (isSuperAdmin) {
+            fetchRestaurants();
+        } else {
+            fetchReports();
+        }
+    }, [isSuperAdmin]);
+
+    // Handle restaurant change
+    const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = e.target.value;
+        setSelectedRestaurantId(id);
+        if (id) {
+            fetchReports(id);
+        } else {
+            setReportData(null);
+        }
+    };
 
     const handleDownload = async () => {
         toast.success("Preparing download...");
     };
 
     const filteredTabs = isSuperAdmin
-        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches" || tab === "Orders & Customers")
+        ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches" || tab === "Order & Customers")
         : TABS;
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-                    <p className="text-gray-500 font-medium">Loading reports...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!reportData) return null;
 
     return (
         <ProtectedRoute module="dashboard:reports">
@@ -109,9 +131,25 @@ export default function ReportsDashboard() {
                 <div className="max-w-[1400px] mx-auto px-6 py-8">
                     {/* Simplified Filter Bar */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                        <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
-                            <Calendar size={16} className="text-gray-400" />
-                            <span className="text-xs font-bold text-gray-500 tracking-tight">Jan 27 2026 - Feb 2 2026</span>
+                        <div className="flex items-center gap-4">
+                            {isSuperAdmin && (
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={selectedRestaurantId}
+                                        onChange={handleRestaurantChange}
+                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="">Select Restaurant</option>
+                                        {restaurants.map((res) => (
+                                            <option key={res.id} value={res.id}>{res.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            {/* <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                                <Calendar size={16} className="text-gray-400" />
+                                <span className="text-xs font-bold text-gray-500 tracking-tight">Jan 27 2026 - Feb 2 2026</span>
+                            </div> */}
                         </div>
 
                         <button
@@ -123,13 +161,36 @@ export default function ReportsDashboard() {
                         </button>
                     </div>
 
-                    <div className="animate-in fade-in duration-300">
-                        {activeTab === 0 && <AnalyticsTab data={reportData} timeRange={timeRange} setTimeRange={setTimeRange} />}
-                        {activeTab === 1 && <OrdersCustomersTab data={reportData.ordersCustomers} />}
-                        {activeTab === 2 && <InventoryTab data={reportData.inventory} />}
-                        {activeTab === 3 && <BranchesTab data={reportData.branches} />}
-                        {activeTab === 4 && <MenuCategoriesTab data={reportData.menuCategories} />}
-                    </div>
+                    {loading ? (
+                        <div className="flex items-center justify-center min-h-[40vh]">
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                                <p className="text-gray-500 font-medium">Loading reports...</p>
+                            </div>
+                        </div>
+                    ) : !reportData ? (
+                        <div className="flex flex-col items-center justify-center min-h-[40vh] bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 text-blue-600">
+                                <Calendar size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                {isSuperAdmin ? "Please Select a Restaurant" : "No Report Data Available"}
+                            </h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-center max-w-sm">
+                                {isSuperAdmin
+                                    ? "Select a restaurant from the dropdown above to view its analytics and performance reports."
+                                    : "We couldn't find any report data for the selected period."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="animate-in fade-in duration-300">
+                            {activeTab === 0 && <AnalyticsTab data={reportData} timeRange={timeRange} setTimeRange={setTimeRange} />}
+                            {activeTab === 1 && <OrdersCustomersTab data={reportData.ordersCustomers} />}
+                            {activeTab === 2 && <InventoryTab data={reportData.inventory} />}
+                            {activeTab === 3 && <BranchesTab data={reportData.branches} />}
+                            {activeTab === 4 && <MenuCategoriesTab data={reportData.menuCategories} />}
+                        </div>
+                    )}
                 </div>
             </div>
         </ProtectedRoute>
