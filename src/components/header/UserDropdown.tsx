@@ -29,8 +29,10 @@ const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
         <div className="mr-3 flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-brand-500 text-sm font-bold text-white uppercase dark:border-gray-800">
-          {user?.name ? (
-            user.name.split(' ').map(n => n[0]).join('').slice(0, 2)
+          {user?.restaurant?.name ? (
+            user.restaurant.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
+          ) : user?.name ? (
+            user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
           ) : (
             <Image
               width={44}
@@ -41,7 +43,14 @@ const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
           )}
         </div>
 
-        <span className="block mr-1 font-medium text-theme-sm">{user?.name || "Saif Abbas"}</span>
+        <div className="mr-1 text-left">
+          <span className="block font-bold text-theme-sm text-gray-800 dark:text-white leading-tight">
+            {user?.restaurant?.name || user?.name || "Restaurant"}
+          </span>
+          <span className="block text-xs text-gray-400 dark:text-gray-500 leading-tight">
+            {user?.role?.name || "Admin"}
+          </span>
+        </div>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
@@ -68,11 +77,11 @@ const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
         className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 !bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:!bg-gray-dark"
       >
         <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.name || "Saif Abbas"}
+          <span className="block font-bold text-gray-800 text-theme-sm dark:text-white">
+            {user?.restaurant?.name || user?.name || "Restaurant"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {user?.email || "Saif@Abbas.com"}
+            {user?.name || "Admin"} &bull; {user?.email || ""}
           </span>
         </div>
 

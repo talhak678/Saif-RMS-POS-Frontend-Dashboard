@@ -403,16 +403,16 @@ const AppSidebar: React.FC = () => {
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
                 alt="Logo"
-                width={200}
-                height={100}
-                className="dark:hidden object-contain max-h-23  w-full mx-auto"
+                width={160}
+                height={56}
+                className="dark:hidden object-contain max-h-14 w-auto mx-auto"
               />
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
                 alt="Logo"
-                width={200}
-                height={100}
-                className="hidden dark:block object-contain max-h-28 w-full mx-auto"
+                width={160}
+                height={56}
+                className="hidden dark:block object-contain max-h-14 w-auto mx-auto"
               />
             </>
           ) : (
