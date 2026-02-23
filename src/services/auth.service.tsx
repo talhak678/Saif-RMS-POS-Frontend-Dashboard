@@ -17,9 +17,15 @@ class AuthService extends BaseService {
         return AuthService.authInstance;
     }
 
+    // helper to get token key based on environment
+    public getTokenKey(): string {
+        return process.env.NEXT_PUBLIC_IS_SUPER_ADMIN_ONLY === 'true' ? 'super_token' : 'normal_token';
+    }
+
     // function to check is user logged in or not
     public getAuthStates(): { token: string | null, status: boolean } {
-        const token = this.getEncryptedCookie('token')
+        const tokenKey = this.getTokenKey();
+        const token = this.getEncryptedCookie(tokenKey)
 
         if (!token) {
             return { token: null, status: false }
@@ -41,7 +47,8 @@ class AuthService extends BaseService {
 
     // function to logout
     public logout(): void {
-        this.deleteAllCookies()
+        this.deleteCookie(this.getTokenKey());
+        this.deleteAllCookies();
         window.location.href = '/signin'
     }
 

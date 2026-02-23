@@ -44,7 +44,9 @@ export default function SignInForm() {
       if (res.data.success) {
         // Save token using AuthService (which handles encryption and cookies)
         const authService = AuthServiceInstance();
-        authService.setEncryptedCookie("token", res.data.data.token);
+        const tokenKey = authService.getTokenKey();
+        authService.setEncryptedCookie(tokenKey, res.data.data.token);
+
         console.log("Login successful:", res.data);
         router.push("/");
         // Using location replace to ensure clean state and bypass router issues
