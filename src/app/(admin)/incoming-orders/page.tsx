@@ -298,10 +298,21 @@ export default function IncomingOrdersPage() {
         try {
             if (!silent) setLoading(true);
             const params: string[] = [];
+
+            // Default to last 2 days (yesterday and today)
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            const formatDate = (date: Date) => date.toISOString().split('T')[0];
+            params.push(`startDate=${formatDate(yesterday)}`);
+            params.push(`endDate=${formatDate(today)}`);
+
             if (branchFilter !== "ALL") params.push(`branchId=${branchFilter}`);
             // Use the active tab's status filter
             const currentStatusFilter = activeTab === "latest" ? latestStatusFilter : allStatusFilter;
             if (currentStatusFilter !== "ALL") params.push(`status=${currentStatusFilter}`);
+
             const query = params.length ? `?${params.join("&")}` : "";
             const res = await api.get(`/orders${query}`);
             if (res.data?.success) {
