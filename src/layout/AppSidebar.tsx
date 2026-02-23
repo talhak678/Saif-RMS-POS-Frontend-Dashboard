@@ -65,7 +65,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Restaurants", path: "/restaurants", pro: false, permission: "restaurant-config:restaurants" },
       { name: "Branches", path: "/branches", pro: false, permission: "restaurant-config:branches" },
-      { name: "Subscriptions & Plans", path: "/payment-plans", pro: false, permission: "restaurant-config:payment-plans" },
+      // { name: "Subscriptions & Plans", path: "/payment-plans", pro: false, permission: "restaurant-config:payment-plans" },
       { name: "Payment History", path: "/payments-history", pro: false, permission: "restaurant-config:payments-history" },
     ],
   },

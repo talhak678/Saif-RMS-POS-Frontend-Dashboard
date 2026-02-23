@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, X, Star, RefreshCw } from "lucide-react";
+import { Eye, X, Star, RefreshCw, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
@@ -44,6 +44,8 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders]: any = useState([]);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // View Modal State
   const [viewOrder, setViewOrder] = useState<any>(null);
@@ -67,16 +69,23 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-  }, [statusFilter]);
+  }, [statusFilter, startDate, endDate]);
 
   const fetchOrders = async () => {
+    // IF EITHER DATE IS SELECTED, BOTH MUST BE SELECTED
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const query =
-        statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
+      const params: any = {};
+      if (statusFilter !== "ALL") params.status = statusFilter;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
 
-      const res = await api.get(`/orders${query}`);
+      const res = await api.get(`/orders`, { params });
 
       if (res.data?.success) {
         const sorted = res.data.data.sort(
@@ -211,19 +220,46 @@ export default function OrdersPage() {
             Orders
           </h1>
 
-          {/* STATUS FILTER */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 rounded border dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none"
-          >
-            <option value="ALL">All Orders</option>
-            {ORDER_STATUSES.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* DATE FILTER */}
+            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-5 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-brand-400">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                />
+              </div>
+              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* STATUS FILTER */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="p-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 focus:ring-2 focus:ring-brand-500 outline-none"
+            >
+              <option value="ALL">All Status</option>
+              {ORDER_STATUSES.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
