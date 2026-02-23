@@ -15,10 +15,18 @@ import {
     MapPin,
     ChevronRight,
     CheckCircle2,
+    Loader2,
 } from "lucide-react";
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+    Elements,
+    PaymentElement,
+    useStripe,
+    useElements,
+} from "@stripe/react-stripe-js";
 
 type OrderType = "DINE_IN" | "TAKE_AWAY" | "DELIVERY";
 type PaymentMethod = "CASH" | "CARD" | "COD";
@@ -452,6 +460,122 @@ function CustomerDetailsModal({
     );
 }
 
+// ─── Stripe Payment Components ───────────────────────────────────────────────
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+function CheckoutForm({
+    clientSecret,
+    amount,
+    onSuccess,
+    onCancel
+}: {
+    clientSecret: string,
+    amount: number,
+    onSuccess: () => void,
+    onCancel: () => void
+}) {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [message, setMessage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements) return;
+        setIsLoading(true);
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: `${window.location.origin}/pos`,
+            },
+            redirect: "if_required",
+        });
+
+        if (error) {
+            if (error.type === "card_error" || error.type === "validation_error") {
+                setMessage(error.message || "An error occurred");
+            } else {
+                setMessage("An unexpected error occurred.");
+            }
+        } else if (paymentIntent && paymentIntent.status === "succeeded") {
+            toast.success("Payment Received!");
+            onSuccess();
+        }
+
+        setIsLoading(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <PaymentElement />
+            <div className="flex gap-3">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    disabled={isLoading || !stripe || !elements}
+                    className="flex-[2] bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                >
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Processing...
+                        </>
+                    ) : `Pay Rs. ${amount.toFixed(2)}`}
+                </button>
+            </div>
+            {message && <div className="text-red-500 text-sm font-medium mt-4 text-center">{message}</div>}
+        </form>
+    );
+}
+
+function StripeModal({
+    clientSecret,
+    amount,
+    onClose,
+    onSuccess
+}: {
+    clientSecret: string,
+    amount: number,
+    onClose: () => void,
+    onSuccess: () => void
+}) {
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Complete Payment</h2>
+                    <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                </div>
+                <div className="p-6">
+                    <div className="mb-6 text-center">
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <CreditCard className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Amount to pay</p>
+                        <p className="text-3xl font-black text-gray-900 dark:text-gray-100">Rs. {amount.toFixed(2)}</p>
+                    </div>
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <CheckoutForm
+                            clientSecret={clientSecret}
+                            amount={amount}
+                            onSuccess={onSuccess}
+                            onCancel={onClose}
+                        />
+                    </Elements>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main POS Page ────────────────────────────────────────────────────────────
 export default function POSPage() {
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -470,6 +594,10 @@ export default function POSPage() {
     // Modal States
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [showCustomerModal, setShowCustomerModal] = useState(false);
+
+    // Stripe States
+    const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+    const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
     // Fetch categories & branches on mount
     useEffect(() => {
@@ -602,10 +730,27 @@ export default function POSPage() {
             if (customerDetails.address) payload.deliveryAddress = customerDetails.address;
             if (customerDetails.tableNumber) payload.tableNumber = customerDetails.tableNumber;
 
-            await api.post("/orders", payload);
-            toast.success("Order placed successfully!");
-            setCart([]);
-            setShowCustomerModal(false);
+            const res = await api.post("/orders", payload);
+
+            if (paymentMethod === "CARD") {
+                const order = res.data.data;
+                const intentRes = await api.post("/stripe-intent", {
+                    orderId: order.id,
+                    amount: total,
+                });
+
+                if (intentRes.data.success) {
+                    setStripeClientSecret(intentRes.data.data.clientSecret);
+                    setPaymentAmount(total);
+                    setShowCustomerModal(false);
+                } else {
+                    toast.error("Failed to initiate payment. Please try again.");
+                }
+            } else {
+                toast.success("Order placed successfully!");
+                setCart([]);
+                setShowCustomerModal(false);
+            }
         } catch (err: any) {
             const msg = err?.response?.data?.message || "Failed to place order";
             toast.error(msg);
@@ -641,6 +786,20 @@ export default function POSPage() {
                     />
                 )}
 
+                {/* Stripe Payment Modal */}
+                {stripeClientSecret && (
+                    <StripeModal
+                        clientSecret={stripeClientSecret}
+                        amount={paymentAmount}
+                        onClose={() => setStripeClientSecret(null)}
+                        onSuccess={() => {
+                            setStripeClientSecret(null);
+                            setCart([]);
+                            toast.success("Order and Payment completed!");
+                        }}
+                    />
+                )}
+
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
                     {/* Left Section - Products */}
@@ -658,14 +817,14 @@ export default function POSPage() {
                                     {/* All Tab */}
                                     <button
                                         onClick={() => setSelectedCategory("all")}
-                                        className={`flex flex-col items-center justify-center min-w-[100px] p-3 rounded-xl transition-all ${selectedCategory === "all"
-                                            ? "bg-blue-600 text-white shadow-lg"
-                                            : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700"
+                                        className={`flex flex-col items-center justify-center min-w-[100px] p-4 rounded-2xl transition-all border-2 ${selectedCategory === "all"
+                                            ? "bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-100 dark:shadow-none"
+                                            : "bg-white dark:bg-gray-800 border-transparent text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700"
                                             }`}
                                     >
                                         <LayoutGrid className="w-6 h-6 mb-1" />
-                                        <span className="text-xs font-medium">All</span>
-                                        <span className="text-[10px] opacity-75">{menuItems.length} items</span>
+                                        <span className="text-xs font-bold">All Items</span>
+                                        <span className={`text-[10px] ${selectedCategory === "all" ? "text-brand-100" : "opacity-75"}`}>{menuItems.length} items</span>
                                     </button>
 
                                     {/* Dynamic Categories */}
@@ -673,14 +832,14 @@ export default function POSPage() {
                                         <button
                                             key={category.id}
                                             onClick={() => setSelectedCategory(category.id)}
-                                            className={`flex flex-col items-center justify-center min-w-[110px] p-3 rounded-xl transition-all ${selectedCategory === category.id
-                                                ? "bg-blue-600 text-white shadow-lg"
-                                                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700"
+                                            className={`flex flex-col items-center justify-center min-w-[110px] p-4 rounded-2xl transition-all border-2 ${selectedCategory === category.id
+                                                ? "bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-100 dark:shadow-none"
+                                                : "bg-white dark:bg-gray-800 border-transparent text-gray-700 dark:text-gray-300 hover:bg-brand-50 dark:hover:bg-gray-700"
                                                 }`}
                                         >
                                             <ShoppingCart className="w-6 h-6 mb-1" />
-                                            <span className="text-xs font-medium text-center leading-tight">{category.name}</span>
-                                            <span className="text-[10px] opacity-75">{category._count?.menuItems || 0} items</span>
+                                            <span className="text-xs font-bold text-center leading-tight">{category.name}</span>
+                                            <span className={`text-[10px] ${selectedCategory === category.id ? "text-brand-100" : "opacity-75"}`}>{category._count?.menuItems || 0} items</span>
                                         </button>
                                     ))}
                                 </div>
@@ -712,57 +871,80 @@ export default function POSPage() {
                                     {menuItems.map((item) => {
                                         const quantity = getCartQuantity(item.id);
                                         const price = parseFloat(item.price);
+                                        const isVeg = item.name.toLowerCase().includes("salad") || item.name.toLowerCase().includes("veg") || item.name.toLowerCase().includes("juice");
+
                                         return (
                                             <div
                                                 key={item.id}
-                                                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col cursor-pointer"
+                                                className={`bg-white dark:bg-gray-800 rounded-3xl p-3 shadow-sm hover:shadow-md transition-all duration-200 border-2 flex flex-col cursor-pointer ${quantity > 0 ? "border-brand-600 shadow-brand-100 dark:shadow-none" : "border-transparent"
+                                                    }`}
                                                 onClick={() => setSelectedItem(item)}
                                             >
                                                 {/* Product Image */}
-                                                <div className="relative h-40 bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+                                                <div className="relative h-44 w-full mb-3 flex-shrink-0">
                                                     <img
                                                         src={item.image}
                                                         alt={item.name}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-cover rounded-2xl"
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).src =
                                                                 "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop";
                                                         }}
                                                     />
-                                                    {/* Badges */}
-                                                    <div className="absolute top-2 left-2 flex gap-1">
-                                                        {item.variations.length > 0 && (
-                                                            <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                                                {item.variations.length} sizes
-                                                            </span>
-                                                        )}
-                                                        {item.addons.length > 0 && (
-                                                            <span className="bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                                                +addons
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {quantity > 0 && (
-                                                        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
-                                                            {quantity}
+                                                    {/* Discount Badge */}
+                                                    {item.variations.length > 0 && (
+                                                        <div className="absolute top-2 left-2 bg-accent-pink text-white text-[10px] font-bold px-2 py-1 rounded-lg">
+                                                            New Deal
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Product Info */}
-                                                <div className="p-3 flex flex-col flex-1">
-                                                    <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2 flex-1">
+                                                <div className="flex flex-col flex-1 px-1">
+                                                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 min-h-[40px] leading-tight">
                                                         {item.name}
                                                     </h3>
-                                                    <p className="text-base font-bold text-blue-600 dark:text-blue-400 mb-2">
-                                                        Rs. {price}
-                                                    </p>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}
-                                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                                                    >
-                                                        {quantity > 0 ? "Add More" : "Add to Dish"}
-                                                    </button>
+
+                                                    <div className="flex items-center justify-between mb-4 mt-auto">
+                                                        <span className="text-lg font-black text-brand-600 dark:text-brand-400">
+                                                            Rs. {price}
+                                                        </span>
+                                                        <div className="flex items-center gap-1.5 opacity-80">
+                                                            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center p-0.5 ${isVeg ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
+                                                                <div className={`w-full h-full rounded-full ${isVeg ? "bg-green-600" : "bg-red-600"}`} />
+                                                            </div>
+                                                            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                                                                {isVeg ? "Veg" : "Non Veg"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {quantity > 0 ? (
+                                                        <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700/50 rounded-2xl p-1 w-full" onClick={(e) => e.stopPropagation()}>
+                                                            <button
+                                                                onClick={() => updateQuantity(item.id.split("-")[0], -1)}
+                                                                className="w-8 h-8 flex items-center justify-center bg-brand-600 text-white rounded-full hover:bg-brand-700 transition-colors"
+                                                            >
+                                                                <Minus className="w-4 h-4" />
+                                                            </button>
+                                                            <span className="font-black text-sm text-gray-900 dark:text-gray-100">
+                                                                {quantity}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => setSelectedItem(item)}
+                                                                className="w-8 h-8 flex items-center justify-center bg-brand-600 text-white rounded-full hover:bg-brand-700 transition-colors"
+                                                            >
+                                                                <Plus className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}
+                                                            className="w-full bg-brand-50 hover:bg-brand-100 text-brand-600 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center uppercase tracking-wider"
+                                                        >
+                                                            Add to Dish
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -785,9 +967,9 @@ export default function POSPage() {
                                     <button
                                         key={type}
                                         onClick={() => setOrderType(type)}
-                                        className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors ${orderType === type
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                        className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all border-2 ${orderType === type
+                                            ? "bg-brand-600 border-brand-600 text-white shadow-sm"
+                                            : "bg-gray-100 dark:bg-gray-700 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200"
                                             }`}
                                     >
                                         {label}
@@ -890,13 +1072,13 @@ export default function POSPage() {
                                         <button
                                             key={method}
                                             onClick={() => setPaymentMethod(method)}
-                                            className={`flex-1 flex flex-col items-center gap-1 p-2.5 rounded-lg border-2 transition-all ${paymentMethod === method
-                                                ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                                                : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700"
+                                            className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all ${paymentMethod === method
+                                                ? "border-brand-600 bg-brand-50 dark:bg-brand-900/20"
+                                                : "border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-700"
                                                 }`}
                                         >
-                                            <Icon className={`w-5 h-5 ${paymentMethod === method ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"}`} />
-                                            <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">{label}</span>
+                                            <Icon className={`w-6 h-6 ${paymentMethod === method ? "text-brand-600 dark:text-brand-400" : "text-gray-500 dark:text-gray-400"}`} />
+                                            <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">{label}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -909,12 +1091,12 @@ export default function POSPage() {
                                     setShowCustomerModal(true);
                                 }}
                                 disabled={cart.length === 0 || placingOrder}
-                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none"
                             >
-                                <ShoppingCart className="w-4 h-4" />
+                                <ShoppingCart className="w-5 h-5" />
                                 Place Order
                                 {cart.length > 0 && (
-                                    <span className="bg-white text-blue-600 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    <span className="bg-white text-brand-600 text-xs font-black px-2 py-1 rounded-full ml-1">
                                         {cart.reduce((sum, i) => sum + i.quantity, 0)}
                                     </span>
                                 )}

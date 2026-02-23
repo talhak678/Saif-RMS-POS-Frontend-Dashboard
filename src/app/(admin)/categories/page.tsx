@@ -67,7 +67,7 @@ export default function CategoriesPage() {
                 {/* HEADER */}
                 <div className="md:flex gap-1 items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                        <LayoutGrid className="w-6 h-6 text-blue-600" />
+                        <LayoutGrid className="w-6 h-6 text-brand-600" />
                         Categories
                     </h1>
 
@@ -124,7 +124,7 @@ export default function CategoriesPage() {
                                         </td>
 
                                         <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800">
                                                 {cat._count?.menuItems || 0} Items
                                             </span>
                                         </td>
@@ -140,7 +140,7 @@ export default function CategoriesPage() {
                                                     setViewCategory(cat);
                                                     setIsViewModalOpen(true);
                                                 }}
-                                                className="p-2 rounded transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                                className="p-2 rounded transition-colors bg-brand-50 text-brand-600 hover:bg-brand-100 dark:bg-brand-900/40 dark:text-brand-300 dark:hover:bg-brand-900/60"
                                                 title="View Details"
                                             >
                                                 <Eye size={18} />
@@ -189,7 +189,7 @@ export default function CategoriesPage() {
                     fields={[
                         { label: "Name", key: "name" },
                         { label: "Description", key: "description", fullWidth: true },
-                        { label: "Total Menu Items", render: (data: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">{data?._count?.menuItems || 0} Items</span> },
+                        { label: "Total Menu Items", render: (data: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800">{data?._count?.menuItems || 0} Items</span> },
                         { label: "ID", key: "id" },
                         { label: "Restaurant ID", key: "restaurantId" },
                         { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },

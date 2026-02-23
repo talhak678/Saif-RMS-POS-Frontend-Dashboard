@@ -81,7 +81,7 @@ export default function CustomersPage() {
                     <td className="px-4 py-3">{customer.email}</td>
                     <td className="px-4 py-3">{customer.phone}</td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800">
                         {customer._count?.orders ?? 0} Orders
                       </span>
                     </td>

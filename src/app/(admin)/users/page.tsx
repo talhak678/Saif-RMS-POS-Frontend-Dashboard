@@ -16,7 +16,7 @@ import { iUser } from "@/types/auth.types";
 const getRoleBadge = (role: string) => {
     const base = "px-2 py-1 rounded text-xs font-medium";
     if (role === "ADMIN") return `${base} bg-purple-100 text-purple-800`;
-    if (role === "MANAGER") return `${base} bg-blue-100 text-blue-800`;
+    if (role === "MANAGER") return `${base} bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 border border-brand-100 dark:border-brand-800`;
     return `${base} bg-gray-100 text-gray-800`;
 };
 
@@ -84,7 +84,7 @@ export default function UsersPage() {
                             <select
                                 value={selectedRestaurantId}
                                 onChange={handleRestaurantChange}
-                                className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="">All Restaurants</option>
                                 {restaurants.map((res) => (
@@ -153,7 +153,7 @@ export default function UsersPage() {
                                                         setOpenUserId(openUserId === user.id ? null : (user.id ?? null))
                                                     }
                                                     className={`p-2 rounded transition-colors ${openUserId === user.id
-                                                        ? "bg-blue-50 text-blue-600 dark:bg-gray-700 dark:text-blue-400"
+                                                        ? "bg-brand-50 text-brand-600 dark:bg-gray-700 dark:text-brand-400"
                                                         : "hover:bg-gray-100 text-gray-500 dark:hover:bg-gray-700 dark:text-gray-400"
                                                         }`}
                                                     title="View Permissions"
@@ -198,7 +198,7 @@ export default function UsersPage() {
                                                         {/* Permissions Column */}
                                                         <div>
                                                             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider flex items-center gap-2">
-                                                                <ShieldCheck size={16} className="text-blue-500" />
+                                                                <ShieldCheck size={16} className="text-brand-500" />
                                                                 Module Access
                                                             </h3>
 
@@ -207,7 +207,7 @@ export default function UsersPage() {
                                                                     {user.role.permissions.map((perm: any, idx: number) => (
                                                                         <span
                                                                             key={idx}
-                                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 border border-brand-200 dark:border-brand-800"
                                                                         >
                                                                             {perm.action} {/* Displaying just the module name */}
                                                                         </span>

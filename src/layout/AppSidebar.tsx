@@ -111,7 +111,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <CircleDollarSign className="w-5 h-5" />,
-    name: "Financials",
+    name: "Payment & Transaction",
     subItems: [
       { name: "Payments", path: "/payments", pro: false, permission: "dashboard:payments" },
     ],

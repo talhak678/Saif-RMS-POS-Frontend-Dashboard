@@ -23,7 +23,7 @@ const getStatusBadge = (status: string) => {
     case "PENDING":
       return `${base} bg-yellow-100 text-yellow-800`;
     case "CONFIRMED":
-      return `${base} bg-blue-100 text-blue-800`;
+      return `${base} bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800`;
     case "PREPARING":
       return `${base} bg-purple-100 text-purple-800`;
     case "KITCHEN_READY":
@@ -214,7 +214,7 @@ export default function OrdersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 rounded border dark:bg-gray-800 dark:border-gray-700"
+            className="p-2 rounded border dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none"
           >
             <option value="ALL">All Orders</option>
             {ORDER_STATUSES.map((st) => (
@@ -266,15 +266,15 @@ export default function OrdersPage() {
                     <td className="px-4 py-3">
                       {order.customer
                         ? (
-                          <span>
+                          <span className="text-brand-600 dark:text-brand-400 font-bold">
                             {order.customer.name}
                             {order.source && order.source !== "WEBSITE" && (
-                              <span className="ml-1 text-blue-600 dark:text-blue-400 text-xs font-medium">({order.source})</span>
+                              <span className="ml-1 text-brand-500 text-[10px] font-black uppercase tracking-tight italic">({order.source})</span>
                             )}
                           </span>
                         )
                         : order.source === "POS"
-                          ? <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">POS</span>
+                          ? <span className="text-brand-600 dark:text-brand-400 text-xs font-black uppercase tracking-tight italic">POS</span>
                           : <span className="text-gray-400 text-xs">—</span>
                       }
                     </td>
@@ -300,7 +300,7 @@ export default function OrdersPage() {
 
                       <button
                         onClick={() => openStatusModal(order)}
-                        className="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        className="text-xs px-3 py-1 rounded bg-brand-600 text-white hover:bg-brand-700 transition-colors"
                       >
                         Change Status
                       </button>
@@ -339,10 +339,10 @@ export default function OrdersPage() {
                     : <span className="text-gray-400">—</span>;
                 }
                 return (
-                  <span>
+                  <span className="text-brand-600 dark:text-brand-400 font-bold uppercase tracking-tight">
                     {data.customer.name}
                     {data.source && data.source !== "WEBSITE" && (
-                      <span className="ml-1 text-blue-600 text-xs font-medium">({data.source})</span>
+                      <span className="ml-1 text-brand-500 text-xs font-black italic">({data.source})</span>
                     )}
                   </span>
                 );
@@ -478,7 +478,7 @@ export default function OrdersPage() {
               <button
                 onClick={handleStatusUpdate}
                 disabled={updating}
-                className="w-full bg-green-600 text-white py-2 rounded"
+                className="w-full bg-brand-600 text-white py-2 rounded font-bold hover:bg-brand-700 disabled:bg-gray-400 transition-all"
               >
                 {updating ? "Updating..." : "Update Status"}
               </button>

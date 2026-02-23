@@ -18,7 +18,7 @@ const STATUS_COLORS: any = {
     PAID: "bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
     PENDING: "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
     FAILED: "bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
-    REFUNDED: "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+    REFUNDED: "bg-brand-50 text-brand-600 border-brand-100 dark:bg-brand-500/10 dark:text-brand-400 dark:border-brand-500/20",
 };
 
 export default function PaymentsPage() {
@@ -74,9 +74,9 @@ export default function PaymentsPage() {
                                 <button
                                     key={s}
                                     onClick={() => setStatusFilter(s)}
-                                    className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${statusFilter === s
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${statusFilter === s
+                                        ? "bg-brand-600 text-white shadow-lg shadow-brand-100"
+                                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                                         }`}
                                 >
                                     {s || "All"}
@@ -87,10 +87,10 @@ export default function PaymentsPage() {
 
                     {/* Stats Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <PaymentStatCard title="Total Volume" value="$12,450.00" icon={<CircleDollarSign size={20} className="text-blue-600" />} />
+                        <PaymentStatCard title="Total Volume" value="$12,450.00" icon={<CircleDollarSign size={20} className="text-brand-600" />} />
                         <PaymentStatCard title="Success Rate" value="98.2%" icon={<CheckCircle2 size={20} className="text-green-600" />} />
                         <PaymentStatCard title="Active Pending" value="14" icon={<Clock size={20} className="text-amber-600" />} />
-                        <PaymentStatCard title="Refunded Vol" value="$420.00" icon={<RefreshCcw size={20} className="text-blue-500" />} />
+                        <PaymentStatCard title="Refunded Vol" value="$420.00" icon={<RefreshCcw size={20} className="text-brand-500" />} />
                     </div>
 
                     {/* Filters & Actions */}
@@ -100,12 +100,12 @@ export default function PaymentsPage() {
                             <input
                                 type="text"
                                 placeholder="Search by Order ID..."
-                                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all shadow-sm">
+                        <button className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-100 dark:shadow-none">
                             <Download size={16} />
                             Export Data
                         </button>
@@ -160,7 +160,7 @@ export default function PaymentsPage() {
                                                     {p.status === 'PAID' && (
                                                         <button
                                                             onClick={() => handleRefund(p.id)}
-                                                            className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                                                            className="text-xs font-bold text-brand-600 hover:text-brand-700 transition-colors"
                                                         >
                                                             Refund
                                                         </button>
@@ -181,7 +181,7 @@ export default function PaymentsPage() {
 
 function PaymentStatCard({ title, value, icon }: any) {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-blue-500/30">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-brand-500/30">
             <div className="flex items-center gap-4">
                 <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900">
                     {icon}

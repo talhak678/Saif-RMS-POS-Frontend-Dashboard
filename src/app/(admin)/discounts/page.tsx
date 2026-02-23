@@ -210,7 +210,7 @@ export default function DiscountsPage() {
 
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
                     >
                         <Plus size={18} />
                         Add Discount
@@ -518,7 +518,7 @@ export default function DiscountsPage() {
                                 <button
                                     onClick={handleEditDiscount}
                                     disabled={updating}
-                                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none mt-2"
                                 >
                                     {updating ? "Updating..." : "Update Discount"}
                                 </button>

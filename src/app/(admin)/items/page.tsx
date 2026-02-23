@@ -158,7 +158,7 @@ export default function MenuItemsPage() {
                     </h1>
                     <Link
                         href="/items/add"
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none"
                     >
                         <Plus size={18} />
                         Add New Item
@@ -202,7 +202,7 @@ export default function MenuItemsPage() {
                                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                                         <Link
                                             href={`/items/add?categoryId=${group.info.id}`}
-                                            className="px-3 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 flex items-center gap-1 transition-colors"
+                                            className="px-4 py-2 text-xs font-bold bg-brand-50 dark:bg-brand-900/20 border-2 border-brand-100 dark:border-brand-800/30 rounded-xl hover:bg-brand-100 dark:hover:bg-brand-800/40 text-brand-700 dark:text-brand-400 flex items-center gap-1.5 transition-all"
                                         >
                                             <Plus size={14} />
                                             Add Item
@@ -214,85 +214,98 @@ export default function MenuItemsPage() {
                                 {expandedCategories.has(group.info.id) && (
                                     <div className="p-4 overflow-x-auto pb-6">
                                         <div className="flex gap-4 min-w-min">
-                                            {group.items.map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    onClick={() => router.push(`/items/${item.id}`)}
-                                                    className="group min-w-[280px] w-[280px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-all relative flex flex-col"
-                                                >
-                                                    {/* Image */}
-                                                    <div className="h-40 w-full bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
-                                                        {item.image ? (
-                                                            <img
-                                                                src={item.image}
-                                                                alt={item.name}
-                                                                className={`w-full h-full object-cover transition-transform duration-300 ${item.isAvailable ? 'group-hover:scale-105' : 'grayscale'}`}
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                                <ImageOff size={32} />
-                                                            </div>
-                                                        )}
-                                                        <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded">
-                                                            Rs. {item.price}
-                                                        </div>
+                                            {group.items.map((item) => {
+                                                const isVeg = item.name.toLowerCase().includes("salad") || item.name.toLowerCase().includes("veg") || item.name.toLowerCase().includes("juice");
 
-                                                        {!item.isAvailable && (
-                                                            <div className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                                                                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                                                    Unavailable
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Content */}
-                                                    <div className="p-4 flex-1 flex flex-col">
-                                                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
-                                                            {item.name}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 h-10 mb-3">
-                                                            {item.description}
-                                                        </p>
-
-                                                        <div className="flex items-center gap-2 mb-3">
-                                                            {item.variations.length > 0 && (
-                                                                <span className="text-[10px] uppercase tracking-wider font-semibold bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded">
-                                                                    {item.variations.length} Vars
-                                                                </span>
-                                                            )}
-                                                            {item.addons.length > 0 && (
-                                                                <span className="text-[10px] uppercase tracking-wider font-semibold bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-0.5 rounded">
-                                                                    {item.addons.length} Adds
-                                                                </span>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Toggle Switch */}
-                                                        <div className="mt-auto pt-3 border-t dark:border-gray-700 flex items-center justify-between">
-                                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                                                Available?
-                                                            </span>
-                                                            <div
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${item.isAvailable ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                                                                onClick={(e) => handleToggleStatus(e, item)}
-                                                            >
-                                                                <span
-                                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${item.isAvailable ? 'translate-x-6' : 'translate-x-1'}`}
+                                                return (
+                                                    <div
+                                                        key={item.id}
+                                                        onClick={() => router.push(`/items/${item.id}`)}
+                                                        className={`group min-w-[300px] w-[300px] bg-white dark:bg-gray-800 border-2 rounded-[32px] p-3 transition-all duration-200 cursor-pointer flex flex-col ${item.isAvailable ? "border-transparent hover:border-brand-600 hover:shadow-lg hover:shadow-brand-50" : "border-red-100 opacity-80"}`}
+                                                    >
+                                                        {/* Image */}
+                                                        <div className="h-44 w-full bg-gray-100 dark:bg-gray-700 relative rounded-[24px] overflow-hidden mb-4">
+                                                            {item.image ? (
+                                                                <img
+                                                                    src={item.image}
+                                                                    alt={item.name}
+                                                                    className={`w-full h-full object-cover transition-transform duration-500 ${item.isAvailable ? 'group-hover:scale-110' : 'grayscale'}`}
                                                                 />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                    <ImageOff size={32} />
+                                                                </div>
+                                                            )}
+
+                                                            {!item.isAvailable && (
+                                                                <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                                                                    <span className="bg-red-500 text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 rounded-xl shadow-lg">
+                                                                        Unavailable
+                                                                    </span>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="absolute top-2 left-2 flex gap-1">
+                                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center p-0.5 border border-white/50 backdrop-blur-md ${isVeg ? "bg-brand-600/80" : "bg-red-600/80"}`}>
+                                                                    <div className="w-full h-full rounded-full bg-white" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Content */}
+                                                        <div className="flex-1 flex flex-col px-1">
+                                                            <div className="flex justify-between items-start mb-2 gap-2">
+                                                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base line-clamp-2 leading-tight flex-1">
+                                                                    {item.name}
+                                                                </h3>
+                                                                <p className="text-brand-600 dark:text-brand-400 font-black text-lg">
+                                                                    Rs. {item.price}
+                                                                </p>
+                                                            </div>
+
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 h-10 mb-4 leading-relaxed">
+                                                                {item.description}
+                                                            </p>
+
+                                                            <div className="flex items-center gap-2 mb-4">
+                                                                {item.variations.length > 0 && (
+                                                                    <span className="text-[9px] uppercase tracking-widest font-black bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg">
+                                                                        {item.variations.length} Variations
+                                                                    </span>
+                                                                )}
+                                                                {item.addons.length > 0 && (
+                                                                    <span className="text-[9px] uppercase tracking-widest font-black bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg">
+                                                                        {item.addons.length} Add-ons
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Availability Toggle */}
+                                                            <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                                                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                                                                    Status Management
+                                                                </span>
+                                                                <div
+                                                                    className={`relative inline-flex h-6 w-12 items-center rounded-full transition-all duration-300 cursor-pointer shadow-inner ${item.isAvailable ? 'bg-brand-500 shadow-brand-200' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                                                    onClick={(e) => handleToggleStatus(e, item)}
+                                                                >
+                                                                    <span
+                                                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${item.isAvailable ? 'translate-x-6' : 'translate-x-1'}`}
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
 
                                             {/* Empty State Card */}
                                             <Link
                                                 href={`/items/add?categoryId=${group.info.id}`}
-                                                className="min-w-[150px] w-[150px] flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-400 dark:border-gray-700 rounded-xl text-gray-400 hover:text-blue-500 hover:border-blue-400 dark:hover:border-blue-900 transition-colors bg-blend dark:bg-gray-800/50"
+                                                className="min-w-[150px] w-[150px] flex flex-col items-center justify-center gap-2 border-[3px] border-dashed border-gray-200 dark:border-gray-700 rounded-[32px] text-gray-400 hover:text-brand-600 hover:border-brand-200 dark:hover:border-brand-900/30 transition-all bg-gray-50/50 dark:bg-gray-800/50 hover:bg-brand-50/30"
                                             >
-                                                <Plus size={24} />
-                                                <span className="text-sm font-medium">Add Item</span>
+                                                <Plus size={28} />
+                                                <span className="text-xs font-bold uppercase tracking-wider">Add Item</span>
                                             </Link>
 
                                         </div>

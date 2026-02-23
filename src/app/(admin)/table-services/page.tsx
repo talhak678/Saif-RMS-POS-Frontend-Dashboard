@@ -13,7 +13,7 @@ const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED"];
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string; cardBg: string }> = {
     AVAILABLE: { label: "Available", color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/30", border: "border-green-200 dark:border-green-700", dot: "bg-green-500", cardBg: "from-green-50 to-white dark:from-green-900/10 dark:to-gray-800" },
     OCCUPIED: { label: "Occupied", color: "text-orange-700 dark:text-orange-300", bg: "bg-orange-100 dark:bg-orange-900/30", border: "border-orange-200 dark:border-orange-700", dot: "bg-orange-500", cardBg: "from-orange-50 to-white dark:from-orange-900/10 dark:to-gray-800" },
-    RESERVED: { label: "Reserved", color: "text-blue-700 dark:text-blue-300", bg: "bg-blue-100 dark:bg-blue-900/30", border: "border-blue-200 dark:border-blue-700", dot: "bg-blue-500", cardBg: "from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-800" },
+    RESERVED: { label: "Reserved", color: "text-brand-700 dark:text-brand-300", bg: "bg-brand-50 dark:bg-brand-900/30", border: "border-brand-200 dark:border-brand-700", dot: "bg-brand-500", cardBg: "from-brand-50/50 to-white dark:from-brand-900/10 dark:to-gray-800" },
 };
 
 function StatusPill({ status }: { status: string }) {
@@ -163,7 +163,7 @@ export default function TableServicesPage() {
         finally { setDeleting(false); }
     };
 
-    const inputCls = "w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    const inputCls = "w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
     const labelCls = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5";
 
     const stats = TABLE_STATUSES.map(st => ({
@@ -178,7 +178,7 @@ export default function TableServicesPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                            <LayoutGrid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            <LayoutGrid className="w-6 h-6 text-brand-600 dark:text-brand-400" />
                             Table Services
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -189,14 +189,14 @@ export default function TableServicesPage() {
                     <div className="flex flex-wrap gap-2 items-center">
                         {/* Branch filter */}
                         <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <option value="ALL">All Branches</option>
                             {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                         </select>
 
                         {/* Status filter */}
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <option value="ALL">All Statuses</option>
                             {TABLE_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
                         </select>
@@ -204,11 +204,11 @@ export default function TableServicesPage() {
                         {/* View toggle */}
                         <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
                             <button onClick={() => setViewMode("grid")}
-                                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === "grid" ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" : "text-gray-500 dark:text-gray-400"}`}>
+                                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === "grid" ? "bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm" : "text-gray-500 dark:text-gray-400"}`}>
                                 Grid
                             </button>
                             <button onClick={() => setViewMode("table")}
-                                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === "table" ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" : "text-gray-500 dark:text-gray-400"}`}>
+                                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${viewMode === "table" ? "bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm" : "text-gray-500 dark:text-gray-400"}`}>
                                 Table
                             </button>
                         </div>
@@ -220,7 +220,7 @@ export default function TableServicesPage() {
                         </button>
 
                         <button onClick={openCreate}
-                            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors">
+                            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none">
                             <Plus className="w-4 h-4" />
                             Add Table
                         </button>
@@ -232,7 +232,7 @@ export default function TableServicesPage() {
                     {stats.map(({ st, count, cfg }) => (
                         <button key={st} onClick={() => setStatusFilter(statusFilter === st ? "ALL" : st)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-sm font-semibold shadow-sm ${statusFilter === st
-                                ? `${cfg.bg} ${cfg.color} ${cfg.border} ring-2 ring-offset-1 ring-blue-400`
+                                ? `${cfg.bg} ${cfg.color} ${cfg.border} ring-2 ring-offset-1 ring-brand-400`
                                 : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 }`}>
                             <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
@@ -277,7 +277,7 @@ export default function TableServicesPage() {
                                             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t.capacity} seats</span>
                                         </div>
                                         {t._count?.reservations > 0 && (
-                                            <p className="text-[10px] text-blue-500 dark:text-blue-400 mt-1 font-medium">
+                                            <p className="text-[10px] text-brand-500 dark:text-brand-400 mt-1 font-medium">
                                                 {t._count.reservations} reservation{t._count.reservations > 1 ? "s" : ""}
                                             </p>
                                         )}
@@ -289,7 +289,7 @@ export default function TableServicesPage() {
                                             Edit
                                         </button>
                                         <button onClick={() => { setSelectedItem(t); setNewStatus(t.status); setStatusModal(true); }}
-                                            className="flex-1 text-[11px] py-1 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors">
+                                            className="flex-1 text-[11px] py-1 rounded-lg bg-brand-600 text-white font-bold hover:bg-brand-700 transition-colors shadow-sm">
                                             Status
                                         </button>
                                         <button onClick={() => { setDeleteTarget(t); setDeleteModal(true); }}
@@ -323,7 +323,7 @@ export default function TableServicesPage() {
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">{t.branch?.name || "—"}</td>
-                                        <td className="px-4 py-3 text-xs text-blue-600 dark:text-blue-400 font-semibold">
+                                        <td className="px-4 py-3 text-xs text-brand-600 dark:text-brand-400 font-semibold">
                                             {t._count?.reservations ?? 0}
                                         </td>
                                         <td className="px-4 py-3"><StatusPill status={t.status} /></td>
@@ -338,7 +338,7 @@ export default function TableServicesPage() {
                                                     Edit
                                                 </button>
                                                 <button onClick={() => { setSelectedItem(t); setNewStatus(t.status); setStatusModal(true); }}
-                                                    className="text-xs px-2.5 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">
+                                                    className="text-xs px-2.5 py-1 rounded-lg bg-brand-600 text-white hover:bg-brand-700 font-bold shadow-sm transition-all text-sm">
                                                     Status
                                                 </button>
                                                 <button onClick={() => { setDeleteTarget(t); setDeleteModal(true); }}
@@ -405,7 +405,7 @@ export default function TableServicesPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleSave} disabled={saving}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
                                     {saving ? "Saving..." : editItem ? "Save Changes" : "Add Table"}
                                 </button>
                             </div>
@@ -466,7 +466,7 @@ export default function TableServicesPage() {
                                             Edit
                                         </button>
                                         <button onClick={() => { setViewItem(null); setSelectedItem(viewItem); setNewStatus(viewItem.status); setStatusModal(true); }}
-                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                            className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm">
                                             Change Status
                                         </button>
                                     </div>
@@ -502,7 +502,7 @@ export default function TableServicesPage() {
                                             <div className="flex-1">
                                                 <span className={`font-semibold text-sm ${isSelected ? cfg.color : "text-gray-700 dark:text-gray-300"}`}>{cfg.label}</span>
                                             </div>
-                                            {isSelected && <CheckCircle size={16} className="text-blue-500 flex-shrink-0" />}
+                                            {isSelected && <CheckCircle size={16} className="text-brand-500 flex-shrink-0" />}
                                         </button>
                                     );
                                 })}
@@ -513,7 +513,7 @@ export default function TableServicesPage() {
                                     Cancel
                                 </button>
                                 <button onClick={handleStatusUpdate} disabled={updatingStatus}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm">
                                     {updatingStatus ? "Updating..." : "Update Status"}
                                 </button>
                             </div>
