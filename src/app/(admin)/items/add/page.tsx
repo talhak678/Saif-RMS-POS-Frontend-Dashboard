@@ -6,10 +6,16 @@ import api from "@/services/api";
 import { ArrowLeft, Plus, Trash2, Save, Image as ImageIcon, Layers, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import ImageUpload from "@/components/common/ImageUpload";
+import { useAuth } from "@/services/permission.service";
+import AddCategoryModal from "../../categories/AddCategoryModal";
 
 function AddItemForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+
+  // Category Modal State
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
   // URL se categoryId uthana (agar mojood ho)
   const preSelectedCategoryId = searchParams.get("categoryId") || "";
@@ -30,21 +36,22 @@ function AddItemForm() {
     addons: [] as { name: string; price: string }[],
   });
 
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/categories");
+      if (res.data?.success) {
+        setCategories(res.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 1. Categories Fetch karna (Dropdown ke liye)
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get("/categories");
-        if (res.data?.success) {
-          setCategories(res.data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCategories();
   }, []);
 
@@ -174,19 +181,29 @@ function AddItemForm() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Category *
                 </label>
-                <select
-                  required
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                >
-                  <option value="" disabled>Select a Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    required
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    className="flex-1 p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  >
+                    <option value="" disabled>Select a Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setIsCatModalOpen(true)}
+                    className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md flex items-center justify-center"
+                    title="Add New Category"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
                 {loading && <span className="text-xs text-blue-500">Loading categories...</span>}
               </div>
 
@@ -366,6 +383,19 @@ function AddItemForm() {
 
         </form>
       </div>
+      {/* Add Category Modal */}
+      {isCatModalOpen && (
+        <AddCategoryModal
+          onClose={() => setIsCatModalOpen(false)}
+          onSuccess={() => {
+            fetchCategories();
+            // Automatically select the new category? 
+            // We can't easily know the ID here unless AddCategoryModal returns it or we fetch and pick the newest.
+            // For now, refreshing the list is good.
+          }}
+          restaurantId={user?.restaurantId || user?.restaurant?.id}
+        />
+      )}
     </div>
   );
 }

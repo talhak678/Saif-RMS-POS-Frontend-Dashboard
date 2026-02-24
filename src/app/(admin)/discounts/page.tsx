@@ -7,6 +7,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import DatePicker from "@/components/common/DatePicker";
 
 const getStatusBadge = (isActive: boolean, expiresAt: string) => {
     const base = "px-2 py-1 rounded text-xs font-medium";
@@ -382,12 +383,10 @@ export default function DiscountsPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                    <input
-                                        type="datetime-local"
+                                    <DatePicker
                                         value={addFormData.expiresAt}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, expiresAt: e.target.value })
-                                        }
+                                        onChange={(val) => setAddFormData({ ...addFormData, expiresAt: val })}
+                                        showTime={true}
                                         className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
                                     />
                                 </div>
@@ -492,12 +491,10 @@ export default function DiscountsPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                    <input
-                                        type="datetime-local"
+                                    <DatePicker
                                         value={editFormData.expiresAt}
-                                        onChange={(e) =>
-                                            setEditFormData({ ...editFormData, expiresAt: e.target.value })
-                                        }
+                                        onChange={(val) => setEditFormData({ ...editFormData, expiresAt: val })}
+                                        showTime={true}
                                         className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
                                     />
                                 </div>

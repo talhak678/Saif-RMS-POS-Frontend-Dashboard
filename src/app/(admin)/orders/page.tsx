@@ -26,6 +26,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import ReceiptModal from "@/components/orders/ReceiptModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import DatePicker from "@/components/common/DatePicker";
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -279,25 +280,23 @@ export default function OrdersPage() {
 
           <div className="flex flex-wrap items-center gap-4">
             {/* DATE FILTER */}
-            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border border-white/20 shadow-sm text-gray-700 dark:text-white">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-5 py-2 rounded-xl border border-white/20 shadow-sm text-gray-700 dark:text-white min-w-[340px]">
+              <div className="flex flex-1 items-center gap-2">
                 <span className="text-[10px] uppercase font-bold text-gray-400">From</span>
-                <input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  onChange={setStartDate}
+                  placeholder="Select"
                   className="bg-transparent text-xs font-bold outline-none cursor-pointer"
                 />
               </div>
-              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
-              <div className="flex items-center gap-2">
+              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-2"></div>
+              <div className="flex flex-1 items-center gap-2">
                 <span className="text-[10px] uppercase font-bold text-gray-400">To</span>
-                <input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  onChange={setEndDate}
+                  placeholder="Select"
                   className="bg-transparent text-xs font-bold outline-none cursor-pointer"
                 />
               </div>

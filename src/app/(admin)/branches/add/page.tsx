@@ -164,7 +164,7 @@ function AddBranchForm() {
                             value={form.phone}
                             onChange={handleChange}
                             required
-                            placeholder="+92 300 1234567"
+                            placeholder="+1 300 1234567"
                             className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                         />
                     </div>

@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 import { toast } from "sonner";
-import { ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check, Search, Info, Phone, MessageSquare, Plus, Trash2, List } from "lucide-react";
+import {
+    ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check,
+    Search, Info, Phone, MessageSquare, Plus, Trash2, List, Star, Quote, Copyright,
+    Video, Type, FileText, HelpCircle, CreditCard, PanelTop, PanelBottom, MousePointer2,
+    Shield
+} from "lucide-react";
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
 import { ProtectedRoute } from "@/services/protected-route";
@@ -148,24 +153,24 @@ const DEFAULT_CONFIG = {
                 required: true, enabled: true,
                 content: { title: "Latest Articles" }
             },
-            footer: {
-                required: true, enabled: true,
-                content: {
-                    address: "123 Street, City, Country",
-                    description: "Quality food delivered to your doorstep.",
-                    contactEmail: "info@example.com",
-                    contactPhone: "+123456789",
-                    facebook: "",
-                    instagram: "",
-                    tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM",
-                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-                }
-            },
-            copyrightBar: {
-                required: false, enabled: false,
-                content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            },
+            // footer: {
+            //     required: true, enabled: true,
+            //     content: {
+            //         address: "123 Street, City, Country",
+            //         description: "Quality food delivered to your doorstep.",
+            //         contactEmail: "info@example.com",
+            //         contactPhone: "+123456789",
+            //         facebook: "",
+            //         instagram: "",
+            //         tiktok: "",
+            //         openHours: "Mon-Sun: 9AM - 11PM",
+            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
+            //     }
+            // },
+            // copyrightBar: {
+            //     required: false, enabled: false,
+            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
+            // },
         }
     },
     faq: {
@@ -180,24 +185,24 @@ const DEFAULT_CONFIG = {
                 required: true, enabled: true,
                 content: { title: "Common Questions" }
             },
-            footer: {
-                required: true, enabled: true,
-                content: {
-                    address: "123 Street, City, Country",
-                    description: "Quality food delivered to your doorstep.",
-                    contactEmail: "info@example.com",
-                    contactPhone: "+123456789",
-                    facebook: "",
-                    instagram: "",
-                    tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM",
-                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-                }
-            },
-            copyrightBar: {
-                required: false, enabled: false,
-                content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            },
+            // footer: {
+            //     required: true, enabled: true,
+            //     content: {
+            //         address: "123 Street, City, Country",
+            //         description: "Quality food delivered to your doorstep.",
+            //         contactEmail: "info@example.com",
+            //         contactPhone: "+123456789",
+            //         facebook: "",
+            //         instagram: "",
+            //         tiktok: "",
+            //         openHours: "Mon-Sun: 9AM - 11PM",
+            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
+            //     }
+            // },
+            // copyrightBar: {
+            //     required: false, enabled: false,
+            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
+            // },
         }
     },
     theme: {
@@ -230,6 +235,30 @@ const DEFAULT_CONFIG = {
                 }
             }
         }
+    }
+};
+
+const getSectionIcon = (key: string) => {
+    switch (key) {
+        case 'header': return <PanelTop className="w-5 h-5" />;
+        case 'banner': return <ImageIcon className="w-5 h-5" />;
+        case 'browseMenu': return <MousePointer2 className="w-5 h-5" />;
+        case 'todaysSpecial': return <Star className="w-5 h-5" />;
+        case 'ourMenu':
+        case 'menuGallery': return <List className="w-5 h-5" />;
+        case 'customerComments': return <Quote className="w-5 h-5" />;
+        case 'footer': return <PanelBottom className="w-5 h-5" />;
+        case 'copyrightBar': return <Copyright className="w-5 h-5" />;
+        case 'video': return <Video className="w-5 h-5" />;
+        case 'whatWeDo': return <Shield className="w-5 h-5" />;
+        case 'cards': return <CreditCard className="w-5 h-5" />;
+        case 'form': return <FileText className="w-5 h-5" />;
+        case 'blogList': return <MessageSquare className="w-5 h-5" />;
+        case 'faqList': return <HelpCircle className="w-5 h-5" />;
+        case 'colors': return <Palette className="w-5 h-5" />;
+        case 'fonts': return <Type className="w-5 h-5" />;
+        case 'logos': return <ImageIcon className="w-5 h-5" />;
+        default: return <SettingsIcon className="w-5 h-5" />;
     }
 };
 
@@ -473,7 +502,7 @@ export default function CMSPage() {
                                             {p === 'faq' && <Check className="w-4 h-4" />}
                                             {p === 'theme' && <Palette className="w-4 h-4" />}
                                             <div className="flex flex-col items-start leading-none">
-                                                <span>{p === 'theme' ? 'Branding' : p}</span>
+                                                <span>{p === 'theme' ? 'Branding' : p === 'faq' ? 'FAQs' : p}</span>
                                                 {!config[p].enabled && <span className="text-[9px] font-bold text-red-500 mt-0.5">Hidden</span>}
                                             </div>
                                         </div>
@@ -540,7 +569,7 @@ export default function CMSPage() {
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${isExpanded ? "bg-brand-500 text-white shadow-md shadow-brand-500/20" : "bg-gray-100 dark:bg-gray-700 text-gray-500"}`}>
-                                                        <SettingsIcon className="w-5 h-5" />
+                                                        {getSectionIcon(sectionKey)}
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-gray-800 dark:text-gray-200 capitalize text-sm">
@@ -582,9 +611,14 @@ export default function CMSPage() {
 
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat'];
 
+
+                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
+
+                                                            const displayLabel = field === 'title' ? 'Heading' : field === 'subtitle' ? 'Subheading' : field.replace(/([A-Z])/g, ' $1');
+
                                                             return (
-                                                                <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' ? 'md:col-span-2' : ''} space-y-1.5`}>
-                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{field.replace(/([A-Z])/g, ' $1')}</label>
+                                                                <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || (isImageField && sectionKey === 'banner') ? 'md:col-span-2' : ''} space-y-1.5`}>
+                                                                    {!isImageField && <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>}
                                                                     {field === 'description' || field === 'address' ? (
                                                                         <textarea
                                                                             rows={3}
@@ -655,9 +689,10 @@ export default function CMSPage() {
                                                                         </div>
                                                                     ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
                                                                         <ImageUpload
-                                                                            label={field.replace(/([A-Z])/g, ' $1').replace('Url', ' Image')}
+                                                                            label=""
                                                                             value={section.content[field]}
                                                                             onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
+                                                                            isBanner={sectionKey === 'banner'}
                                                                         />
                                                                     ) : (
                                                                         <input

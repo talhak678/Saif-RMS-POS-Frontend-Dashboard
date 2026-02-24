@@ -89,7 +89,7 @@ export default function FaqsPage({ embedded = false }: Props) {
     if (loading) return <div className="flex justify-center items-center h-96"><Loader size="md" /></div>;
 
     return (
-        <ProtectedRoute module="cms-website:faqs">
+        <ProtectedRoute module="cms-website:faqs" component={embedded}>
 
             <div className="space-y-6">
                 {!embedded && (

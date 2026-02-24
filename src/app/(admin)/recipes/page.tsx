@@ -136,7 +136,7 @@ export default function RecipesPage() {
             recipeGroups.map((group) => (
               <div
                 key={group.menuItemId}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col"
+                className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col"
               >
                 {/* Card Header (Image & Title) */}
                 <div className="relative h-32 bg-gray-100 dark:bg-gray-700">
@@ -213,7 +213,7 @@ export default function RecipesPage() {
         {/* DELETE CONFIRMATION MODAL */}
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
               <div className="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle size={28} />
               </div>

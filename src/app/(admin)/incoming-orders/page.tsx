@@ -6,6 +6,7 @@ import { Eye, X, RefreshCw, Clock, ChevronRight, LayoutGrid, List, Bell, BellOff
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import DatePicker from "@/components/common/DatePicker";
 import { toast } from "sonner";
 
 const ORDER_STATUSES = [
@@ -174,48 +175,26 @@ export default function IncomingOrdersPage() {
     // Separate status filters per tab
     const [latestStatusFilter, setLatestStatusFilter] = useState("PENDING");
     const [allStatusFilter, setAllStatusFilter] = useState("ALL");
+    const [startDate, setStartDate] = useState(new Date(Date.now() - 86400000).toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
     // Sound alert state
     const [isMuted, setIsMuted] = useState(false);
     const isMutedRef = useRef(false);
-    const audioCtxRef = useRef<AudioContext | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const ringIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isRingingRef = useRef(false);
 
-    // Play a realistic bell sound
+    // Play custom shop bell sound
     const playDing = () => {
         try {
-            if (!audioCtxRef.current) {
-                audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+            if (!audioRef.current) {
+                audioRef.current = new Audio("/Shop_bell.wav");
             }
-            const ctx = audioCtxRef.current;
-            if (ctx.state === 'suspended') ctx.resume();
-
-            const startTime = ctx.currentTime;
-
-            // Multiple oscillators for a rich "Bell" harmonic spectrum
-            const frequencies = [880, 1100, 1320, 1760]; // Harmonics of A5
-
-            frequencies.forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = i === 0 ? "sine" : "triangle";
-                osc.frequency.setValueAtTime(freq, startTime);
-
-                // Attack and long decay for bell effect
-                gain.gain.setValueAtTime(0, startTime);
-                gain.gain.linearRampToValueAtTime(i === 0 ? 0.4 : 0.1, startTime + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5 + (i * 0.2));
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start(startTime);
-                osc.stop(startTime + 2);
-            });
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(e => console.error("Audio play failed:", e));
         } catch (e) { console.error("Audio error:", e); }
     };
 
@@ -268,7 +247,7 @@ export default function IncomingOrdersPage() {
 
     // Fetch on filter change — tab specific
     const activeStatusFilter = activeTab === "latest" ? latestStatusFilter : allStatusFilter;
-    useEffect(() => { fetchOrders(); }, [branchFilter, latestStatusFilter, allStatusFilter, activeTab]);
+    useEffect(() => { fetchOrders(); }, [branchFilter, latestStatusFilter, allStatusFilter, activeTab, startDate, endDate]);
 
     // 30s polling — both tabs
     useEffect(() => {
@@ -278,7 +257,7 @@ export default function IncomingOrdersPage() {
         return () => {
             if (pollingRef.current) clearInterval(pollingRef.current);
         };
-    }, [branchFilter, latestStatusFilter, allStatusFilter, activeTab]);
+    }, [branchFilter, latestStatusFilter, allStatusFilter, activeTab, startDate, endDate]);
 
     // Ring when pending orders exist
     useEffect(() => {
@@ -299,14 +278,8 @@ export default function IncomingOrdersPage() {
             if (!silent) setLoading(true);
             const params: string[] = [];
 
-            // Default to last 2 days (yesterday and today)
-            const today = new Date();
-            const yesterday = new Date();
-            yesterday.setDate(today.getDate() - 1);
-
-            const formatDate = (date: Date) => date.toISOString().split('T')[0];
-            params.push(`startDate=${formatDate(yesterday)}`);
-            params.push(`endDate=${formatDate(today)}`);
+            if (startDate) params.push(`startDate=${startDate}`);
+            if (endDate) params.push(`endDate=${endDate}`);
 
             if (branchFilter !== "ALL") params.push(`branchId=${branchFilter}`);
             // Use the active tab's status filter
@@ -465,6 +438,28 @@ export default function IncomingOrdersPage() {
                     <option value="ALL">All Branches</option>
                     {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
+
+                {/* <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-brand-500 min-w-[280px]">
+                    <div className="flex flex-1 items-center gap-2">
+                        <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                        <DatePicker
+                            value={startDate}
+                            onChange={setStartDate}
+                            placeholder="Select"
+                            className="text-xs font-bold text-gray-700 dark:text-gray-200"
+                        />
+                    </div>
+                    <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                    <div className="flex flex-1 items-center gap-2">
+                        <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                        <DatePicker
+                            value={endDate}
+                            onChange={setEndDate}
+                            placeholder="Select"
+                            className="text-xs font-bold text-gray-700 dark:text-gray-200"
+                        />
+                    </div>
+                </div> */}
                 <select
                     value={statusVal}
                     onChange={(e) => setStatusVal(e.target.value)}
