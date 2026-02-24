@@ -1,12 +1,16 @@
+"use client";
+
 import React from "react";
 import { Modal } from "@/components/ui/modal";
+import { X, Info } from "lucide-react";
 
 export interface DetailField {
     label: string;
     value?: string | number | null;
     render?: (data: any) => React.ReactNode;
-    key?: string; // key to access in data if value is not provided
-    fullWidth?: boolean; // if true, takes up full width in the grid
+    key?: string;
+    fullWidth?: boolean;
+    icon?: React.ReactNode;
 }
 
 interface ViewDetailModalProps {
@@ -30,14 +34,33 @@ export const ViewDetailModal: React.FC<ViewDetailModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            className="max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl"
+            className="max-w-4xl bg-white dark:bg-gray-900 
+                 rounded-2xl shadow-2xl border border-gray-200 
+                 dark:border-gray-700 flex flex-col 
+                 max-h-fit"
         >
-            <div className="p-6">
-                <h2 className="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b pb-2 dark:border-gray-700">
-                    {title}
-                </h2>
+            {/* Header */}
+            <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-brand-600/10 flex items-center justify-center">
+                        <Info size={18} className="text-brand-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {title}
+                    </h2>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <button
+                    onClick={onClose}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                >
+                    <X size={18} className="text-gray-500" />
+                </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fields.map((field, index) => {
                         const content = field.render
                             ? field.render(data)
@@ -52,25 +75,35 @@ export const ViewDetailModal: React.FC<ViewDetailModalProps> = ({
                                 key={index}
                                 className={`${field.fullWidth ? "md:col-span-2" : ""}`}
                             >
-                                <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                                    {field.label}
-                                </div>
-                                <div className="text-base text-gray-800 dark:text-gray-200 mt-1 break-words">
-                                    {content}
+                                <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        {field.icon && (
+                                            <span className="text-brand-600">{field.icon}</span>
+                                        )}
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                            {field.label}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200 break-words">
+                                        {content}
+                                    </div>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+            </div>
 
-                <div className="mt-8 flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                        Close
-                    </button>
-                </div>
+            {/* Footer */}
+            <div className="shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                <button
+                    onClick={onClose}
+                    className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 
+                     text-white rounded-xl text-xs font-semibold 
+                     uppercase tracking-wide transition active:scale-95"
+                >
+                    Close
+                </button>
             </div>
         </Modal>
     );

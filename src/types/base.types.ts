@@ -1,6 +1,6 @@
 export interface iBaseDTO {
-    createdAt?: Date,
-    udpatedAt?: Date,
+    createdAt?: Date | string,
+    updatedAt?: Date | string,
 }
 
 export interface iApiResponse {
@@ -26,6 +26,6 @@ export interface iAPIErrorRes {
 }
 
 export enum statusEnum {
-    ACTIVE = 1,
-    INACTIVE = 2,
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
 }
