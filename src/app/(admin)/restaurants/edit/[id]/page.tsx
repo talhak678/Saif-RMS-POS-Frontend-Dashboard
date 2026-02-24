@@ -35,6 +35,7 @@ export default function EditRestaurantPage() {
         instagramUrl: "",
         tiktokUrl: "",
         metaPixelId: "",
+        customDomain: "",
     });
 
     const [loading, setLoading] = useState(true);
@@ -71,6 +72,7 @@ export default function EditRestaurantPage() {
                     instagramUrl: data.instagramUrl || "",
                     tiktokUrl: data.tiktokUrl || "",
                     metaPixelId: data.metaPixelId || "",
+                    customDomain: data.customDomain || "",
                 });
             } else {
                 setError("Restaurant not found");
@@ -183,6 +185,18 @@ export default function EditRestaurantPage() {
                             value={form.slug}
                             onChange={handleChange}
                             placeholder="saifs-kitchen"
+                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        />
+                    </div>
+
+                    {/* CUSTOM DOMAIN */}
+                    <div>
+                        <label className="text-sm font-medium dark:text-gray-300">Custom Domain / URL</label>
+                        <input
+                            name="customDomain"
+                            value={form.customDomain}
+                            onChange={handleChange}
+                            placeholder="alshaikhmandi.vercel.app"
                             className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                         />
                     </div>
