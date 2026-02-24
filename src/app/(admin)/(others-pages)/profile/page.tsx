@@ -20,6 +20,11 @@ import {
   RefreshCw,
   CalendarDays,
   Clock,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  RefreshCcw,
+  Bell,
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -31,7 +36,7 @@ import ImageUpload from "@/components/common/ImageUpload";
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import RenewModal from "./renew-modal";
 
-type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY";
+type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY" | "SUBSCRIPTION_REQUESTS";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyAhwD5EE1C7J_K5qaqlPuBX6o0SjqJ2wYw";
 
@@ -97,6 +102,10 @@ export default function ProfilePage() {
 
   // Payment History State
   const [payments, setPayments] = useState<any[]>([]);
+
+  // Subscription Requests State (Super Admin only)
+  const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
+  const [subReqLoading, setSubReqLoading] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -287,10 +296,58 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchSubscriptionRequests = async () => {
+    try {
+      setSubReqLoading(true);
+      const res = await api.get('/subscription-requests');
+      if (res.data?.success) {
+        setSubscriptionRequests(res.data.data || []);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch subscription requests');
+    } finally {
+      setSubReqLoading(false);
+    }
+  };
+
+  const handleApproveReject = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    const label = status === 'APPROVED' ? 'approve' : 'reject';
+    if (!confirm(`Are you sure you want to ${label} this request?`)) return;
+    try {
+      setLoading(true);
+      const res = await api.put(`/subscription-requests/${id}`, { status });
+      if (res.data?.success) {
+        toast.success(`Request ${status.toLowerCase()} successfully!`);
+        fetchSubscriptionRequests();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to ${label} request`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSubRequest = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this subscription request?')) return;
+    try {
+      setLoading(true);
+      const res = await api.delete(`/subscription-requests/${id}`);
+      if (res.data?.success) {
+        toast.success('Request deleted successfully!');
+        fetchSubscriptionRequests();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to delete request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const tabs = isSuperAdmin
     ? [
       { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
-      // { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
+      { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
+      { id: "SUBSCRIPTION_REQUESTS", label: "Subscription Requests", icon: <Bell className="w-4 h-4" /> },
     ]
     : [
       { id: "RESTAURANT_INFO", label: "Restaurant Information", icon: <Building2 className="w-4 h-4" /> },
@@ -318,6 +375,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isSuperAdmin) {
       setActiveTab("INFO");
+      fetchSubscriptionRequests();
     }
   }, [isSuperAdmin]);
 
@@ -1010,6 +1068,137 @@ export default function ProfilePage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {/* SUBSCRIPTION REQUESTS - Super Admin only */}
+            {activeTab === "SUBSCRIPTION_REQUESTS" && isSuperAdmin && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-lg font-black text-gray-800 dark:text-white">Subscription Requests</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">Review and manage all restaurant subscription upgrade requests</p>
+                  </div>
+                  <button
+                    onClick={fetchSubscriptionRequests}
+                    disabled={subReqLoading}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5d69b9]/10 text-[#5d69b9] hover:bg-[#5d69b9]/20 font-bold text-xs transition-all"
+                  >
+                    <RefreshCcw className={`w-3.5 h-3.5 ${subReqLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                </div>
+
+                {subReqLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader size="md" />
+                  </div>
+                ) : subscriptionRequests.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Bell className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <p className="text-gray-400 font-bold">No subscription requests found</p>
+                    <p className="text-xs text-gray-400 mt-1">Requests will appear here when restaurants submit upgrade requests</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {subscriptionRequests.map((req) => (
+                      <div
+                        key={req.id}
+                        className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 transition-all hover:shadow-md hover:border-[#5d69b9]/20"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                          {/* Restaurant Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 rounded-xl bg-[#5d69b9]/10 flex items-center justify-center shrink-0">
+                                <Building2 className="w-5 h-5 text-[#5d69b9]" />
+                              </div>
+                              <div>
+                                <p className="font-black text-gray-900 dark:text-white text-sm">
+                                  {req.restaurant?.name || 'Unknown Restaurant'}
+                                </p>
+                                <p className="text-xs text-gray-400">/{req.restaurant?.slug}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Plan</p>
+                                <p className="text-xs font-black text-[#5d69b9] mt-0.5">{req.plan}</p>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Billing</p>
+                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">{req.billingCycle}</p>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status</p>
+                                <span className={`inline-block text-[9px] font-black uppercase mt-0.5 px-2 py-0.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                    : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                  }`}>
+                                  {req.status}
+                                </span>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Received</p>
+                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">
+                                  {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+                              </div>
+                            </div>
+
+                            {req.description && (
+                              <p className="mt-3 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 italic">
+                                &quot;{req.description}&quot;
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Action Buttons */}
+                          {req.status === 'PENDING' ? (
+                            <div className="flex flex-row md:flex-col gap-2 shrink-0">
+                              <button
+                                onClick={() => handleApproveReject(req.id, 'APPROVED')}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleApproveReject(req.id, 'REJECTED')}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-red-500/20"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                Reject
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSubRequest(req.id)}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Delete
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleDeleteSubRequest(req.id)}
+                              disabled={loading}
+                              className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95 shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
