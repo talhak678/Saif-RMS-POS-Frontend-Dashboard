@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, Plus, Utensils, LayoutGrid, Trash2 } from "lucide-react";
-// Modals import karein
+import { Plus, Utensils, LayoutGrid, Trash2 } from "lucide-react";
 import AddCategoryModal from "./AddCategoryModal";
 import DeleteCategoryModal from "./DeleteCategoryModal";
-import { ViewDetailModal } from "@/components/ViewDetailModal";
+import CategoryDetailModal from "./CategoryDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 
@@ -14,11 +13,10 @@ export default function CategoriesPage() {
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // --- VIEW DETAILS MODAL ---
-    const [viewCategory, setViewCategory] = useState<any>(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    // Detail panel
+    const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    // Modal States
+    // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -31,7 +29,6 @@ export default function CategoriesPage() {
         try {
             setLoading(true);
             const res = await api.get("/categories");
-
             if (res.data?.success) {
                 const sorted = res.data.data.sort(
                     (a: any, b: any) =>
@@ -47,14 +44,15 @@ export default function CategoriesPage() {
         }
     };
 
-    // Delete Handler
     const handleDelete = async () => {
         if (!deleteId) return;
         try {
             setDeleteLoading(true);
             await api.delete(`/categories/${deleteId}`);
             setDeleteId(null);
-            fetchCategories(); // Refresh list
+            // Close detail panel if we just deleted the open category
+            if (selectedId === deleteId) setSelectedId(null);
+            fetchCategories();
         } catch (error) {
             console.error("Delete failed", error);
         } finally {
@@ -65,11 +63,17 @@ export default function CategoriesPage() {
     return (
         <ProtectedRoute module="menu-management:categories">
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+
                 {/* HEADER */}
-                <div className="md:flex gap-1 items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                         <LayoutGrid className="w-6 h-6 text-brand-600" />
                         Categories
+                        {!loading && (
+                            <span className="ml-1 text-sm font-medium text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 px-2.5 py-0.5 rounded-full">
+                                {categories.length}
+                            </span>
+                        )}
                     </h1>
 
                     <button
@@ -77,91 +81,79 @@ export default function CategoriesPage() {
                         className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 hover:opacity-90"
                     >
                         <Plus className="h-4 w-4" />
-                        Add New Category
+                        Add Category
                     </button>
                 </div>
 
-                {/* TABLE */}
-                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
-                            <tr>
-                                <th className="px-4 py-3 text-left">#</th>
-                                <th className="px-4 py-3 text-left">Category Name</th>
-                                <th className="px-4 py-3 text-left">Description</th>
-                                <th className="px-4 py-3 text-center">Menu Items</th>
-                                <th className="px-4 py-3 text-left">Created</th>
-                                <th className="px-4 py-3 text-left">Actions</th>
-                            </tr>
-                        </thead>
+                {/* CONTENT */}
+                {loading ? (
+                    <div className="flex items-center justify-center py-32">
+                        <Loader size="md" />
+                    </div>
+                ) : categories.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-32 text-gray-400 gap-3">
+                        <LayoutGrid className="w-14 h-14 opacity-20" />
+                        <p className="text-base font-medium">No categories yet</p>
+                        <p className="text-sm">Create your first category to organize your menu</p>
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="mt-2 bg-button text-white px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add First Category
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                        {categories.map((cat: any) => (
+                            <div
+                                key={cat.id}
+                                onClick={() => setSelectedId(cat.id)}
+                                className="relative flex flex-col items-center justify-center gap-2.5 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-brand-300 dark:hover:border-brand-600 transition-all cursor-pointer group select-none"
+                            >
+                                {/* Delete button — top right on hover */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDeleteId(cat.id);
+                                    }}
+                                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Delete"
+                                >
+                                    <Trash2 size={13} />
+                                </button>
 
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={6} className="py-20 text-center">
-                                        <Loader size="md" />
-                                    </td>
-                                </tr>
-                            ) : categories.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="py-10 text-center text-gray-500">
-                                        No categories found
-                                    </td>
-                                </tr>
-                            ) : (
-                                categories.map((cat: any, index: number) => (
-                                    <tr
-                                        key={cat.id}
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                                    >
-                                        <td className="px-4 py-3 text-gray-500">{index + 1}</td>
+                                {/* Icon */}
+                                <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center group-hover:bg-brand-100 dark:group-hover:bg-brand-900/50 transition-colors">
+                                    <Utensils className="w-7 h-7 text-brand-500 dark:text-brand-400" />
+                                </div>
 
-                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-                                            {cat.name}
-                                        </td>
+                                {/* Name */}
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 text-center leading-tight px-1 line-clamp-2">
+                                    {cat.name}
+                                </p>
 
-                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                            {cat.description || "N/A"}
-                                        </td>
+                                {/* Item count badge */}
+                                <span className="text-xs font-medium text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 px-2.5 py-0.5 rounded-full">
+                                    {cat._count?.menuItems ?? 0} items
+                                </span>
+                            </div>
+                        ))}
 
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800">
-                                                {cat._count?.menuItems || 0} Items
-                                            </span>
-                                        </td>
-
-                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
-                                            {new Date(cat.createdAt).toLocaleDateString()}
-                                        </td>
-
-                                        <td className="px-4 py-3 flex items-center gap-2">
-                                            {/* View Button */}
-                                            <button
-                                                onClick={() => {
-                                                    setViewCategory(cat);
-                                                    setIsViewModalOpen(true);
-                                                }}
-                                                className="p-2 rounded transition-colors bg-brand-50 text-brand-600 hover:bg-brand-100 dark:bg-brand-900/40 dark:text-brand-300 dark:hover:bg-brand-900/60"
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
-
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={() => setDeleteId(cat.id)}
-                                                className="p-2 rounded hover:bg-red-100 text-gray-500 hover:text-red-600 dark:hover:bg-red-900/30 transition-colors"
-                                                title="Delete Category"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                        {/* Add New Card */}
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="flex flex-col items-center justify-center gap-2.5 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-brand-400 dark:hover:border-brand-500 hover:bg-brand-50/40 dark:hover:bg-brand-900/10 transition-all cursor-pointer group"
+                        >
+                            <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-brand-100 dark:group-hover:bg-brand-900/30 transition-colors">
+                                <Plus className="w-7 h-7 text-gray-400 group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                                Add New
+                            </p>
+                        </button>
+                    </div>
+                )}
 
                 {/* ADD CATEGORY MODAL */}
                 {showAddModal && (
@@ -172,7 +164,7 @@ export default function CategoriesPage() {
                     />
                 )}
 
-                {/* DELETE CONFIRMATION MODAL */}
+                {/* DELETE MODAL */}
                 {deleteId && (
                     <DeleteCategoryModal
                         loading={deleteLoading}
@@ -181,21 +173,10 @@ export default function CategoriesPage() {
                     />
                 )}
 
-                {/* VIEW DETAIL MODAL */}
-                <ViewDetailModal
-                    isOpen={isViewModalOpen}
-                    onClose={() => setIsViewModalOpen(false)}
-                    title="Category Details"
-                    data={viewCategory}
-                    fields={[
-                        { label: "Name", key: "name" },
-                        { label: "Description", key: "description", fullWidth: true },
-                        { label: "Total Menu Items", render: (data: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 border border-brand-100 dark:border-brand-800">{data?._count?.menuItems || 0} Items</span> },
-                        { label: "ID", key: "id" },
-                        { label: "Restaurant ID", key: "restaurantId" },
-                        { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
-                        { label: "Last Updated", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
-                    ]}
+                {/* CATEGORY DETAIL SIDE PANEL */}
+                <CategoryDetailModal
+                    categoryId={selectedId}
+                    onClose={() => setSelectedId(null)}
                 />
             </div>
         </ProtectedRoute>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "@/services/api";
 import {
     Eye,
@@ -11,22 +11,26 @@ import {
     X,
     Save,
     AlertTriangle,
+    Search,
+    Filter,
+    Upload,
+    MoreVertical,
+    ChevronDown,
 } from "lucide-react";
-import { ViewDetailModal } from "@/components/ViewDetailModal";
+import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
 
 export default function IngredientsPage() {
+    const router = useRouter();
     const [ingredients, setIngredients] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // --- VIEW DETAIS MODAL ---
-    const [viewIngredient, setViewIngredient] = useState<any>(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     // --- MODAL STATES ---
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<any>(null); // Null = Add Mode, Object = Edit Mode
+    const [editingItem, setEditingItem] = useState<any>(null);
     const [formData, setFormData] = useState({ name: "", unit: "" });
     const [formLoading, setFormLoading] = useState(false);
 
@@ -37,13 +41,11 @@ export default function IngredientsPage() {
         fetchIngredients();
     }, []);
 
-    // --- FETCH DATA ---
     const fetchIngredients = async () => {
         try {
             setLoading(true);
             const res = await api.get("/ingredients");
             if (res.data?.success) {
-                // Sorting by Created Date (Newest First)
                 const sorted = res.data.data.sort(
                     (a: any, b: any) =>
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -52,12 +54,12 @@ export default function IngredientsPage() {
             }
         } catch (err) {
             console.error("Ingredients fetch failed", err);
+            toast.error("Failed to load ingredients");
         } finally {
             setLoading(false);
         }
     };
 
-    // --- HANDLERS ---
     const openAddModal = () => {
         setEditingItem(null);
         setFormData({ name: "", unit: "" });
@@ -75,17 +77,17 @@ export default function IngredientsPage() {
         setFormLoading(true);
         try {
             if (editingItem) {
-                // Update Logic
                 await api.put(`/ingredients/${editingItem.id}`, formData);
+                toast.success("Ingredient updated");
             } else {
-                // Create Logic
                 await api.post("/ingredients", formData);
+                toast.success("Ingredient created");
             }
             setIsFormModalOpen(false);
-            fetchIngredients(); // Refresh list
+            fetchIngredients();
         } catch (error) {
             console.error("Operation failed", error);
-            alert("Something went wrong");
+            toast.error("Operation failed");
         } finally {
             setFormLoading(false);
         }
@@ -96,187 +98,195 @@ export default function IngredientsPage() {
         setDeleteLoading(true);
         try {
             await api.delete(`/ingredients/${deleteId}`);
+            toast.success("Ingredient deleted");
             setDeleteId(null);
-            fetchIngredients(); // Refresh list
+            fetchIngredients();
         } catch (error) {
             console.error("Delete failed", error);
-            alert("Could not delete ingredient");
+            toast.error("Delete failed");
         } finally {
             setDeleteLoading(false);
         }
     };
 
+    const filteredIngredients = useMemo(() => {
+        return ingredients.filter(ing =>
+            ing.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [ingredients, searchQuery]);
+
+    const getOnHand = (stocks: any[] = []) => {
+        return stocks.reduce((sum, s) => sum + Number(s.quantity), 0);
+    };
+
     return (
         <ProtectedRoute module="inventory-recipes:ingredients">
-            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen bg-white dark:bg-gray-950 pb-20 font-outfit">
 
-                {/* HEADER */}
-                <div className="md:flex gap-1 items-center justify-between mb-6">
-                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                        <Package className="text-brand-600" />
-                        Ingredients Inventory
-                    </h1>
+                {/* --- SIMPLIFIED HEADER --- */}
+                <div className="px-8 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-brand-50 dark:bg-brand-900/30 rounded-xl flex items-center justify-center text-brand-600">
+                            <Package size={22} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Ingredients</h1>
+                            <p className="text-xs text-gray-500 font-medium tracking-tight">Manage your restaurant inventory and stock</p>
+                        </div>
+                    </div>
 
-                    <button
-                        onClick={openAddModal}
-                        className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex items-center gap-2"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Add New Ingredient
-                    </button>
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="relative group flex-1 md:w-64">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search inventory..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl outline-none text-sm transition-all"
+                            />
+                        </div>
+                        <button className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 hover:text-brand-600 transition-all">
+                            <Filter size={18} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* TABLE */}
-                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 tracking-wider">
-                            <tr>
-                                <th className="px-4 py-3 text-left">#</th>
-                                <th className="px-4 py-3 text-left">Ingredient Name</th>
-                                <th className="px-4 py-3 text-left">Unit</th>
-                                <th className="px-4 py-3 text-center">Stock Batches</th>
-                                <th className="px-4 py-3 text-center">Used In Recipes</th>
-                                <th className="px-4 py-3 text-left">Created</th>
-                                <th className="px-4 py-3 text-left">Actions</th>
-                            </tr>
-                        </thead>
+                <div className="p-8 max-w-7xl mx-auto space-y-6">
 
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={7} className="py-20 text-center text-gray-500">
-                                        <Loader size="md" />
-                                    </td>
-                                </tr>
-                            ) : ingredients.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="py-10 text-center text-gray-500">
-                                        No ingredients found. Add one to get started.
-                                    </td>
-                                </tr>
-                            ) : (
-                                ingredients.map((ing: any, index: number) => (
-                                    <tr
-                                        key={ing.id}
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                                    >
-                                        <td className="px-4 py-3 text-gray-500">{index + 1}</td>
+                    {/* --- ACTIONS BAR --- */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm gap-4">
+                        <div className="flex gap-4">
+                            <button className="text-xs font-bold text-brand-600">All Items</button>
+                            <button className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors">Low Stocks</button>
+                            <button className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors">History</button>
+                        </div>
+                        <div className="flex gap-3 w-full sm:w-auto">
+                            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 hover:bg-gray-100 transition-all">
+                                <Upload size={14} /> Bulk
+                            </button>
+                            <button
+                                onClick={openAddModal}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition-all shadow-md shadow-brand-600/10"
+                            >
+                                <Plus size={16} /> New Ingredient
+                            </button>
+                        </div>
+                    </div>
 
-                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-                                            {ing.name}
-                                        </td>
-
-                                        <td className="px-4 py-3">
-                                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border dark:border-gray-600">
-                                                {ing.unit}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                                {ing._count?.stocks || 0} Batches
-                                            </span>
-                                        </td>
-
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                                {ing._count?.recipes || 0} Recipes
-                                            </span>
-                                        </td>
-
-                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
-                                            {new Date(ing.createdAt).toLocaleDateString()}
-                                        </td>
-
-                                        <td className="px-4 py-3 flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setViewIngredient(ing);
-                                                    setIsViewModalOpen(true);
-                                                }}
-                                                className="p-2 rounded transition-colors bg-brand-50 text-brand-600 hover:bg-brand-100 dark:bg-brand-900/40 dark:text-brand-300 dark:hover:bg-brand-900/60"
-                                                title="View Details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => openEditModal(ing)}
-                                                className="p-2 rounded transition-colors bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                                                title="Edit"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => setDeleteId(ing.id)}
-                                                className="p-2 rounded transition-colors bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/40"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
+                    {/* --- SIMPLE TABLE --- */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+                                    <tr>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Name</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Category</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">In Stock</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Par Level</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Unit Price</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right pr-8">Total Value</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider"></th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                                    {loading ? (
+                                        <tr><td colSpan={7} className="py-20 text-center"><Loader size="sm" /></td></tr>
+                                    ) : filteredIngredients.length === 0 ? (
+                                        <tr><td colSpan={7} className="py-20 text-center text-gray-400 text-sm italic">No records found.</td></tr>
+                                    ) : (
+                                        filteredIngredients.map((ing: any) => (
+                                            <tr
+                                                key={ing.id}
+                                                className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                                onClick={() => router.push(`/ingredients/${ing.id}`)}
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <div>
+                                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{ing.name}</span>
+                                                        <span className="block text-[10px] text-gray-400 mt-0.5 font-medium uppercase">{ing.id.slice(-6)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-xs text-gray-500 font-medium">Liquor / Bar</td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="inline-flex items-baseline gap-1 px-3 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 rounded-lg">
+                                                        <span className="text-sm font-bold">{getOnHand(ing.stocks)}</span>
+                                                        <span className="text-[10px] font-medium opacity-70 uppercase">{ing.unit}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-center text-xs text-gray-400 font-medium italic">Not set</td>
+                                                <td className="px-6 py-4 text-right text-xs text-gray-500 font-semibold">$0.00</td>
+                                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-800 dark:text-gray-200 pr-8">$0.00</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                                                        <button onClick={() => openEditModal(ing)} className="p-2 text-gray-400 hover:text-brand-600 transition-colors">
+                                                            <Edit size={16} />
+                                                        </button>
+                                                        <button onClick={() => setDeleteId(ing.id)} className="p-2 text-gray-400 hover:text-rose-600 transition-colors">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                {/* --- ADD / EDIT MODAL --- */}
+                {/* --- SIMPLE MODALS --- */}
                 {isFormModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                    {editingItem ? "Edit Ingredient" : "Add New Ingredient"}
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+                            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                                <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                                    {editingItem ? "Edit Ingredient" : "New Ingredient"}
                                 </h2>
-                                <button onClick={() => setIsFormModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                <button onClick={() => setIsFormModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Name
-                                    </label>
+                            <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 ml-1">Name</label>
                                     <input
                                         required
                                         type="text"
-                                        placeholder="e.g. Tomatoes"
+                                        placeholder="Tomatoes, Flour, etc."
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500"
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
                                     />
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Unit (e.g. kg, liter, pcs)
-                                    </label>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 ml-1">Base Unit</label>
                                     <input
                                         required
                                         type="text"
-                                        placeholder="e.g. kg"
+                                        placeholder="kg, box, litre"
                                         value={formData.unit}
                                         onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                        className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500"
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
                                     />
                                 </div>
 
-                                <div className="flex justify-end gap-3 pt-4">
+                                <div className="flex gap-3 pt-2">
                                     <button
                                         type="button"
                                         onClick={() => setIsFormModalOpen(false)}
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                        className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={formLoading}
-                                        className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none min-w-[140px]"
+                                        className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
                                     >
-                                        {formLoading ? <Loader size="sm" className="space-y-0" /> : <><Save size={16} /> Save Ingredient</>}
+                                        {formLoading ? "Saving..." : "Save Item"}
                                     </button>
                                 </div>
                             </form>
@@ -284,53 +294,21 @@ export default function IngredientsPage() {
                     </div>
                 )}
 
-                {/* --- DELETE CONFIRMATION MODAL --- */}
                 {deleteId && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
-                            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <AlertTriangle size={24} />
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-8 text-center animate-in fade-in zoom-in duration-200">
+                            <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <AlertTriangle size={28} />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete Ingredient?</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                                This will remove the ingredient from the system. This action cannot be undone.
-                            </p>
-                            <div className="flex gap-3 justify-center">
-                                <button
-                                    onClick={() => setDeleteId(null)}
-                                    disabled={deleteLoading}
-                                    className="flex-1 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={deleteLoading}
-                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 flex items-center justify-center"
-                                >
-                                    {deleteLoading ? <Loader size="sm" className="space-y-0" /> : "Delete"}
-                                </button>
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Delete Item?</h3>
+                            <p className="text-xs text-gray-500 mb-6">Are you sure? This action will remove the ingredient from your list and recipes.</p>
+                            <div className="flex gap-3">
+                                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600">Cancel</button>
+                                <button onClick={handleDelete} className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-rose-500/20">Delete</button>
                             </div>
                         </div>
                     </div>
                 )}
-
-                {/* VIEW DETAIL MODAL */}
-                <ViewDetailModal
-                    isOpen={isViewModalOpen}
-                    onClose={() => setIsViewModalOpen(false)}
-                    title="Ingredient Details"
-                    data={viewIngredient}
-                    fields={[
-                        { label: "Name", key: "name" },
-                        { label: "Unit", key: "unit" },
-                        { label: "Stock Batches", render: (data: any) => data?._count?.stocks || 0 },
-                        { label: "Recipes Used In", render: (data: any) => data?._count?.recipes || 0 },
-                        { label: "Created At", render: (data: any) => new Date(data?.createdAt).toLocaleString() },
-                        { label: "Last Updated", render: (data: any) => new Date(data?.updatedAt).toLocaleString() },
-                        { label: "ID", key: "id" },
-                    ]}
-                />
             </div>
         </ProtectedRoute>
     );
