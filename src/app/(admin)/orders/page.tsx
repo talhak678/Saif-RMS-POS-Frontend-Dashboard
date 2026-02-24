@@ -273,7 +273,7 @@ export default function OrdersPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Incoming Orders</h1>
-              <p className="text-[10px] opacity-80 uppercase font-black tracking-widest">Powered by BMS POS</p>
+              <p className="text-[10px] opacity-80 uppercase font-bold tracking-widest">Powered by BMS POS</p>
             </div>
           </div>
 
@@ -281,7 +281,7 @@ export default function OrdersPage() {
             {/* DATE FILTER */}
             <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border border-white/20 shadow-sm text-gray-700 dark:text-white">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                <span className="text-[10px] uppercase font-bold text-gray-400">From</span>
                 <input
                   type="date"
                   value={startDate}
@@ -292,7 +292,7 @@ export default function OrdersPage() {
               </div>
               <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                <span className="text-[10px] uppercase font-bold text-gray-400">To</span>
                 <input
                   type="date"
                   value={endDate}
@@ -468,19 +468,19 @@ export default function OrdersPage() {
                       />
                     </th>
                     <th className="p-4 w-14"></th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Ref#</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Cust Ref#</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Branch Name</th>
-                    <th className="p-4 text-[11px) font-black uppercase text-gray-400 tracking-wider">Name</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Contact Phone</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-center">TransType</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-center">Payment</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-right">Total</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-right">Tax</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-right">Total W/Tax</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Status</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Platform</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Date</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Ref#</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Cust Ref#</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Branch Name</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Name</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Contact Phone</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Type</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Payment</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Total</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Tax</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Final</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Status</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Platform</th>
+                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
@@ -544,7 +544,7 @@ export default function OrdersPage() {
                           </div>
                         </td>
                         <td className="p-4 text-center">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase ${o.payment?.method === "CASH" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40" : "bg-blue-50 text-blue-600 dark:bg-blue-900/40"
+                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase ${o.payment?.method === "CASH" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40" : "bg-blue-50 text-blue-600 dark:bg-blue-900/40"
                             }`}>
                             {o.payment?.method || "CASH"}
                           </span>
@@ -616,7 +616,7 @@ export default function OrdersPage() {
               </div>
               <div className="p-6 space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Select New Status</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Select New Status</label>
                   <select
                     value={newStatus}
                     onChange={(e) => {
@@ -644,9 +644,9 @@ export default function OrdersPage() {
                 <button
                   onClick={handleStatusUpdate}
                   disabled={updating}
-                  className="w-full bg-brand-600 text-white font-black py-4 rounded-2xl hover:bg-brand-700 disabled:opacity-50 shadow-lg shadow-brand-600/30 transition-all active:scale-95"
+                  className="w-full bg-brand-600 text-white font-bold py-3.5 rounded-2xl hover:bg-brand-700 disabled:opacity-50 shadow-lg shadow-brand-600/20 transition-all active:scale-95 text-sm"
                 >
-                  {updating ? "UPDATING..." : "CONFIRM UPDATE"}
+                  {updating ? "Updating..." : "Confirm Update"}
                 </button>
               </div>
             </div>

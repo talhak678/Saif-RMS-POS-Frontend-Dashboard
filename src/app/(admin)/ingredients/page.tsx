@@ -124,7 +124,7 @@ export default function IngredientsPage() {
             <div className="min-h-screen bg-white dark:bg-gray-950 pb-20 font-outfit">
 
                 {/* --- SIMPLIFIED HEADER --- */}
-                <div className="px-8 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
+                <div className="px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-brand-50 dark:bg-brand-900/30 rounded-xl flex items-center justify-center text-brand-600">
                             <Package size={22} />
@@ -152,7 +152,7 @@ export default function IngredientsPage() {
                     </div>
                 </div>
 
-                <div className="p-8 max-w-7xl mx-auto space-y-6">
+                <div className="p-4 md:p-6 space-y-6">
 
                     {/* --- ACTIONS BAR --- */}
                     <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm gap-4">

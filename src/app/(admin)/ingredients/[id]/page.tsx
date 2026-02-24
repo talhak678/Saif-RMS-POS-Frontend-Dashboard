@@ -84,7 +84,7 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                         </button>
                         <div className="flex flex-col">
                             <h1 className="text-lg font-bold text-gray-800 dark:text-white">{ingredient.name}</h1>
-                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Ingredient ID: {ingredient.id.slice(-8)}</p>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Ingredient ID: {ingredient.id.slice(-8)}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -107,8 +107,8 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                                 <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/20 rounded-2xl flex items-center justify-center text-brand-600 mb-4">
                                     <Package size={28} />
                                 </div>
-                                <h2 className="text-xl font-bold text-gray-800 dark:text-white uppercase tracking-tight">{ingredient.name}</h2>
-                                <p className="text-xs text-brand-600 font-bold uppercase mt-1 tracking-widest bg-brand-50 dark:bg-brand-900/40 px-3 py-1 rounded-full">Base Unit: {ingredient.unit}</p>
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-white uppercase tracking-normal">{ingredient.name}</h2>
+                                <p className="text-xs text-brand-600 font-bold uppercase mt-1 tracking-wide bg-brand-50 dark:bg-brand-900/40 px-3 py-1 rounded-full">Base Unit: {ingredient.unit}</p>
 
                                 <div className="w-full grid grid-cols-2 gap-px bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden mt-8">
                                     <div className="bg-white dark:bg-gray-900 p-4">
@@ -123,7 +123,7 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                             </div>
 
                             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 space-y-5 shadow-sm">
-                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 dark:border-gray-800 pb-3">History & Meta</h4>
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wide border-b border-gray-50 dark:border-gray-800 pb-3">History & Meta</h4>
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400">
                                         <Clock size={16} />
@@ -164,7 +164,7 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                                         <Database size={16} className="text-brand-600" />
                                         <h3 className="text-sm font-bold text-gray-800 dark:text-white">Live Stock Inventory</h3>
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{ingredient.stocks?.length || 0} Records</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{ingredient.stocks?.length || 0} Records</span>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left">
