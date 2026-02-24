@@ -34,9 +34,18 @@ export default function UsersPage() {
     const [openUserId, setOpenUserId] = useState<string | null>(null);
 
     const fetchUsers = async (restaurantId?: string) => {
+        const idToUse = restaurantId || selectedRestaurantId;
+
+        // If super admin and no restaurant selected, don't fetch
+        if (isSuperAdmin && !idToUse) {
+            setUsers([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
-            const res = await authServ.getUsers(restaurantId || selectedRestaurantId);
+            const res = await authServ.getUsers(idToUse);
             if (res?.success) {
                 setUsers(res?.data || []);
             } else {
@@ -64,7 +73,12 @@ export default function UsersPage() {
         if (isSuperAdmin) {
             fetchRestaurants();
         }
-        fetchUsers();
+        // Only fetch users if not super admin, or if super admin has a selected restaurant
+        if (!isSuperAdmin || selectedRestaurantId) {
+            fetchUsers();
+        } else {
+            setLoading(false); // Stop initial loader for Super Admin
+        }
     }, [isSuperAdmin]);
 
     const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -87,7 +101,7 @@ export default function UsersPage() {
                                 onChange={handleRestaurantChange}
                                 className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                             >
-                                <option value="">All Restaurants</option>
+                                <option value="">Select Restaurant</option>
                                 {restaurants.map((res) => (
                                     <option key={res.id} value={res.id}>
                                         {res.name}
@@ -117,6 +131,18 @@ export default function UsersPage() {
                                 <tr>
                                     <td colSpan={6} className="py-20 text-center">
                                         <Loader size="md" />
+                                    </td>
+                                </tr>
+                            ) : isSuperAdmin && !selectedRestaurantId ? (
+                                <tr>
+                                    <td colSpan={6} className="py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
+                                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
+                                                <ShieldCheck size={24} />
+                                            </div>
+                                            <p className="font-medium text-lg text-gray-800 dark:text-gray-200">Please Select a Restaurant</p>
+                                            <p className="text-sm max-w-[300px] mx-auto opacity-70">To manage users, please select a restaurant from the dropdown menu above.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : users.length === 0 ? (

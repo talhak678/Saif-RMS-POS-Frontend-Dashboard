@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
-import { Eye, Trash2, Plus, X, Edit } from "lucide-react";
+import { Eye, Trash2, Plus, X, Edit, Filter } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
@@ -50,11 +50,20 @@ function Branch() {
         }
     };
 
-    const fetchBranches = async () => {
+    const fetchBranches = async (id?: string) => {
+        const idToUse = id || restaurantId;
+
+        // If super admin and no restaurant selected, don't fetch
+        if (isSuperAdmin && !idToUse) {
+            setBranches([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             const res = await api.get("/branches", {
-                params: restaurantId ? { restaurantId } : {},
+                params: idToUse ? { restaurantId: idToUse } : {},
             });
             if (res.data?.success) {
                 setBranches(res.data.data);
@@ -70,8 +79,10 @@ function Branch() {
         const id = e.target.value;
         if (id) {
             router.push(`/branches?restaurantId=${id}`);
+            fetchBranches(id);
         } else {
             router.push(`/branches`);
+            setBranches([]);
         }
     };
 
@@ -105,7 +116,7 @@ function Branch() {
                             onChange={handleRestaurantChange}
                             className="p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                         >
-                            <option value="">All Restaurants</option>
+                            <option value="">Select Restaurant</option>
                             {restaurants.map((res: any) => (
                                 <option key={res.id} value={res.id}>
                                     {res.name}
@@ -133,15 +144,15 @@ function Branch() {
             </div>
 
             {/* TABLE */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg overflow-x-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg overflow-x-auto border border-gray-100 dark:border-gray-700 shadow-sm">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-100 dark:bg-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th className="px-4 py-3">#</th>
-                            <th className="px-4 py-3">Branch</th>
-                            <th className="px-4 py-3">Restaurant</th>
-                            <th className="px-4 py-3">Phone</th>
-                            <th className="px-4 py-3">Actions</th>
+                            <th className="px-4 py-3 text-left">#</th>
+                            <th className="px-4 py-3 text-left">Branch</th>
+                            <th className="px-4 py-3 text-left">Restaurant</th>
+                            <th className="px-4 py-3 text-left">Phone</th>
+                            <th className="px-4 py-3 text-left text-right">Actions</th>
                         </tr>
                     </thead>
 
@@ -152,39 +163,59 @@ function Branch() {
                                     <Loader size="md" />
                                 </td>
                             </tr>
+                        ) : isSuperAdmin && !restaurantId ? (
+                            <tr>
+                                <td colSpan={5} className="py-24 text-center">
+                                    <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
+                                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
+                                            <Filter size={24} />
+                                        </div>
+                                        <p className="font-medium text-lg text-gray-800 dark:text-gray-200">Please Select a Restaurant</p>
+                                        <p className="text-sm max-w-[300px] mx-auto opacity-70">To view branches, please select a restaurant from the dropdown menu above.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : branches.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="py-20 text-center text-gray-500">
+                                    No branches found
+                                </td>
+                            </tr>
                         ) : (
                             branches.map((branch: any, i: number) => (
                                 <tr
                                     key={branch.id}
-                                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    className="border-b dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
                                     onDoubleClick={() => {
                                         setViewBranch(branch);
                                         setIsViewModalOpen(true);
                                     }}
                                 >
-                                    <td className="px-4 py-3">{i + 1}</td>
-                                    <td className="px-4 py-3">{branch.name}</td>
-                                    <td className="px-4 py-3">
-                                        {branch.restaurant?.name}
+                                    <td className="px-4 py-3 text-gray-500 font-medium">{i + 1}</td>
+                                    <td className="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">{branch.name}</td>
+                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-brand-500"></span>
+                                            {branch.restaurant?.name}
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3">{branch.phone}</td>
-                                    <td className="px-4 py-3 flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setViewBranch(branch);
-                                                setIsViewModalOpen(true);
-                                            }}
-                                            className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                                            title="View Details"
-                                        >
-                                            <Eye size={16} />
-                                        </button>
+                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{branch.phone}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setViewBranch(branch);
+                                                    setIsViewModalOpen(true);
+                                                }}
+                                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                                                title="View Details"
+                                            >
+                                                <Eye size={16} />
+                                            </button>
 
-                                        {/* {isSuperAdmin && ( */}
-                                        <>
                                             <button
                                                 onClick={() => router.push(`/branches/edit/${branch.id}`)}
-                                                className="p-2 rounded hover:bg-brand-100 dark:hover:bg-brand-900/30 text-brand-600"
+                                                className="p-2 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 text-brand-600 transition-colors"
                                                 title="Edit Branch"
                                             >
                                                 <Edit size={16} />
@@ -194,13 +225,12 @@ function Branch() {
                                                     setSelectedBranch(branch);
                                                     setDeleteModal(true);
                                                 }}
-                                                className="p-2 rounded bg-red-600 text-white"
+                                                className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 transition-colors"
                                                 title="Delete Branch"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
-                                        </>
-                                        {/* )} */}
+                                        </div>
                                     </td>
                                 </tr>
                             ))

@@ -20,11 +20,19 @@ export default function PaymentPlansPage() {
     const [loading, setLoading] = useState<boolean>(true);
 
     const fetchPrices = async (restaurantId?: string) => {
+        const idToUse = restaurantId !== undefined ? restaurantId : selectedRestaurantId;
+
+        // If super admin and no restaurant selected, don't fetch
+        if (isSuperAdmin && !idToUse) {
+            setPrices([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
-            const rId = restaurantId !== undefined ? restaurantId : selectedRestaurantId;
             const res = await api.get(endpoints.getSubscriptionPrices, {
-                params: rId ? { restaurantId: rId } : {},
+                params: idToUse ? { restaurantId: idToUse } : {},
             });
             if (res.data?.success) {
                 setPrices(res.data.data);
@@ -54,7 +62,12 @@ export default function PaymentPlansPage() {
         if (isSuperAdmin) {
             fetchRestaurants();
         }
-        fetchPrices();
+        // Only fetch prices if not super admin, or if super admin has a selected restaurant
+        if (!isSuperAdmin || selectedRestaurantId) {
+            fetchPrices();
+        } else {
+            setLoading(false); // Stop initial loader for Super Admin
+        }
     }, [isSuperAdmin]);
 
     const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -96,7 +109,7 @@ export default function PaymentPlansPage() {
                                         onChange={handleRestaurantChange}
                                         className="bg-transparent text-sm focus:outline-none dark:text-gray-200"
                                     >
-                                        <option value="">All Restaurants</option>
+                                        <option value="">Select Restaurant</option>
                                         {restaurants.map((res) => (
                                             <option key={res.id} value={res.id}>
                                                 {res.name}
@@ -132,6 +145,18 @@ export default function PaymentPlansPage() {
                                 <tr>
                                     <td colSpan={7} className="py-10 text-center text-gray-500">
                                         Loading plans...
+                                    </td>
+                                </tr>
+                            ) : isSuperAdmin && !selectedRestaurantId ? (
+                                <tr>
+                                    <td colSpan={7} className="py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
+                                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
+                                                <Filter size={24} />
+                                            </div>
+                                            <p className="font-medium text-lg text-gray-800 dark:text-gray-200">Please Select a Restaurant</p>
+                                            <p className="text-sm max-w-[300px] mx-auto opacity-70">To manage subscription plans, please select a restaurant from the dropdown menu above.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : prices.length === 0 ? (

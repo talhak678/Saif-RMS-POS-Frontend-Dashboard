@@ -41,6 +41,8 @@ export default function ReportsDashboard() {
     const [reportData, setReportData] = useState<any>(null);
     const [restaurants, setRestaurants] = useState<any[]>([]);
     const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
 
     const fetchRestaurants = async () => {
         try {
@@ -59,10 +61,20 @@ export default function ReportsDashboard() {
         // If super admin and no restaurant selected, don't fetch
         if (isSuperAdmin && !idToUse) return;
 
+        // IF EITHER DATE IS SELECTED, BOTH MUST BE SELECTED
+        if ((startDate && !endDate) || (!startDate && endDate)) {
+            return;
+        }
+
         try {
             setLoading(true);
+            const params: any = {};
+            if (idToUse) params.restaurantId = idToUse;
+            if (startDate) params.startDate = startDate;
+            if (endDate) params.endDate = endDate;
+
             const res = await api.get("/reports", {
-                params: idToUse ? { restaurantId: idToUse } : {}
+                params: params
             });
             if (res.data.success) {
                 setReportData(res.data.data);
@@ -83,15 +95,22 @@ export default function ReportsDashboard() {
         }
     }, [isSuperAdmin]);
 
+    // Handle date filtering
+    useEffect(() => {
+        if (isSuperAdmin && !selectedRestaurantId) return;
+        fetchReports();
+    }, [startDate, endDate]);
+
     // Handle restaurant change
     const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const id = e.target.value;
         setSelectedRestaurantId(id);
-        if (id) {
-            fetchReports(id);
-        } else {
+        if (!id) {
             setReportData(null);
         }
+        // fetchReports will be triggered if no dates or both dates are present
+        // But since we want immediate response on restaurant change:
+        fetchReports(id);
     };
 
     const handleDownload = async () => {
@@ -158,10 +177,35 @@ export default function ReportsDashboard() {
                                     </select>
                                 </div>
                             )}
-                            {/* <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
-                                <Calendar size={16} className="text-gray-400" />
-                                <span className="text-xs font-bold text-gray-500 tracking-tight">Jan 27 2026 - Feb 2 2026</span>
-                            </div> */}
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-5 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-blue-400">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => {
+                                                setStartDate(e.target.value);
+                                            }}
+                                            onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                                            className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={(e) => {
+                                                setEndDate(e.target.value);
+                                            }}
+                                            onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                                            className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <button
@@ -345,7 +389,7 @@ function OrdersCustomersTab({ data }: { data: any }) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Order Source</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Order Source</h3>
                 <div className="h-[350px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -368,7 +412,7 @@ function OrdersCustomersTab({ data }: { data: any }) {
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Top Locations</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Top Locations</h3>
                 <div className="h-[350px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.customerLocations}>
@@ -390,7 +434,7 @@ function InventoryTab({ data }: { data: any }) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Stock Usage</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Stock Usage</h3>
                 <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.stockConsumption} layout="vertical">
@@ -404,13 +448,13 @@ function InventoryTab({ data }: { data: any }) {
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Recipe Popularity</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Recipe Popularity</h3>
                 <div className="space-y-4">
                     {data.recipePopularity.map((recipe: any, index: number) => (
                         <div key={recipe.recipe} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                             <div className="flex items-center gap-4">
                                 <span className="font-bold text-gray-400">#{index + 1}</span>
-                                <span className="font-bold">{recipe.recipe}</span>
+                                <span className="font-bold text-gray-900 dark:text-gray-100">{recipe.recipe}</span>
                             </div>
                             <span className="font-bold text-blue-600">${recipe.revenue.toLocaleString()}</span>
                         </div>
@@ -425,7 +469,7 @@ function InventoryTab({ data }: { data: any }) {
 function BranchesTab({ data }: { data: any }) {
     return (
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-bold mb-8">Branch Comparison</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Branch Comparison</h3>
             <div className="h-[450px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data.salesPerBranch}>
@@ -447,7 +491,7 @@ function MenuCategoriesTab({ data }: { data: any }) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Category Revenue</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Category Revenue</h3>
                 <div className="h-[350px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -464,11 +508,11 @@ function MenuCategoriesTab({ data }: { data: any }) {
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-8">Top Items</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">Top Items</h3>
                 <div className="space-y-4">
                     {data.topSellingItems.map((item: any, index: number) => (
-                        <div key={item.item} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                            <span className="font-bold">{item.item}</span>
+                        <div key={item.item} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                            <span className="font-bold text-gray-900 dark:text-gray-100">{item.item}</span>
                             <span className="font-bold text-green-500">${item.sales.toLocaleString()}</span>
                         </div>
                     ))}

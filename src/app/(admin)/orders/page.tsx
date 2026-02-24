@@ -19,6 +19,7 @@ import {
   Smartphone,
   Globe,
   MoreVertical,
+  Calendar,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
@@ -94,6 +95,10 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [paymentFilter, setPaymentFilter] = useState("ALL");
 
+  // Date Filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   // Selection
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
@@ -119,11 +124,21 @@ export default function OrdersPage() {
   const [loadingRiderDetails, setLoadingRiderDetails] = useState(false);
 
   const fetchOrders = useCallback(async (isRefresh = false) => {
+    // IF EITHER DATE IS SELECTED, BOTH MUST BE SELECTED
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      return;
+    }
+
     try {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
-      const res = await api.get(`/orders`);
+      const params: any = {};
+      if (statusFilter !== "ALL") params.status = statusFilter;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      const res = await api.get(`/orders`, { params });
       if (res.data?.success) {
         setOrders(res.data.data);
       }
@@ -133,7 +148,7 @@ export default function OrdersPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [statusFilter, startDate, endDate]);
 
   useEffect(() => {
     fetchOrders();
@@ -250,8 +265,8 @@ export default function OrdersPage() {
     <ProtectedRoute module="customers-orders:orders-history">
       <div className="min-h-screen bg-white dark:bg-gray-950">
 
-        {/* Header Bar - Purple Theme */}
-        <div className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-500 p-4 shadow-lg flex justify-between items-center text-white">
+        {/* Header Bar - Purple Theme with Combined Filters */}
+        <div className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-500 p-4 shadow-lg flex flex-wrap justify-between items-center text-white gap-4">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md border border-white/20">
               <ShoppingBag size={20} />
@@ -261,7 +276,33 @@ export default function OrdersPage() {
               <p className="text-[10px] opacity-80 uppercase font-black tracking-widest">Powered by BMS POS</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex flex-wrap items-center gap-4">
+            {/* DATE FILTER */}
+            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border border-white/20 shadow-sm text-gray-700 dark:text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                />
+              </div>
+              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => (e.currentTarget as any).showPicker?.()}
+                  className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full border border-green-400/30 text-[10px] font-bold">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               ONLINE
@@ -430,7 +471,7 @@ export default function OrdersPage() {
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Ref#</th>
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Cust Ref#</th>
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Branch Name</th>
-                    <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Name</th>
+                    <th className="p-4 text-[11px) font-black uppercase text-gray-400 tracking-wider">Name</th>
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider">Contact Phone</th>
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-center">TransType</th>
                     <th className="p-4 text-[11px] font-black uppercase text-gray-400 tracking-wider text-center">Payment</th>

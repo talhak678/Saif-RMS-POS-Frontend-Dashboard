@@ -6,6 +6,7 @@ import { Eye, X, RefreshCw, Clock, ChevronRight, LayoutGrid, List, Bell, BellOff
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
 
 const ORDER_STATUSES = [
     "PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY",
@@ -42,7 +43,7 @@ function getStatusBadge(status: string) {
 /* ── ORDER CARD ─────────────────────────────────────────────── */
 function OrderCard({ order, onChangeStatus, onView }: {
     order: any;
-    onChangeStatus: (o: any) => void;
+    onChangeStatus: (o: any, quick?: boolean) => void;
     onView: (o: any) => void;
 }) {
     const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG["PENDING"];
@@ -56,7 +57,12 @@ function OrderCard({ order, onChangeStatus, onView }: {
             {/* Header */}
             <div className={`px-4 pt-4 pb-3 flex justify-between items-start`}>
                 <div>
-                    <p className="text-base font-bold text-gray-800 dark:text-gray-100">Order #{order.orderNo}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-base font-bold text-gray-800 dark:text-gray-100">Order #{order.orderNo}</p>
+                        {order.status === "PENDING" && (
+                            <Bell size={16} className="text-yellow-500 animate-bounce" />
+                        )}
+                    </div>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
                         <Clock className="w-3 h-3" />
                         {new Date(order.createdAt).toLocaleString("en-PK", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
@@ -133,12 +139,25 @@ function OrderCard({ order, onChangeStatus, onView }: {
                     >
                         <Eye size={15} className="text-gray-600 dark:text-gray-300" />
                     </button>
-                    <button
-                        onClick={() => onChangeStatus(order)}
-                        className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg ${cfg.bg} ${cfg.color} border ${cfg.border} hover:opacity-80 transition-opacity`}
-                    >
-                        Update <ChevronRight className="w-3 h-3" />
-                    </button>
+                    {["PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY"].includes(order.status) ? (
+                        <button
+                            onClick={() => onChangeStatus(order, true)}
+                            className={`flex items-center gap-2 text-xs font-bold px-4 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-all shadow-md shadow-brand-100 dark:shadow-none animate-in zoom-in-95 duration-200`}
+                        >
+                            {order.status === "PENDING" ? "Confirm Order" :
+                                order.status === "CONFIRMED" ? "Start Preparing" :
+                                    order.status === "PREPARING" ? "Mark Ready" :
+                                        order.status === "KITCHEN_READY" ? "Send for Delivery" : "Update"}
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => onChangeStatus(order, false)}
+                            className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg ${cfg.bg} ${cfg.color} border ${cfg.border} hover:opacity-80 transition-opacity`}
+                        >
+                            Update <ChevronRight className="w-3 h-3" />
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -165,43 +184,39 @@ export default function IncomingOrdersPage() {
     const ringIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isRingingRef = useRef(false);
 
-    // Play a rich loud ring using Web Audio API (two oscillators + compressor)
+    // Play a realistic bell sound
     const playDing = () => {
         try {
             if (!audioCtxRef.current) {
                 audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
             }
             const ctx = audioCtxRef.current;
+            if (ctx.state === 'suspended') ctx.resume();
 
-            const compressor = ctx.createDynamicsCompressor();
-            compressor.connect(ctx.destination);
+            const startTime = ctx.currentTime;
 
-            // First tone — high bell
-            const osc1 = ctx.createOscillator();
-            const gain1 = ctx.createGain();
-            osc1.type = "sine";
-            osc1.frequency.setValueAtTime(1046, ctx.currentTime); // C6
-            osc1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.4);
-            gain1.gain.setValueAtTime(0.9, ctx.currentTime);
-            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-            osc1.connect(gain1);
-            gain1.connect(compressor);
-            osc1.start(ctx.currentTime);
-            osc1.stop(ctx.currentTime + 0.8);
+            // Multiple oscillators for a rich "Bell" harmonic spectrum
+            const frequencies = [880, 1100, 1320, 1760]; // Harmonics of A5
 
-            // Second tone — lower echo
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
-            osc2.type = "sine";
-            osc2.frequency.setValueAtTime(523, ctx.currentTime + 0.1); // C5
-            osc2.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5);
-            gain2.gain.setValueAtTime(0.7, ctx.currentTime + 0.1);
-            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
-            osc2.connect(gain2);
-            gain2.connect(compressor);
-            osc2.start(ctx.currentTime + 0.1);
-            osc2.stop(ctx.currentTime + 0.9);
-        } catch (e) { /* ignore */ }
+            frequencies.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = i === 0 ? "sine" : "triangle";
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                // Attack and long decay for bell effect
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(i === 0 ? 0.4 : 0.1, startTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5 + (i * 0.2));
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 2);
+            });
+        } catch (e) { console.error("Audio error:", e); }
     };
 
     const startRing = () => {
@@ -283,10 +298,21 @@ export default function IncomingOrdersPage() {
         try {
             if (!silent) setLoading(true);
             const params: string[] = [];
+
+            // Default to last 2 days (yesterday and today)
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            const formatDate = (date: Date) => date.toISOString().split('T')[0];
+            params.push(`startDate=${formatDate(yesterday)}`);
+            params.push(`endDate=${formatDate(today)}`);
+
             if (branchFilter !== "ALL") params.push(`branchId=${branchFilter}`);
             // Use the active tab's status filter
             const currentStatusFilter = activeTab === "latest" ? latestStatusFilter : allStatusFilter;
             if (currentStatusFilter !== "ALL") params.push(`status=${currentStatusFilter}`);
+
             const query = params.length ? `?${params.join("&")}` : "";
             const res = await api.get(`/orders${query}`);
             if (res.data?.success) {
@@ -318,11 +344,50 @@ export default function IncomingOrdersPage() {
         finally { setLoadingRiderDetails(false); }
     };
 
-    const openStatusModal = (order: any) => {
+    const openStatusModal = (order: any, quick = false) => {
+        if (quick) {
+            handleQuickAction(order);
+            return;
+        }
         setSelectedOrder(order);
         setNewStatus(order.status);
         setSelectedRiderId("");
         setStatusModal(true);
+    };
+
+    const handleQuickAction = async (order: any) => {
+        const sequence = ["PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY", "OUT_FOR_DELIVERY", "DELIVERED"];
+        const currentIndex = sequence.indexOf(order.status);
+
+        if (currentIndex === -1 || currentIndex >= sequence.length - 1) return;
+
+        const nextS = sequence[currentIndex + 1];
+
+        // If next step is delivery, we MUST pick a rider, so open modal instead
+        if (nextS === "OUT_FOR_DELIVERY") {
+            setSelectedOrder(order);
+            setNewStatus(nextS);
+            fetchAvailableRiders();
+            setStatusModal(true);
+            return;
+        }
+
+        try {
+            setLoading(true); // show loader instead of full page lock
+            const payload: any = {
+                status: nextS,
+                paymentStatus: nextS === "DELIVERED" ? "PAID"
+                    : order.payment?.status === "PAID" ? "PAID" : "PENDING",
+            };
+            await api.put(`/orders/${order.id}`, payload);
+            toast.success(`Order moved to ${nextS}`);
+            fetchOrders(true);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update status");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const openViewModal = (order: any) => {
@@ -352,6 +417,36 @@ export default function IncomingOrdersPage() {
             fetchOrders();
         } catch (err) { console.error(err); }
         finally { setUpdating(false); }
+    };
+
+    const handleDirectStatusUpdate = async (order: any, nextS: string) => {
+        if (nextS === order.status) return;
+
+        // If next step requires extra info, open modal
+        if (nextS === "OUT_FOR_DELIVERY") {
+            setSelectedOrder(order);
+            setNewStatus(nextS);
+            fetchAvailableRiders();
+            setStatusModal(true);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const payload: any = {
+                status: nextS,
+                paymentStatus: nextS === "DELIVERED" ? "PAID"
+                    : order.payment?.status === "PAID" ? "PAID" : "PENDING",
+            };
+            await api.put(`/orders/${order.id}`, payload);
+            toast.success(`Order status updated to ${nextS}`);
+            fetchOrders(true);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update status");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const latestSix = orders;
@@ -525,7 +620,14 @@ export default function IncomingOrdersPage() {
                                     {orders.map((order: any, index: number) => (
                                         <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
                                             <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs">{index + 1}</td>
-                                            <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">#{order.orderNo}</td>
+                                            <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">
+                                                <div className="flex items-center gap-2">
+                                                    #{order.orderNo}
+                                                    {order.status === "PENDING" && (
+                                                        <Bell size={14} className="text-yellow-500 animate-bounce" />
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td className="px-4 py-3">
                                                 {order.customer
                                                     ? <span className="text-brand-600 dark:text-brand-400 font-bold">
@@ -542,7 +644,17 @@ export default function IncomingOrdersPage() {
                                             <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">{order.branch?.name || "—"}</td>
                                             <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">{order.type?.replace("_", " ")}</td>
                                             <td className="px-4 py-3">
-                                                <span className={getStatusBadge(order.status)}>{STATUS_CONFIG[order.status]?.label || order.status}</span>
+                                                <select
+                                                    value={order.status}
+                                                    onChange={(e) => handleDirectStatusUpdate(order, e.target.value)}
+                                                    className={`text-[11px] font-bold px-2 py-1.5 rounded-lg border-none focus:ring-2 focus:ring-brand-500 outline-none cursor-pointer ${STATUS_CONFIG[order.status]?.bg} ${STATUS_CONFIG[order.status]?.color}`}
+                                                >
+                                                    {ORDER_STATUSES.map((st) => (
+                                                        <option key={st} value={st} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                                                            {STATUS_CONFIG[st]?.label || st}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </td>
                                             <td className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">$ {parseFloat(order.total).toFixed(0)}</td>
                                             <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
@@ -552,16 +664,11 @@ export default function IncomingOrdersPage() {
                                                 <div className="flex gap-1.5">
                                                     <button
                                                         onClick={() => openViewModal(order)}
-                                                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                                                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-1 text-gray-500 dark:text-gray-400 font-bold"
                                                         title="View"
                                                     >
-                                                        <Eye size={15} className="text-gray-500 dark:text-gray-400" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openStatusModal(order)}
-                                                        className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors font-bold shadow-sm shadow-brand-100 dark:shadow-none"
-                                                    >
-                                                        Status
+                                                        <Eye size={15} />
+                                                        <span className="text-[10px] uppercase">Details</span>
                                                     </button>
                                                 </div>
                                             </td>

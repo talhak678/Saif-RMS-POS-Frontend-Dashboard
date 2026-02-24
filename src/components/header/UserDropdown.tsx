@@ -14,7 +14,7 @@ interface UserDropdownProps {
 }
 
 const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const authServ = AuthServiceInstance();
 
   const handleLogout = (e: React.MouseEvent) => {
@@ -112,31 +112,33 @@ const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
             </DropdownItem>
           </li>
 
-          <li>
-            <DropdownItem
-              onItemClick={close}
-              tag="a"
-              href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+          {permissions?.some((p: any) => p.action === "restaurant-config:payment-plans") && (
+            <li>
+              <DropdownItem
+                onItemClick={close}
+                tag="a"
+                href="/payment-plans"
+                className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
               >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M3.5 12C3.5 7.30558 7.30558 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C7.30558 20.5 3.5 16.6944 3.5 12ZM12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM11.0991 7.52507C11.0991 8.02213 11.5021 8.42507 11.9991 8.42507H12.0001C12.4972 8.42507 12.9001 8.02213 12.9001 7.52507C12.9001 7.02802 12.4972 6.62507 12.0001 6.62507H11.9991C11.5021 6.62507 11.0991 7.02802 11.0991 7.52507ZM12.0001 17.3714C11.5859 17.3714 11.2501 17.0356 11.2501 16.6214V10.9449C11.2501 10.5307 11.5859 10.1949 12.0001 10.1949C12.4143 10.1949 12.7501 10.5307 12.7501 10.9449V16.6214C12.7501 17.0356 12.4143 17.3714 12.0001 17.3714Z"
-                  fill=""
-                />
-              </svg>
-              Support
-            </DropdownItem>
-          </li>
+                <svg
+                  className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M2.25 6C2.25 4.20507 3.70507 2.75 5.5 2.75H18.5C20.2949 2.75 21.75 4.20507 21.75 6V18C21.75 19.7949 20.2949 21.25 18.5 21.25H5.5C3.70507 21.25 2.25 19.7949 2.25 18V6ZM5.5 4.25C4.5335 4.25 3.75 5.0335 3.75 6V7.25H20.25V6C20.25 5.0335 19.4665 4.25 18.5 4.25H5.5ZM20.25 8.75H3.75V18C3.75 18.9665 4.5335 19.75 5.5 19.75H18.5C19.4665 19.75 20.25 18.9665 20.25 18V8.75ZM6 12C5.58579 12 5.25 12.3358 5.25 12.75V14.25C5.25 14.6642 5.58579 15 6 15H9C9.41421 15 9.75 14.6642 9.75 14.25V12.75C9.75 12.3358 9.41421 12 9 12H6Z"
+                    fill=""
+                  />
+                </svg>
+                Subscriptions & Plans
+              </DropdownItem>
+            </li>
+          )}
         </ul>
         <button
           onClick={handleLogout}
