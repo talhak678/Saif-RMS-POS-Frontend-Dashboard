@@ -66,7 +66,6 @@ const navItems: NavItem[] = [
       { name: "Restaurants", path: "/restaurants", pro: false, permission: "restaurant-config:restaurants" },
       { name: "Branches", path: "/branches", pro: false, permission: "restaurant-config:branches" },
       // { name: "Subscriptions & Plans", path: "/payment-plans", pro: false, permission: "restaurant-config:payment-plans" },
-      { name: "Payment History", path: "/payments-history", pro: false, permission: "restaurant-config:payments-history" },
     ],
   },
   {
@@ -108,13 +107,6 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Users", path: "/users", pro: false, permission: "authentication:users" },
       { name: "Roles", path: "/role", pro: false, permission: "authentication:roles" },
-    ],
-  },
-  {
-    icon: <CircleDollarSign className="w-5 h-5" />,
-    name: "Payment & Transaction",
-    subItems: [
-      { name: "Payments", path: "/payments", pro: false, permission: "dashboard:payments" },
     ],
   },
   {

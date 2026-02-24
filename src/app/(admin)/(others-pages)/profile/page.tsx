@@ -214,6 +214,22 @@ export default function ProfilePage() {
     }
   }, []);
 
+  const handleRefund = async (paymentId: string) => {
+    if (!confirm("Are you sure you want to refund this payment?")) return;
+    try {
+      setLoading(true);
+      const res = await api.patch("/payments", { paymentId, status: "REFUNDED" });
+      if (res.data.success) {
+        toast.success("Payment refunded successfully");
+        fetchData();
+      }
+    } catch (error) {
+      toast.error("Refund failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const tabs = [
     { id: "RESTAURANT_INFO", label: "Restaurant Information", icon: <Building2 className="w-4 h-4" /> },
     { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
@@ -700,6 +716,7 @@ export default function ProfilePage() {
                         <th className="px-6 py-4 font-black">Amount</th>
                         <th className="px-6 py-4 font-black">Method</th>
                         <th className="px-6 py-4 font-black">Status</th>
+                        <th className="px-6 py-4 font-black text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y dark:divide-gray-700">
@@ -721,6 +738,16 @@ export default function ProfilePage() {
                             <Badge variant="solid" color={p.status === 'PAID' ? 'success' : 'warning'} className="uppercase text-[10px] font-black">
                               {p.status}
                             </Badge>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {p.status === 'PAID' && (
+                              <button
+                                onClick={() => handleRefund(p.id)}
+                                className="text-xs font-bold text-brand-600 hover:underline"
+                              >
+                                Refund
+                              </button>
+                            )}
                           </td>
                         </tr>
                       )) : (
