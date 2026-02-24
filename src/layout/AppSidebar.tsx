@@ -388,33 +388,34 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="py-6 flex justify-center items-center w-full">
-        <Link href="/" className="flex justify-center items-center w-full">
+      <div className="py-8 flex justify-center items-center w-full overflow-hidden">
+        <Link href="/" className="flex justify-center items-center w-full px-6">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
+            <div className="relative w-full h-24 lg:h-28 flex justify-center items-center">
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
                 alt="Logo"
-                width={160}
-                height={56}
-                className="dark:hidden object-contain max-h-14 w-auto mx-auto"
+                fill
+                className="dark:hidden object-contain"
+                priority
               />
               <Image
                 src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
                 alt="Logo"
-                width={160}
-                height={56}
-                className="hidden dark:block object-contain max-h-14 w-auto mx-auto"
+                fill
+                className="hidden dark:block object-contain"
+                priority
               />
-            </>
+            </div>
           ) : (
-            <Image
-              src={user?.restaurant?.logo || "/images/logo/logo-icon.svg"}
-              alt="Logo"
-              width={52}
-              height={50}
-              className="object-contain mx-auto"
-            />
+            <div className="relative w-12 h-12">
+              <Image
+                src={user?.restaurant?.logo || "/images/logo/logo-icon.svg"}
+                alt="Logo"
+                fill
+                className="object-contain transition-all duration-300"
+              />
+            </div>
           )}
         </Link>
       </div>

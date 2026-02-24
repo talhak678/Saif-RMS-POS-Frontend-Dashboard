@@ -16,6 +16,10 @@ import {
   Mail,
   Camera,
   Map as MapIcon,
+  Activity,
+  RefreshCw,
+  CalendarDays,
+  Clock,
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -24,7 +28,8 @@ import Badge from "@/components/ui/badge/Badge";
 import MultiSelect from "@/components/form/MultiSelect";
 import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
+import RenewModal from "./renew-modal";
 
 type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY";
 
@@ -45,6 +50,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>("RESTAURANT_INFO");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
 
   // Restaurant Form State
   const [restaurantForm, setRestaurantForm] = useState<any>({
@@ -67,7 +73,12 @@ export default function ProfilePage() {
     serviceType: "BOTH",
     status: "ACTIVE",
     lat: 30.1575,
-    lng: 66.9961
+    lng: 66.9961,
+    subscription: "FREE",
+    subStartDate: null,
+    subEndDate: null,
+    price: 0,
+    billingCycle: "MONTHLY"
   });
 
   // User Form State
@@ -88,8 +99,32 @@ export default function ProfilePage() {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries: ['places']
   });
+
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+  const onAutocompleteLoad = (autocompleteInstance: google.maps.places.Autocomplete) => {
+    setAutocomplete(autocompleteInstance);
+  };
+
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setRestaurantForm((prev: any) => ({
+          ...prev,
+          lat,
+          lng
+        }));
+      }
+    } else {
+      console.log('Autocomplete is not loaded yet!');
+    }
+  };
 
   useEffect(() => {
     if (user?.restaurantId) {
@@ -107,6 +142,15 @@ export default function ProfilePage() {
 
       if (restRes.data?.success) {
         const data = restRes.data.data;
+
+        // Determine effective plan: prioritized assigned price plan if current is FREE
+        const hasPaidPlan = data.subscriptionPrices && data.subscriptionPrices.length > 0;
+        const effectivePlan = (data.subscription === "FREE" && hasPaidPlan)
+          ? data.subscriptionPrices[0].plan
+          : (data.subscription || "FREE");
+
+        const planPrice = data.subscriptionPrices?.find((p: any) => p.plan === effectivePlan);
+
         setRestaurantForm({
           name: data.name || "",
           slug: data.slug || "",
@@ -127,7 +171,12 @@ export default function ProfilePage() {
           serviceType: data.serviceType || "BOTH",
           status: data.status || "ACTIVE",
           lat: data.lat || 30.1575,
-          lng: data.lng || 66.9961
+          lng: data.lng || 66.9961,
+          subscription: effectivePlan,
+          subStartDate: data.subStartDate || null,
+          subEndDate: data.subEndDate || null,
+          price: planPrice?.price || 0,
+          billingCycle: planPrice?.billingCycle || "MONTHLY"
         });
       }
 
@@ -603,7 +652,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* 4. GOOGLE MAP */}
+            {/* 5. MEMBERSHIP */}
             {activeTab === "MAP" && (
               <div className="space-y-6 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
@@ -623,21 +672,44 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden border-2 border-brand-100 dark:border-brand-900/30 shadow-2xl">
-                  {isLoaded ? (
-                    <GoogleMap
-                      mapContainerStyle={containerStyle}
-                      center={{ lat: restaurantForm.lat, lng: restaurantForm.lng }}
-                      zoom={15}
-                      onClick={onMapClick}
-                    >
-                      <Marker position={{ lat: restaurantForm.lat, lng: restaurantForm.lng }} />
-                    </GoogleMap>
-                  ) : (
-                    <div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                      <p>Loading Map...</p>
+                <div className="space-y-4">
+                  {isLoaded && (
+                    <div className="relative w-full max-w-xl">
+                      <Autocomplete
+                        onLoad={onAutocompleteLoad}
+                        onPlaceChanged={onPlaceChanged}
+                      >
+                        <input
+                          type="text"
+                          placeholder="Search your location (e.g. City, Street, Restaurant name)..."
+                          className="w-full p-3.5 pl-11 border border-gray-200 rounded-2xl shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
+                        />
+                      </Autocomplete>
+                      <MapPin className="absolute left-4 top-4 w-5 h-5 text-brand-500" />
                     </div>
                   )}
+
+                  <div className="rounded-3xl overflow-hidden border-2 border-brand-100 dark:border-brand-900/30 shadow-2xl relative">
+                    {isLoaded ? (
+                      <GoogleMap
+                        mapContainerStyle={containerStyle}
+                        center={{ lat: restaurantForm.lat, lng: restaurantForm.lng }}
+                        zoom={15}
+                        onClick={onMapClick}
+                        options={{
+                          mapTypeControl: false,
+                          streetViewControl: false,
+                          fullscreenControl: false,
+                        }}
+                      >
+                        <Marker position={{ lat: restaurantForm.lat, lng: restaurantForm.lng }} />
+                      </GoogleMap>
+                    ) : (
+                      <div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                        <p>Loading Map...</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex justify-end pt-6">
@@ -650,50 +722,75 @@ export default function ProfilePage() {
 
             {/* 5. MEMBERSHIP */}
             {activeTab === "MEMBERSHIP" && (
-              <div className="max-w-4xl mx-auto py-10 animate-in zoom-in duration-500">
-                <div className="bg-gradient-to-br from-brand-600 to-brand-800 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-10 opacity-10">
-                    <CreditCard size={200} />
-                  </div>
+              <div className="max-w-4xl mx-auto py-2 animate-in fade-in duration-500">
+                <div className="flex flex-col gap-6">
+                  {/* Subscription Summary Card */}
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/20 dark:bg-gray-900/10">
+                      <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-gray-400" /> Membership Details
+                      </h3>
+                      <Badge variant="solid" color={restaurantForm.status === 'ACTIVE' ? 'success' : 'warning'} className="font-black px-4 py-1.5 rounded-lg uppercase text-[10px] tracking-widest">
+                        {restaurantForm.status}
+                      </Badge>
+                    </div>
 
-                  <div className="relative z-10">
-                    <Badge variant="solid" color="light" className="mb-4 text-brand-600 uppercase font-black tracking-widest">
-                      Current Plan
-                    </Badge>
-                    <h2 className="text-5xl font-black mb-2">{restaurantForm.subscription}</h2>
-                    <p className="text-brand-100 mb-8 max-w-md italic">Enjoy prime features of our system to grow your business exponentially.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700">
+                      <div className="p-8 space-y-6">
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Plan</p>
+                          <div className="flex items-baseline gap-3">
+                            <h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase">{restaurantForm.subscription || 'FREE'}</h4>
+                            <span className="text-lg font-bold text-brand-600">${restaurantForm.price} <span className="text-xs text-gray-400 font-medium capitalize">/{restaurantForm.billingCycle?.toLowerCase()}</span></span>
+                          </div>
+                        </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 border-t border-brand-500/30">
-                      <div>
-                        <p className="text-brand-200 text-xs uppercase font-bold tracking-tighter mb-1">Status</p>
-                        <p className="text-xl font-bold">Active</p>
+                        <div className="flex flex-wrap gap-4">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border dark:border-gray-700">
+                            <RefreshCw size={12} className="text-gray-400" /> {restaurantForm.billingCycle} BILLING
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border dark:border-gray-700">
+                            <Activity size={12} className="text-emerald-500" /> {restaurantForm.status} STATUS
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={() => setIsRenewModalOpen(true)}
+                          className="w-full md:w-fit bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-transform"
+                        >
+                          Renew or Upgrade Plan
+                        </Button>
                       </div>
-                      <div>
-                        <p className="text-brand-200 text-xs uppercase font-bold tracking-tighter mb-1">Billing cycle</p>
-                        <p className="text-xl font-bold">Lifetime Access</p>
-                      </div>
-                      <div>
-                        <p className="text-brand-200 text-xs uppercase font-bold tracking-tighter mb-1">Renewal date</p>
-                        <p className="text-xl font-bold">N/A</p>
+
+                      <div className="p-8 space-y-6 bg-gray-50/10 dark:bg-gray-900/5">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700">
+                          <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Activation Date</span>
+                          <span className="text-sm font-black text-gray-800 dark:text-gray-200">
+                            {restaurantForm.subStartDate ? new Date(restaurantForm.subStartDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700">
+                          <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Expiry Date</span>
+                          <span className="text-sm font-black text-error-600">
+                            {restaurantForm.subEndDate ? new Date(restaurantForm.subEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="mt-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100/50 dark:border-blue-900/30">
+                          <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-relaxed font-medium">
+                            Your subscription is managed automatically. Please ensure your payment method is up to date to avoid service interruption.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border dark:border-gray-700 shadow-sm">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" /> System Limits
-                    </h3>
-                    <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                      <li className="flex justify-between"><span>Branches Allowed</span><span className="font-bold dark:text-white">Unlimited</span></li>
-                      <li className="flex justify-between"><span>Monthly Orders</span><span className="font-bold dark:text-white">Unlimited</span></li>
-                      <li className="flex justify-between"><span>Storage Space</span><span className="font-bold dark:text-white">10 GB</span></li>
-                    </ul>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border dark:border-gray-700 shadow-sm flex flex-col justify-center items-center">
-                    <p className="text-sm text-gray-500 mb-4">Want specialized enterprise features?</p>
-                    <Button variant="outline">Contact Sales</Button>
+                  {/* Simple Health Bar */}
+                  <div className="bg-emerald-50/30 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active & Secured</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-medium">Last synced: Just now</span>
                   </div>
                 </div>
               </div>
@@ -764,6 +861,13 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <RenewModal
+        isOpen={isRenewModalOpen}
+        onClose={() => setIsRenewModalOpen(false)}
+        restaurantId={user?.restaurantId || ""}
+        currentPlan={restaurantForm.subscription}
+      />
     </div>
   );
 }

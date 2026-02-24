@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "@/services/api";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { ApexOptions } from "apexcharts";
 import {
   ShoppingBag, Users, Globe, TrendingUp, Star, Package,
@@ -10,6 +11,7 @@ import {
   Monitor, Smartphone, BarChart2, MessageSquare, ArrowUpRight,
   ArrowDownRight, Minus, UtensilsCrossed, Bike, Coffee,
   Activity, CalendarDays, DollarSign, LayoutGrid,
+  Facebook, Instagram, Search, MapPin
 } from "lucide-react";
 import Loader from "@/components/common/Loader";
 
@@ -141,6 +143,37 @@ const STATUS_META: Record<string, { label: string; color: string; dot: string; i
   CANCELLED: { label: "Cancelled", dot: "bg-red-500", color: "text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400", icon: <XCircle size={12} /> },
 };
 
+function KeywordRow({ keyword, count, percentage }: { keyword: string; count: number; percentage: number }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+          <Search size={14} className="text-indigo-600 dark:text-indigo-400" />
+        </div>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{keyword}</span>
+      </div>
+      <div className="text-right">
+        <p className="text-sm font-bold text-gray-900 dark:text-white">{count}</p>
+        <p className="text-[10px] text-gray-400">{percentage}% of searches</p>
+      </div>
+    </div>
+  );
+}
+
+function SocialLinkRow({ name, clicks, icon, color }: { name: string; clicks: string; icon: React.ReactNode; color: string }) {
+  return (
+    <div className="flex items-center gap-4 py-3">
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${color} shadow-sm border-2 border-white dark:border-gray-800`}>
+        {icon}
+      </div>
+      <div>
+        <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100">{name}</h4>
+        <p className="text-xs text-gray-400 font-medium">{clicks} of clicks</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -241,6 +274,25 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 pb-10">
+
+      {/* ── PROMO BANNER ────────────────────────────────────────────────── */}
+      <div className="relative w-full max-w-5xl mx-auto h-[180px] md:h-[220px] rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
+        <Image
+          src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
+          alt="Dashboard Banner"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-6 transition-colors duration-300 group-hover:bg-black/50">
+          <div className="max-w-3xl text-center animate-in fade-in zoom-in duration-700">
+            <h2 className="text-xl md:text-3xl font-black text-white leading-tight drop-shadow-2xl">
+              Our digital menu makes restaurant management <br className="hidden md:block" />
+              <span className="text-brand-400">simple and comfortable</span>
+            </h2>
+          </div>
+        </div>
+      </div>
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -490,6 +542,33 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── ROW: Keywords + Outbound Links ────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Website Keyword Searcher */}
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<Search size={18} />} title="Website Keyword Searcher" sub="Top keywords used by visitors" />
+          <div className="mt-4 space-y-1">
+            <KeywordRow keyword="Best burger in town" count={1240} percentage={24} />
+            <KeywordRow keyword="Restaurant near me" count={850} percentage={18} />
+            <KeywordRow keyword="Special deals today" count={620} percentage={12} />
+            <KeywordRow keyword="Late night delivery" count={430} percentage={8} />
+            <KeywordRow keyword="Top rated pizza" count={310} percentage={6} />
+          </div>
+        </div>
+
+        {/* Outbound Links */}
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<Globe size={18} />} title="Outbound Links" sub="Engagement with social media links" />
+          <div className="mt-2 divide-y dark:divide-gray-700/50">
+            <SocialLinkRow name="Facebook" clicks="4%" icon={<Facebook size={22} />} color="bg-[#1877F2]" />
+            <SocialLinkRow name="Instagram" clicks="7%" icon={<Instagram size={22} />} color="bg-gradient-to-tr from-[#f09433] 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%" />
+            <SocialLinkRow name="Google Maps" clicks="0%" icon={<MapPin size={22} />} color="bg-[#EA4335]" />
+          </div>
+        </div>
+
       </div>
 
     </div>
