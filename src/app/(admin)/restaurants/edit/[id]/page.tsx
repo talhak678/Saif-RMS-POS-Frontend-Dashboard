@@ -36,6 +36,11 @@ export default function EditRestaurantPage() {
         tiktokUrl: "",
         metaPixelId: "",
         customDomain: "",
+        smtpHost: "",
+        smtpPort: "",
+        smtpUser: "",
+        smtpPass: "",
+        smtpSecure: false,
     });
 
     const [loading, setLoading] = useState(true);
@@ -73,6 +78,11 @@ export default function EditRestaurantPage() {
                     tiktokUrl: data.tiktokUrl || "",
                     metaPixelId: data.metaPixelId || "",
                     customDomain: data.customDomain || "",
+                    smtpHost: data.smtpHost || "",
+                    smtpPort: data.smtpPort || "",
+                    smtpUser: data.smtpUser || "",
+                    smtpPass: data.smtpPass || "",
+                    smtpSecure: !!data.smtpSecure,
                 });
             } else {
                 setError("Restaurant not found");
@@ -299,6 +309,83 @@ export default function EditRestaurantPage() {
                             placeholder="TikTok URL"
                             className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                         />
+                    </div>
+                </div>
+
+                {/* SMTP SETTINGS SECTION */}
+                <div className="md:col-span-2 mt-8 border-t pt-8">
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2 dark:text-gray-200">
+                        📧 Custom SMTP Settings (For Emails)
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-6 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+                        Har restaurant ki apni email settings yahan se control hoti hain. Agar aap ye khali chorren gay toh system ki default email gateweay use hogi.
+                    </p>
+
+                    <div className="grid md:grid-cols-2 gap-5">
+                        {/* SMTP HOST */}
+                        <div>
+                            <label className="text-sm font-semibold dark:text-gray-300">SMTP Host</label>
+                            <input
+                                name="smtpHost"
+                                value={form.smtpHost}
+                                onChange={handleChange}
+                                placeholder="smtp.gmail.com"
+                                className="w-full p-2.5 mt-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            />
+                        </div>
+
+                        {/* SMTP PORT */}
+                        <div>
+                            <label className="text-sm font-semibold dark:text-gray-300">SMTP Port</label>
+                            <input
+                                name="smtpPort"
+                                type="number"
+                                value={form.smtpPort}
+                                onChange={handleChange}
+                                placeholder="587"
+                                className="w-full p-2.5 mt-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            />
+                        </div>
+
+                        {/* SMTP USER */}
+                        <div>
+                            <label className="text-sm font-semibold dark:text-gray-300">SMTP User (Email)</label>
+                            <input
+                                name="smtpUser"
+                                value={form.smtpUser}
+                                onChange={handleChange}
+                                placeholder="restaurant@domain.com"
+                                className="w-full p-2.5 mt-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            />
+                        </div>
+
+                        {/* SMTP PASS */}
+                        <div>
+                            <label className="text-sm font-semibold dark:text-gray-300">SMTP App Password</label>
+                            <input
+                                name="smtpPass"
+                                type="password"
+                                value={form.smtpPass}
+                                onChange={handleChange}
+                                placeholder="••••••••••••••••"
+                                className="w-full p-2.5 mt-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            />
+                        </div>
+
+                        {/* SMTP SECURE CHECKBOX */}
+                        <div className="flex items-center gap-3 md:col-span-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border dark:border-gray-600">
+                            <input
+                                type="checkbox"
+                                name="smtpSecure"
+                                id="smtpSecure"
+                                checked={form.smtpSecure}
+                                onChange={(e) => setForm({ ...form, smtpSecure: e.target.checked })}
+                                className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500"
+                            />
+                            <label htmlFor="smtpSecure" className="text-sm font-bold text-gray-700 dark:text-gray-200 cursor-pointer">
+                                Use Secure Connection (SSL/465)
+                            </label>
+                        </div>
                     </div>
                 </div>
 
