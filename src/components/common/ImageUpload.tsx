@@ -9,9 +9,10 @@ interface ImageUploadProps {
     value: string;
     onChange: (url: string) => void;
     label?: string;
+    isBanner?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upload Image" }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,14 +69,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
     };
 
     return (
-        <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {label}
-            </label>
+        <div className="space-y-2 w-full">
+            {label && (
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {label}
+                </label>
+            )}
 
-            <div className="relative">
+            <div className="relative w-full">
                 {value ? (
-                    <div className="relative h-40 w-full max-w-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg group">
+                    <div className={`relative ${isBanner ? 'aspect-[21/9] w-full' : 'h-40 w-full max-w-sm'} rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg group`}>
                         <img
                             src={value}
                             alt="Uploaded"
@@ -103,7 +106,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
                 ) : (
                     <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="h-40 w-full max-w-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative"
+                        className={`${isBanner ? 'aspect-[21/9] w-full' : 'h-40 w-full max-w-sm'} rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative`}
                     >
                         {loading ? (
                             <Loader size="md" />
@@ -114,7 +117,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
                                 </div>
                                 <div className="text-center px-6">
                                     <p className="text-base font-bold text-gray-800 dark:text-gray-100">
-                                        Click to upload image
+                                        Click to upload {isBanner ? 'banner' : 'image'}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                         PNG, JPG, WEBP up to 5MB
@@ -136,12 +139,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Upl
                     accept="image/*"
                 />
             </div>
-
-            {value && (
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate mt-1">
-                    Source: {value}
-                </p>
-            )}
         </div>
     );
 };

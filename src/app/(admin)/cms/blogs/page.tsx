@@ -91,7 +91,7 @@ export default function BlogsPage({ embedded = false }: Props) {
     if (loading) return <div className="flex justify-center items-center h-96"><Loader size="md" /></div>;
 
     return (
-        <ProtectedRoute module="cms">
+        <ProtectedRoute module="cms-website:page-sections" component={embedded}>
 
             <div className="space-y-6">
                 {!embedded && (

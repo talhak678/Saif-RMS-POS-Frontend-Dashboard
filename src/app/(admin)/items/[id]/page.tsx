@@ -20,11 +20,17 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ImageUpload from "@/components/common/ImageUpload";
+import { useAuth } from "@/services/permission.service";
+import AddCategoryModal from "../../categories/AddCategoryModal";
 
 function ItemDetails() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const id = params?.id;
+
+  // Category Modal State
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
   // --- STATES ---
   const [item, setItem] = useState<any>(null);
@@ -302,15 +308,24 @@ function ItemDetails() {
                 <div className="mt-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
                   <Utensils size={18} className="text-blue-500" />
                   {isEditing ? (
-                    <select
-                      value={formData.categoryId || ""}
-                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                      className="w-full p-1.5 border rounded text-sm dark:bg-gray-700 dark:border-gray-600"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex gap-1 w-full">
+                      <select
+                        value={formData.categoryId || ""}
+                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                        className="flex-1 p-1.5 border rounded text-sm dark:bg-gray-700 dark:border-gray-600"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setIsCatModalOpen(true)}
+                        className="p-1 px-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
                   ) : (
                     <span>{item.category?.name || "Uncategorized"}</span>
                   )}
@@ -502,6 +517,16 @@ function ItemDetails() {
         </div>
       )}
 
+      {/* Add Category Modal */}
+      {isCatModalOpen && (
+        <AddCategoryModal
+          onClose={() => setIsCatModalOpen(false)}
+          onSuccess={() => {
+            fetchCategories();
+          }}
+          restaurantId={user?.restaurantId || user?.restaurant?.id}
+        />
+      )}
     </div>
   );
 }

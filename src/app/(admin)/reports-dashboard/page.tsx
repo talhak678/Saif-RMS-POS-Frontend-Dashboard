@@ -22,6 +22,7 @@ import { toast } from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
 import Loader from "@/components/common/Loader";
+import DatePicker from "@/components/common/DatePicker";
 
 const TABS = [
     "Analytics",
@@ -178,30 +179,24 @@ export default function ReportsDashboard() {
                                 </div>
                             )}
                             <div className="flex flex-wrap items-center gap-3">
-                                <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-5 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-blue-400">
-                                    <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-4 bg-white dark:bg-gray-800 px-6 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-brand-500 min-w-[320px]">
+                                    <div className="flex flex-1 items-center gap-2">
                                         <span className="text-[10px] uppercase font-black text-gray-400">From</span>
-                                        <input
-                                            type="date"
+                                        <DatePicker
                                             value={startDate}
-                                            onChange={(e) => {
-                                                setStartDate(e.target.value);
-                                            }}
-                                            onClick={(e) => (e.currentTarget as any).showPicker?.()}
-                                            className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                                            onChange={setStartDate}
+                                            placeholder="Select"
+                                            className="text-xs font-bold text-gray-700 dark:text-gray-200"
                                         />
                                     </div>
-                                    <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-2"></div>
+                                    <div className="flex flex-1 items-center gap-2">
                                         <span className="text-[10px] uppercase font-black text-gray-400">To</span>
-                                        <input
-                                            type="date"
+                                        <DatePicker
                                             value={endDate}
-                                            onChange={(e) => {
-                                                setEndDate(e.target.value);
-                                            }}
-                                            onClick={(e) => (e.currentTarget as any).showPicker?.()}
-                                            className="bg-transparent text-xs font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+                                            onChange={setEndDate}
+                                            placeholder="Select"
+                                            className="text-xs font-bold text-gray-700 dark:text-gray-200"
                                         />
                                     </div>
                                 </div>

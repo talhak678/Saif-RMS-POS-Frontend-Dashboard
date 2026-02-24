@@ -121,7 +121,7 @@ export default function IngredientsPage() {
 
     return (
         <ProtectedRoute module="inventory-recipes:ingredients">
-            <div className="min-h-screen bg-white dark:bg-gray-950 pb-20 font-outfit">
+            <div className="min-h-screen bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl pb-20 font-outfit">
 
                 {/* --- SIMPLIFIED HEADER --- */}
                 <div className="px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">

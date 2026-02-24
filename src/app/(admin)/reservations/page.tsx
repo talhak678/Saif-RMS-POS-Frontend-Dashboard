@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import DatePicker from "@/components/common/DatePicker";
 
 const RESERVATION_STATUSES = ["BOOKED", "ARRIVED", "COMPLETED", "CANCELLED"];
 
@@ -412,7 +413,7 @@ export default function ReservationsPage() {
                                         <label className={labelCls}>Phone *</label>
                                         <input type="tel" value={form.phone}
                                             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                            placeholder="+92 300 1234567" className={inputCls} />
+                                            placeholder="+1 300 1234567" className={inputCls} />
                                     </div>
                                     <div>
                                         <label className={labelCls}>Guests *</label>
@@ -422,9 +423,12 @@ export default function ReservationsPage() {
                                     </div>
                                     <div className="col-span-2">
                                         <label className={labelCls}>Reservation Date & Time *</label>
-                                        <input type="datetime-local" value={form.startTime}
-                                            onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                                            className={inputCls} />
+                                        <DatePicker
+                                            value={form.startTime}
+                                            onChange={(val) => setForm({ ...form, startTime: val })}
+                                            showTime={true}
+                                            className={inputCls}
+                                        />
                                     </div>
                                     <div>
                                         <label className={labelCls}>Branch *</label>
