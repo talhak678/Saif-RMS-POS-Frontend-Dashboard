@@ -20,6 +20,11 @@ import {
   RefreshCw,
   CalendarDays,
   Clock,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  RefreshCcw,
+  Bell,
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -31,7 +36,7 @@ import ImageUpload from "@/components/common/ImageUpload";
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import RenewModal from "./renew-modal";
 
-type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY";
+type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY" | "SUBSCRIPTION_REQUESTS";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyAhwD5EE1C7J_K5qaqlPuBX6o0SjqJ2wYw";
 
@@ -47,6 +52,7 @@ const centerDefault = {
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
+  const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
   const [activeTab, setActiveTab] = useState<TabType>("RESTAURANT_INFO");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -78,7 +84,8 @@ export default function ProfilePage() {
     subStartDate: null,
     subEndDate: null,
     price: 0,
-    billingCycle: "MONTHLY"
+    billingCycle: "MONTHLY",
+    features: [] as string[]
   });
 
   // User Form State
@@ -96,6 +103,10 @@ export default function ProfilePage() {
 
   // Payment History State
   const [payments, setPayments] = useState<any[]>([]);
+
+  // Subscription Requests State (Super Admin only)
+  const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
+  const [subReqLoading, setSubReqLoading] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -129,6 +140,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.restaurantId) {
       fetchData();
+    } else if (user) {
+      // Super Admin or user without restaurantId - just populate userForm from auth context
+      setUserForm({
+        name: user.name || "",
+        email: user.email || ""
+      });
+      setFetching(false);
     }
   }, [user]);
 
@@ -176,7 +194,8 @@ export default function ProfilePage() {
           subStartDate: data.subStartDate || null,
           subEndDate: data.subEndDate || null,
           price: planPrice?.price || 0,
-          billingCycle: planPrice?.billingCycle || "MONTHLY"
+          billingCycle: planPrice?.billingCycle || "MONTHLY",
+          features: planPrice?.features || []
         });
       }
 
@@ -202,7 +221,10 @@ export default function ProfilePage() {
   const handleUpdateRestaurant = async () => {
     try {
       setLoading(true);
-      const res = await api.put(`/restaurants/${user?.restaurantId}`, restaurantForm);
+      // Strip out subscription billing fields — backend validates and rejects them
+      // when passed in a regular restaurant update request
+      const { subStartDate, subEndDate, price, billingCycle, subscription, ...restPayload } = restaurantForm;
+      const res = await api.put(`/restaurants/${user?.restaurantId}`, restPayload);
       if (res.data?.success) {
         toast.success("Restaurant information updated!");
         refreshUser();
@@ -279,14 +301,67 @@ export default function ProfilePage() {
     }
   };
 
-  const tabs = [
-    { id: "RESTAURANT_INFO", label: "Restaurant Information", icon: <Building2 className="w-4 h-4" /> },
-    { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
-    { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
-    { id: "MAP", label: "Google Map", icon: <MapIcon className="w-4 h-4" /> },
-    { id: "MEMBERSHIP", label: "Membership Status", icon: <CreditCard className="w-4 h-4" /> },
-    { id: "PAYMENT_HISTORY", label: "Payment History", icon: <History className="w-4 h-4" /> },
-  ];
+  const fetchSubscriptionRequests = async () => {
+    try {
+      setSubReqLoading(true);
+      const res = await api.get('/subscription-requests');
+      if (res.data?.success) {
+        setSubscriptionRequests(res.data.data || []);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch subscription requests');
+    } finally {
+      setSubReqLoading(false);
+    }
+  };
+
+  const handleApproveReject = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    const label = status === 'APPROVED' ? 'approve' : 'reject';
+    if (!confirm(`Are you sure you want to ${label} this request?`)) return;
+    try {
+      setLoading(true);
+      const res = await api.put(`/subscription-requests/${id}`, { status });
+      if (res.data?.success) {
+        toast.success(`Request ${status.toLowerCase()} successfully!`);
+        fetchSubscriptionRequests();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to ${label} request`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSubRequest = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this subscription request?')) return;
+    try {
+      setLoading(true);
+      const res = await api.delete(`/subscription-requests/${id}`);
+      if (res.data?.success) {
+        toast.success('Request deleted successfully!');
+        fetchSubscriptionRequests();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to delete request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tabs = isSuperAdmin
+    ? [
+      { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
+      { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
+      { id: "SUBSCRIPTION_REQUESTS", label: "Subscription Requests", icon: <Bell className="w-4 h-4" /> },
+    ]
+    : [
+      { id: "RESTAURANT_INFO", label: "Restaurant Information", icon: <Building2 className="w-4 h-4" /> },
+      { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
+      { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
+      { id: "MAP", label: "Google Map", icon: <MapIcon className="w-4 h-4" /> },
+      { id: "MEMBERSHIP", label: "Membership Status", icon: <CreditCard className="w-4 h-4" /> },
+      { id: "PAYMENT_HISTORY", label: "Payment History", icon: <History className="w-4 h-4" /> },
+    ];
 
   const cuisineOptions = [
     { value: "Bakery", text: "Bakery", selected: false },
@@ -301,6 +376,14 @@ export default function ProfilePage() {
     { value: "Burgers", text: "Burgers", selected: false },
   ];
 
+  // Set default tab based on role
+  useEffect(() => {
+    if (isSuperAdmin) {
+      setActiveTab("INFO");
+      fetchSubscriptionRequests();
+    }
+  }, [isSuperAdmin]);
+
   if (fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -314,7 +397,9 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto space-y-6">
 
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-black text-brand-600 dark:text-brand-400">Merchant</h1>
+          <h1 className="text-2xl font-black text-brand-600 dark:text-brand-400">
+            {isSuperAdmin ? "Super Admin" : "Merchant"}
+          </h1>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -582,37 +667,170 @@ export default function ProfilePage() {
 
             {/* 2. PERSONAL INFO */}
             {activeTab === "INFO" && (
-              <div className="max-w-2xl mx-auto space-y-6 animate-in slide-in-from-bottom duration-500">
-                <div className="text-center mb-8">
-                  <div className="w-24 h-24 bg-brand-50 dark:bg-brand-900/40 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-brand-100 dark:border-brand-800 shadow-xl">
-                    <User className="w-12 h-12 text-brand-600 dark:text-brand-400" />
+              isSuperAdmin ? (
+                // ====== SUPER ADMIN VIEW ======
+                <div className="animate-in fade-in duration-500">
+                  {/* Header Banner */}
+                  <div className="relative rounded-2xl overflow-hidden mb-8 bg-gradient-to-r from-[#5d69b9] to-[#7a88d1] p-6 text-white">
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32" />
+                      <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24" />
+                    </div>
+                    <div className="relative flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-xl">
+                        {user?.restaurant?.logo ? (
+                          <img src={user.restaurant.logo} alt="logo" className="w-full h-full object-cover rounded-2xl" />
+                        ) : (
+                          <User className="w-10 h-10 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-widest text-white/70 mb-1">Super Admin</p>
+                        <h2 className="text-2xl font-black">{user?.name}</h2>
+                        <p className="text-sm text-white/80 mt-0.5">{user?.email}</p>
+                        <span className="mt-2 inline-block text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-white/20 rounded-full">
+                          {user?.role?.name}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-xl font-bold dark:text-white">Admin Details</h2>
-                  <p className="text-sm text-gray-500">Manage your account information</p>
-                </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label className="font-bold">Full Name</Label>
-                    <Input
-                      value={userForm.name}
-                      onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="font-bold">Email Address</Label>
-                    <Input
-                      value={userForm.email}
-                      onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="pt-4">
-                    <Button onClick={handleUpdateUser} disabled={loading} className="w-full">
-                      {loading ? "Updating..." : "Update Personal Info"}
-                    </Button>
+                  <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                    {/* Personal Info Card */}
+                    <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="font-black text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-5 pb-3 border-b dark:border-gray-700">
+                        <User className="w-4 h-4 text-[#5d69b9]" /> Personal Information
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="font-bold text-xs text-gray-500 uppercase tracking-widest">Full Name</Label>
+                          <Input
+                            value={userForm.name}
+                            onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                            className="mt-1 bg-gray-50/50"
+                          />
+                        </div>
+                        <div>
+                          <Label className="font-bold text-xs text-gray-500 uppercase tracking-widest">Email Address</Label>
+                          <Input
+                            value={userForm.email}
+                            onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                            className="mt-1 bg-gray-50/50"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 pt-2">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Created</p>
+                            <p className="text-xs font-bold mt-1 text-gray-700 dark:text-gray-300">
+                              {user?.createdAt ? new Date(user.createdAt as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Updated</p>
+                            <p className="text-xs font-bold mt-1 text-gray-700 dark:text-gray-300">
+                              {user?.updatedAt ? new Date(user.updatedAt as string).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">User ID</p>
+                          <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">{user?.id}</p>
+                        </div>
+                        <Button onClick={handleUpdateUser} disabled={loading} className="w-full bg-[#5d69b9] hover:bg-[#4a56a8] font-bold mt-2">
+                          {loading ? "Updating..." : "Update Profile"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Restaurant Info Card (read-only) */}
+                    {user?.restaurant && (
+                      <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                        <h3 className="font-black text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-5 pb-3 border-b dark:border-gray-700">
+                          <Building2 className="w-4 h-4 text-[#5d69b9]" /> Associated Restaurant
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                            {user.restaurant.logo && (
+                              <img src={user.restaurant.logo} alt="Restaurant Logo" className="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-md" />
+                            )}
+                            <div>
+                              <p className="font-black text-gray-900 dark:text-white">{user.restaurant.name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">/{user.restaurant.slug}</p>
+                              <Badge variant="solid" color={user.restaurant.status === 'ACTIVE' ? 'success' : 'warning'} className="mt-1.5 text-[9px] font-black uppercase">
+                                {user.restaurant.status}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {[
+                            { label: 'Subscription', value: user.restaurant.subscription },
+                            { label: 'Service Type', value: user.restaurant.serviceType },
+                            { label: 'Country', value: `${user.restaurant.country} (${user.restaurant.countryCode})` },
+                            { label: 'Contact Phone', value: user.restaurant.contactPhone || '—' },
+                            { label: 'Contact Email', value: user.restaurant.contactEmail || '—' },
+                          ].map(({ label, value }) => (
+                            <div key={label} className="flex items-center justify-between py-2.5 border-b dark:border-gray-700 last:border-0">
+                              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">{label}</span>
+                              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Role & Permissions Card */}
+                    {user?.role && (
+                      <div className="lg:col-span-2 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                        <h3 className="font-black text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-5 pb-3 border-b dark:border-gray-700">
+                          <Lock className="w-4 h-4 text-[#5d69b9]" /> Role & Permissions ({user.role.permissions?.length || 0} total)
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {(user.role.permissions || []).map((perm) => (
+                            <span
+                              key={perm.id}
+                              className="inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1.5 rounded-lg bg-[#5d69b9]/10 text-[#5d69b9] dark:bg-[#5d69b9]/20 dark:text-[#8b97d9] uppercase tracking-wide"
+                            >
+                              {perm.action}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              ) : (
+                // ====== NORMAL USER VIEW ======
+                <div className="max-w-2xl mx-auto space-y-6 animate-in slide-in-from-bottom duration-500">
+                  <div className="text-center mb-8">
+                    <div className="w-24 h-24 bg-brand-50 dark:bg-brand-900/40 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-brand-100 dark:border-brand-800 shadow-xl">
+                      <User className="w-12 h-12 text-brand-600 dark:text-brand-400" />
+                    </div>
+                    <h2 className="text-xl font-bold dark:text-white">Admin Details</h2>
+                    <p className="text-sm text-gray-500">Manage your account information</p>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="font-bold">Full Name</Label>
+                      <Input
+                        value={userForm.name}
+                        onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="font-bold">Email Address</Label>
+                      <Input
+                        value={userForm.email}
+                        onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="pt-4">
+                      <Button onClick={handleUpdateUser} disabled={loading} className="w-full">
+                        {loading ? "Updating..." : "Update Personal Info"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
             )}
 
             {/* 3. LOGIN INFO */}
@@ -797,11 +1015,34 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
+                  {/* Plan Features */}
+                  {restaurantForm.features?.length > 0 && (
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/20 dark:bg-gray-900/10">
+                        <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-brand-500" /> Included Features
+                        </h3>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {restaurantForm.features.map((feature: string, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-brand-50/50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30">
+                              <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle2 className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Simple Health Bar */}
                   <div className="bg-emerald-50/30 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active & Secured</span>
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active &amp; Secured</span>
                     </div>
                     <span className="text-[10px] text-gray-400 font-medium">Last synced: Just now</span>
                   </div>
@@ -868,6 +1109,137 @@ export default function ProfilePage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {/* SUBSCRIPTION REQUESTS - Super Admin only */}
+            {activeTab === "SUBSCRIPTION_REQUESTS" && isSuperAdmin && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-lg font-black text-gray-800 dark:text-white">Subscription Requests</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">Review and manage all restaurant subscription upgrade requests</p>
+                  </div>
+                  <button
+                    onClick={fetchSubscriptionRequests}
+                    disabled={subReqLoading}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5d69b9]/10 text-[#5d69b9] hover:bg-[#5d69b9]/20 font-bold text-xs transition-all"
+                  >
+                    <RefreshCcw className={`w-3.5 h-3.5 ${subReqLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                </div>
+
+                {subReqLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader size="md" />
+                  </div>
+                ) : subscriptionRequests.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Bell className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <p className="text-gray-400 font-bold">No subscription requests found</p>
+                    <p className="text-xs text-gray-400 mt-1">Requests will appear here when restaurants submit upgrade requests</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {subscriptionRequests.map((req) => (
+                      <div
+                        key={req.id}
+                        className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 transition-all hover:shadow-md hover:border-[#5d69b9]/20"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                          {/* Restaurant Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 rounded-xl bg-[#5d69b9]/10 flex items-center justify-center shrink-0">
+                                <Building2 className="w-5 h-5 text-[#5d69b9]" />
+                              </div>
+                              <div>
+                                <p className="font-black text-gray-900 dark:text-white text-sm">
+                                  {req.restaurant?.name || 'Unknown Restaurant'}
+                                </p>
+                                <p className="text-xs text-gray-400">/{req.restaurant?.slug}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Plan</p>
+                                <p className="text-xs font-black text-[#5d69b9] mt-0.5">{req.plan}</p>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Billing</p>
+                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">{req.billingCycle}</p>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status</p>
+                                <span className={`inline-block text-[9px] font-black uppercase mt-0.5 px-2 py-0.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                  : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                  }`}>
+                                  {req.status}
+                                </span>
+                              </div>
+                              <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Received</p>
+                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">
+                                  {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+                              </div>
+                            </div>
+
+                            {req.description && (
+                              <p className="mt-3 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 italic">
+                                &quot;{req.description}&quot;
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Action Buttons */}
+                          {req.status === 'PENDING' ? (
+                            <div className="flex flex-row md:flex-col gap-2 shrink-0">
+                              <button
+                                onClick={() => handleApproveReject(req.id, 'APPROVED')}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleApproveReject(req.id, 'REJECTED')}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-red-500/20"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                Reject
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSubRequest(req.id)}
+                                disabled={loading}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Delete
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleDeleteSubRequest(req.id)}
+                              disabled={loading}
+                              className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95 shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

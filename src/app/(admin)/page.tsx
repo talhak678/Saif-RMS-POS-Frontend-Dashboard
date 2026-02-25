@@ -174,6 +174,46 @@ function SocialLinkRow({ name, clicks, icon, color }: { name: string; clicks: st
   );
 }
 
+// ─── Banner Section ───────────────────────────────────────────────────────────
+function BannerCarousel() {
+  return (
+    <div className="w-full max-w-5xl mx-auto flex gap-3 h-[180px] md:h-[220px]">
+
+      {/* Left — big banner */}
+      <div className="relative flex-[2] rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
+        <Image
+          src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
+          alt="Dashboard Banner 1"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/35 flex items-center justify-center p-6 transition-colors duration-300 group-hover:bg-black/45">
+          <h2 className="text-xl md:text-3xl font-black text-white leading-tight drop-shadow-2xl text-center">
+            Our digital menu makes restaurant management{" "}
+            <br className="hidden md:block" />
+            <span className="text-brand-400">simple and comfortable</span>
+          </h2>
+        </div>
+      </div>
+
+      {/* Right — small banner */}
+      <div className="relative flex-1 rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
+        <Image
+          src="/images/authentication-images/Dashboard-Banner 2.jpg.jpeg"
+          alt="Dashboard Banner 2"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
+      </div>
+
+    </div>
+  );
+}
+
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -276,23 +316,7 @@ export default function DashboardPage() {
     <div className="space-y-5 pb-10">
 
       {/* ── PROMO BANNER ────────────────────────────────────────────────── */}
-      <div className="relative w-full max-w-5xl mx-auto h-[180px] md:h-[220px] rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
-        <Image
-          src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
-          alt="Dashboard Banner"
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-6 transition-colors duration-300 group-hover:bg-black/50">
-          <div className="max-w-3xl text-center animate-in fade-in zoom-in duration-700">
-            <h2 className="text-xl md:text-3xl font-black text-white leading-tight drop-shadow-2xl">
-              Our digital menu makes restaurant management <br className="hidden md:block" />
-              <span className="text-brand-400">simple and comfortable</span>
-            </h2>
-          </div>
-        </div>
-      </div>
+      <BannerCarousel />
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">

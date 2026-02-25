@@ -31,10 +31,24 @@ const AddPlan = ({ onAction }: { onAction?: () => void }) => {
         restaurantId: "",
         isActive: true,
     });
+    const [features, setFeatures] = useState<string[]>([]);
+    const [featureInput, setFeatureInput] = useState("");
     const [restaurants, setRestaurants] = useState<any[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
     const [loadingRestaurants, setLoadingRestaurants] = useState<boolean>(true);
+
+    const addFeature = () => {
+        const trimmed = featureInput.trim();
+        if (trimmed && !features.includes(trimmed)) {
+            setFeatures([...features, trimmed]);
+        }
+        setFeatureInput("");
+    };
+
+    const removeFeature = (idx: number) => {
+        setFeatures(features.filter((_, i) => i !== idx));
+    };
 
     const fetchRestaurants = async () => {
         try {
@@ -58,7 +72,7 @@ const AddPlan = ({ onAction }: { onAction?: () => void }) => {
 
         try {
             setSaving(true);
-            const res = await api.post(endpoints.addSubscriptionPrice, form);
+            const res = await api.post(endpoints.addSubscriptionPrice, { ...form, features });
             if (res.data?.success) {
                 toast.success("Payment plan added successfully!");
                 onAction?.();
@@ -70,6 +84,8 @@ const AddPlan = ({ onAction }: { onAction?: () => void }) => {
                     restaurantId: "",
                     isActive: true,
                 });
+                setFeatures([]);
+                setFeatureInput("");
             } else {
                 toast.error(res.data?.message || "Failed to add payment plan");
             }
@@ -118,7 +134,7 @@ const AddPlan = ({ onAction }: { onAction?: () => void }) => {
                     </div>
 
                     {/* Body */}
-                    <div className="p-6">
+                    <div className="p-6 overflow-y-auto max-h-[70vh]">
                         <form id="add-plan-form" onSubmit={handleSubmit} className="space-y-5">
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                                 <div className="flex flex-col">
@@ -173,6 +189,42 @@ const AddPlan = ({ onAction }: { onAction?: () => void }) => {
                                         disabled={saving}
                                         className="w-full"
                                     />
+                                </div>
+
+                                {/* Features Input */}
+                                <div className="col-span-2">
+                                    <Label>Plan Features</Label>
+                                    <div className="flex gap-2 mt-1">
+                                        <input
+                                            type="text"
+                                            value={featureInput}
+                                            onChange={(e) => setFeatureInput(e.target.value)}
+                                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addFeature(); } }}
+                                            placeholder="e.g. Unlimited Orders — press Enter or + to add"
+                                            disabled={saving}
+                                            className="flex-1 p-2.5 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={addFeature}
+                                            disabled={!featureInput.trim() || saving}
+                                            className="px-3 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-40 transition-colors"
+                                        >
+                                            <Plus size={16} />
+                                        </button>
+                                    </div>
+                                    {features.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {features.map((f, i) => (
+                                                <span key={i} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200 dark:border-brand-800">
+                                                    {f}
+                                                    <button type="button" onClick={() => removeFeature(i)} className="text-brand-400 hover:text-brand-700">
+                                                        <X size={11} />
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="col-span-2">

@@ -7,7 +7,8 @@ import {
     ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check,
     Search, Info, Phone, MessageSquare, Plus, Trash2, List, Star, Quote, Copyright,
     Video, Type, FileText, HelpCircle, CreditCard, PanelTop, PanelBottom, MousePointer2,
-    Shield
+    Shield,
+    X
 } from "lucide-react";
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
@@ -558,14 +559,14 @@ export default function CMSPage() {
                                     return (
                                         <div
                                             key={sectionKey}
-                                            className={`rounded-xl border transition-all ${isExpanded
+                                            className={`rounded-xl border transition-all overflow-hidden ${isExpanded
                                                 ? "border-brand-500 ring-1 ring-brand-500/10 bg-white dark:bg-white/[0.03]"
                                                 : "border-gray-200 dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-500/30"
                                                 }`}
                                         >
                                             <div
                                                 onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-                                                className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${isExpanded ? "bg-brand-50 dark:bg-brand-500/5" : ""}`}
+                                                className={`flex items-center justify-between p-4 cursor-pointer transition-colors rounded-t-xl ${isExpanded ? "bg-brand-50 dark:bg-brand-500/5" : ""}`}
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${isExpanded ? "bg-brand-500 text-white shadow-md shadow-brand-500/20" : "bg-gray-100 dark:bg-gray-700 text-gray-500"}`}>
@@ -575,7 +576,7 @@ export default function CMSPage() {
                                                         <p className="font-bold text-gray-800 dark:text-gray-200 capitalize text-sm">
                                                             {sectionKey.replace(/([A-Z])/g, ' $1')}
                                                         </p>
-                                                        <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide">Configure Content</span>
+                                                        {/* <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide">Configure Content</span> */}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-6">
@@ -609,15 +610,17 @@ export default function CMSPage() {
                                                                 textColor: "Main text color",
                                                             };
 
-                                                            const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat'];
+                                                            const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
 
 
                                                             const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
 
-                                                            const displayLabel = field === 'title' ? 'Heading' : field === 'subtitle' ? 'Subheading' : field.replace(/([A-Z])/g, ' $1');
+                                                            const isBooleanField = field === 'showCart' || field === 'showLogin';
+
+                                                            const displayLabel = field === 'title' ? 'Heading' : field === 'subtitle' ? 'Subheading' : field === 'showCart' ? 'Show Cart Button' : field === 'showLogin' ? 'Show Login Button' : field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
-                                                                <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || (isImageField && sectionKey === 'banner') ? 'md:col-span-2' : ''} space-y-1.5`}>
+                                                                <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
                                                                     {!isImageField && <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>}
                                                                     {field === 'description' || field === 'address' ? (
                                                                         <textarea
@@ -687,13 +690,63 @@ export default function CMSPage() {
                                                                                 placeholder="#000000"
                                                                             />
                                                                         </div>
+                                                                    ) : isBooleanField ? (
+                                                                        /* ── BOOLEAN TOGGLE ── */
+                                                                        <div className="flex items-center gap-4 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3">
+                                                                            <span className={`text-xs font-bold ${section.content[field] === 'true' || section.content[field] === true ? 'text-green-600' : 'text-red-500'}`}>
+                                                                                {section.content[field] === 'true' || section.content[field] === true ? '✓ Enabled' : '✗ Disabled'}
+                                                                            </span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleContentChange(activeTab, sectionKey, field, String(!(section.content[field] === 'true' || section.content[field] === true)))}
+                                                                                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 focus:outline-none ${(section.content[field] === 'true' || section.content[field] === true)
+                                                                                    ? 'bg-brand-500 shadow-md shadow-brand-500/30'
+                                                                                    : 'bg-gray-300 dark:bg-gray-700'
+                                                                                    }`}
+                                                                            >
+                                                                                <span className={`inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${(section.content[field] === 'true' || section.content[field] === true) ? 'translate-x-8' : 'translate-x-1'
+                                                                                    }`}>
+                                                                                    {(section.content[field] === 'true' || section.content[field] === true)
+                                                                                        ? <Check className="w-2.5 h-2.5 text-brand-500" />
+                                                                                        : <X className="w-2.5 h-2.5 text-gray-400" />
+                                                                                    }
+                                                                                </span>
+                                                                            </button>
+                                                                            <div className="flex items-center gap-2 ml-2">
+                                                                                {['true', 'false'].map((opt) => (
+                                                                                    <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`${sectionKey}-${field}`}
+                                                                                            checked={String(section.content[field]) === opt}
+                                                                                            onChange={() => handleContentChange(activeTab, sectionKey, field, opt)}
+                                                                                            className="accent-brand-500 w-3.5 h-3.5"
+                                                                                        />
+                                                                                        <span className={`text-xs font-semibold capitalize ${opt === 'true' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
+                                                                                            }`}>{opt === 'true' ? 'Yes' : 'No'}</span>
+                                                                                    </label>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
                                                                     ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
-                                                                        <ImageUpload
-                                                                            label=""
-                                                                            value={section.content[field]}
-                                                                            onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
-                                                                            isBanner={sectionKey === 'banner'}
-                                                                        />
+                                                                        /* ── IMAGE UPLOAD ── */
+                                                                        <div className="space-y-1.5">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
+                                                                                {sectionKey !== 'banner' && (
+                                                                                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
+                                                                                        {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : '(400×200)'}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <ImageUpload
+                                                                                label=""
+                                                                                value={section.content[field]}
+                                                                                onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
+                                                                                isBanner={sectionKey === 'banner'}
+                                                                                isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
+                                                                            />
+                                                                        </div>
                                                                     ) : (
                                                                         <input
                                                                             type="text"

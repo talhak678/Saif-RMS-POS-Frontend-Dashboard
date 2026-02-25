@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Plus, Utensils, LayoutGrid, Trash2 } from "lucide-react";
+import { Plus, Utensils, LayoutGrid, Trash2, Pencil } from "lucide-react";
 import AddCategoryModal from "./AddCategoryModal";
 import DeleteCategoryModal from "./DeleteCategoryModal";
 import CategoryDetailModal from "./CategoryDetailModal";
+import EditCategoryModal from "./EditCategoryModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 
@@ -20,6 +21,7 @@ export default function CategoriesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [editCategory, setEditCategory] = useState<{ id: string; name: string; description?: string } | null>(null);
 
     useEffect(() => {
         fetchCategories();
@@ -111,6 +113,18 @@ export default function CategoriesPage() {
                                 onClick={() => setSelectedId(cat.id)}
                                 className="relative flex flex-col items-center justify-center gap-2.5 p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-brand-300 dark:hover:border-brand-600 transition-all cursor-pointer group select-none"
                             >
+                                {/* Edit button — top left on hover */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditCategory({ id: cat.id, name: cat.name, description: cat.description });
+                                    }}
+                                    className="absolute top-2 left-2 p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Edit"
+                                >
+                                    <Pencil size={13} />
+                                </button>
+
                                 {/* Delete button — top right on hover */}
                                 <button
                                     onClick={(e) => {
@@ -161,6 +175,15 @@ export default function CategoriesPage() {
                         onClose={() => setShowAddModal(false)}
                         onSuccess={fetchCategories}
                         restaurantId={categories[0]?.restaurantId}
+                    />
+                )}
+
+                {/* EDIT CATEGORY MODAL */}
+                {editCategory && (
+                    <EditCategoryModal
+                        category={editCategory}
+                        onClose={() => setEditCategory(null)}
+                        onSuccess={fetchCategories}
                     />
                 )}
 
