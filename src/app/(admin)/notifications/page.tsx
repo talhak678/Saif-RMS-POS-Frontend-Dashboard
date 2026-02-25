@@ -213,7 +213,7 @@ export default function NotificationsPage() {
                     <AlertCircle size={20} />
                 </div>
                 <p className="text-xs text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
-                    Notifications help you stay updated with restaurant requests. Check back often to ensure timely responses to your customers and staff.
+                    Contact us via email at <span className="font-black">saifgrill@gmail.com</span> or call <span className="font-black">+1-994-343-434</span> for new subscriptions and feature updates.
                 </p>
             </div>
         </div>
