@@ -44,8 +44,11 @@ api.interceptors.response.use(
     async (error) => {
         const originalConfig = error.config;
 
-        if (error.response && error.response.status === 401 && !originalConfig._retry) {
+        if (error.response && (error.response.status === 401 || error.response.status === 402) && !originalConfig._retry) {
             const authServ = AuthServiceInstance()
+            if (error.response.status === 402) {
+                alert(error.response.data?.message || "Subscription expired. Logging out.");
+            }
             authServ.logout()
         }
 

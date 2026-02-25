@@ -745,21 +745,34 @@ export default function ProfilePage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-4">
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border dark:border-gray-700">
-                            <RefreshCw size={12} className="text-gray-400" /> {restaurantForm.billingCycle} BILLING
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border dark:border-gray-700">
-                            <Activity size={12} className="text-emerald-500" /> {restaurantForm.status} STATUS
-                          </div>
+                        <div className="flex flex-wrap gap-3">
+                          <Button
+                            onClick={() => setIsRenewModalOpen(true)}
+                            className="w-full md:w-fit bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-transform"
+                          >
+                            Renew or Upgrade Plan
+                          </Button>
+
+                          {restaurantForm.subscription !== 'FREE' && (
+                            <Button
+                              onClick={() => {/* Direct Payment Logic */ }}
+                              className="w-full md:w-fit bg-brand-600 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-all flex items-center justify-center"
+                              style={{ background: 'linear-gradient(45deg, #ff6b35, #ff9f10)' }}
+                            >
+                              <CreditCard size={14} /> Pay Now (Instant)
+                            </Button>
+                          )}
                         </div>
 
-                        <Button
-                          onClick={() => setIsRenewModalOpen(true)}
-                          className="w-full md:w-fit bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-transform"
-                        >
-                          Renew or Upgrade Plan
-                        </Button>
+                        {restaurantForm.subEndDate && new Date(restaurantForm.subEndDate) < new Date() && (
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-3 mt-4 animate-pulse">
+                            <Info size={18} className="text-red-500 mt-0.5 shrink-0" />
+                            <div>
+                              <p className="text-sm font-black text-red-600 dark:text-red-400">YOUR SUBSCRIPTION HAS EXPIRED!</p>
+                              <p className="text-[11px] text-red-500 font-medium">Please pay now to restore access to all features.</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-8 space-y-6 bg-gray-50/10 dark:bg-gray-900/5">
