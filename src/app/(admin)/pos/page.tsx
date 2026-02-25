@@ -118,11 +118,11 @@ function ItemSelectionModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 {/* Image */}
-                <div className="relative h-48">
+                <div className="relative h-56 p-4">
                     <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-2xl shadow-md border border-gray-100 dark:border-gray-700"
                         onError={(e) => {
                             (e.target as HTMLImageElement).src =
                                 "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop";
@@ -130,13 +130,13 @@ function ItemSelectionModal({
                     />
                     <button
                         onClick={onClose}
-                        className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 rounded-full p-1.5 hover:bg-white"
+                        className="absolute top-6 right-6 bg-white/90 dark:bg-gray-800/90 rounded-full p-1.5 hover:bg-white shadow-sm transition-all active:scale-90"
                     >
                         <X className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     </button>
                 </div>
 
-                <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className="p-5 space-y-4 max-h-[calc(85vh-250px)] overflow-y-auto custom-scrollbar overscroll-contain">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.name}</h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{item.description}</p>
@@ -435,7 +435,7 @@ function CustomerDetailsModal({
                     </button>
                 </div>
 
-                <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="p-5 space-y-4 max-h-[calc(85vh-160px)] overflow-y-auto custom-scrollbar overscroll-contain">
                     {/* Order Summary */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -738,6 +738,32 @@ export default function POSPage() {
     const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
     const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
+    // Prevent background scroll when modal is open
+    useEffect(() => {
+        const isModalOpen = !!(selectedItem || showCustomerModal || stripeClientSecret);
+        if (isModalOpen) {
+            document.body.style.overflow = "hidden";
+            // Also try to find and lock the dashboard scrollable container
+            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
+            if (dashboardContainer instanceof HTMLElement) {
+                dashboardContainer.style.overflow = "hidden";
+            }
+        } else {
+            document.body.style.overflow = "unset";
+            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
+            if (dashboardContainer instanceof HTMLElement) {
+                dashboardContainer.style.overflow = "auto";
+            }
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
+            if (dashboardContainer instanceof HTMLElement) {
+                dashboardContainer.style.overflow = "auto";
+            }
+        };
+    }, [selectedItem, showCustomerModal, stripeClientSecret]);
+
     // Fetch categories & branches on mount
     useEffect(() => {
         const fetchInit = async () => {
@@ -905,7 +931,7 @@ export default function POSPage() {
 
     return (
         <ProtectedRoute module="pos:menu">
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+            <div className="h-full bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
                 {/* Item Selection Modal */}
                 {selectedItem && (
                     <ItemSelectionModal
@@ -1088,7 +1114,7 @@ export default function POSPage() {
                     </div>
 
                     {/* Right Section - Cart Sidebar */}
-                    <div className="w-full lg:w-[360px] flex-shrink-0 bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 flex flex-col max-h-[50vh] lg:max-h-none">
+                    <div className="w-full lg:w-[400px] flex-shrink-0 bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 flex flex-col h-[60vh] lg:h-full overflow-hidden shadow-2xl">
                         {/* Order Type Toggle */}
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                             <div className="flex gap-2">

@@ -177,10 +177,10 @@ function SocialLinkRow({ name, clicks, icon, color }: { name: string; clicks: st
 // ─── Banner Section ───────────────────────────────────────────────────────────
 function BannerCarousel() {
   return (
-    <div className="w-full max-w-5xl mx-auto flex gap-3 h-[180px] md:h-[220px]">
+    <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 flex gap-1 h-[180px] md:h-[260px] border-b border-gray-100 dark:border-gray-800">
 
       {/* Left — big banner */}
-      <div className="relative flex-[2] rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
+      <div className="relative flex-[2.5] overflow-hidden group">
         <Image
           src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
           alt="Dashboard Banner 1"
@@ -198,7 +198,7 @@ function BannerCarousel() {
       </div>
 
       {/* Right — small banner */}
-      <div className="relative flex-1 rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
+      <div className="relative flex-1 overflow-hidden group">
         <Image
           src="/images/authentication-images/Dashboard-Banner 2.jpg.jpeg"
           alt="Dashboard Banner 2"
