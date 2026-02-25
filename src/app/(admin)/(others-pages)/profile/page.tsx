@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { Info } from "lucide-react";
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import { toast } from "sonner";
