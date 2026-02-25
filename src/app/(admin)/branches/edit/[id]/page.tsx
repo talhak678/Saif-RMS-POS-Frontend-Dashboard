@@ -106,9 +106,9 @@ function EditBranchForm() {
                     whatsappNumber: data.whatsappNumber || "",
                     isOpen: data.isOpen !== undefined ? data.isOpen : true,
                     timing: data.timing || "",
-                    deliveryRadius: data.deliveryRadius || 0,
-                    freeDeliveryThreshold: data.freeDeliveryThreshold || 0,
-                    deliveryCharge: data.deliveryCharge || 0,
+                    deliveryRadius: Number(data.deliveryRadius) || 0,
+                    freeDeliveryThreshold: Number(data.freeDeliveryThreshold) || 0,
+                    deliveryCharge: Number(data.deliveryCharge) || 0,
                     deliveryOffTime: data.deliveryOffTime || '',
                     lat: Number(data.lat) || 30.1575,
                     lng: Number(data.lng) || 66.9961,
@@ -151,7 +151,15 @@ function EditBranchForm() {
 
         try {
             setSaving(true);
-            const res = await api.put(`/branches/${id}`, form);
+            const payload = {
+                ...form,
+                deliveryRadius: Number(form.deliveryRadius),
+                freeDeliveryThreshold: Number(form.freeDeliveryThreshold),
+                deliveryCharge: Number(form.deliveryCharge),
+                lat: Number(form.lat),
+                lng: Number(form.lng)
+            };
+            const res = await api.put(`/branches/${id}`, payload);
             if (res.data?.success) {
                 toast.success("Branch updated successfully");
                 router.push(`/branches?restaurantId=${form.restaurantId}`);
@@ -367,7 +375,7 @@ function EditBranchForm() {
                                 name="whatsappNumber"
                                 value={form.whatsappNumber}
                                 onChange={handleChange}
-                                placeholder="+92 300 7654321"
+                                placeholder="+1 300 7654321"
                                 className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                             />
                         </div>

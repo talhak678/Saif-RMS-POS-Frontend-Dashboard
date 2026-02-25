@@ -129,7 +129,15 @@ function AddBranchForm() {
 
         try {
             setLoading(true);
-            const res = await api.post("/branches", form);
+            const payload = {
+                ...form,
+                deliveryRadius: Number(form.deliveryRadius),
+                freeDeliveryThreshold: Number(form.freeDeliveryThreshold),
+                deliveryCharge: Number(form.deliveryCharge),
+                lat: Number(form.lat),
+                lng: Number(form.lng)
+            };
+            const res = await api.post("/branches", payload);
             if (res.data?.success) {
                 toast.success("Branch created successfully");
                 router.push(`/branches?restaurantId=${form.restaurantId}`);
@@ -334,7 +342,7 @@ function AddBranchForm() {
                                 name="whatsappNumber"
                                 value={form.whatsappNumber}
                                 onChange={handleChange}
-                                placeholder="+92 300 7654321"
+                                placeholder="+1 300 7654321"
                                 className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                             />
                         </div>
