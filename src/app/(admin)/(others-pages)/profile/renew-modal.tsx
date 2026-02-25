@@ -22,6 +22,11 @@ interface RenewModalProps {
     onClose: () => void;
     restaurantId: string;
     currentPlan?: string;
+    initialContact?: {
+        name: string;
+        email: string;
+        phone: string;
+    };
 }
 
 const PLAN_ORDER = ["FREE", "BASIC", "PREMIUM", "ENTERPRISE"];
@@ -38,13 +43,31 @@ const PLAN_BADGE: Record<string, string> = {
     ENTERPRISE: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
 };
 
-const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalProps) => {
+const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan, initialContact }: RenewModalProps) => {
     const [loading, setLoading] = useState(false);
     const [plansLoading, setPlansLoading] = useState(true);
     const [step, setStep] = useState(1);
     const [plans, setPlans] = useState<PlanPrice[]>([]);
     const [selectedPlan, setSelectedPlan] = useState<PlanPrice | null>(null);
     const [description, setDescription] = useState("");
+
+    // Contact Info State
+    const [contactInfo, setContactInfo] = useState({
+        name: "",
+        email: "",
+        phone: "",
+    });
+
+    // Populate initial contact info
+    useEffect(() => {
+        if (initialContact) {
+            setContactInfo({
+                name: initialContact.name || "",
+                email: initialContact.email || "",
+                phone: initialContact.phone || "",
+            });
+        }
+    }, [initialContact, isOpen]);
 
     // Fetch subscription plans
     useEffect(() => {
@@ -85,10 +108,13 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                 billingCycle: selectedPlan.billingCycle,
                 description,
                 restaurantId,
+                contactName: contactInfo.name,
+                contactEmail: contactInfo.email,
+                contactPhone: contactInfo.phone,
             });
             if (res.data?.success) {
                 toast.success("Upgrade request submitted! Super Admin will be notified.");
-                setStep(3);
+                setStep(4);
                 setTimeout(() => { handleClose(); }, 3000);
             } else {
                 toast.error(res.data?.message || "Failed to submit request");
@@ -114,10 +140,10 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                 <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-900/20">
                     <div>
                         <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                            {step === 3 ? "Request Sent!" : step === 2 ? "Confirm Upgrade" : "Renew / Upgrade Plan"}
+                            {step === 4 ? "Request Sent!" : step === 3 ? "Confirm Upgrade" : step === 2 ? "Contact Information" : "Renew / Upgrade Plan"}
                         </h3>
                         <p className="text-xs text-gray-500 font-medium mt-0.5">
-                            {step === 1 ? `Current plan: ${currentPlan || "FREE"}` : step === 2 ? "Review your selection" : ""}
+                            {step === 1 ? `Current plan: ${currentPlan || "FREE"}` : step === 2 ? "Review your contact details" : step === 3 ? "Review your selection" : ""}
                         </p>
                     </div>
                     <button onClick={handleClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
@@ -151,10 +177,10 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                                                     onClick={() => !isCurrentPlan && setSelectedPlan(plan)}
                                                     disabled={isCurrentPlan}
                                                     className={`relative text-left rounded-2xl border-2 p-5 transition-all duration-200 ${isSelected
-                                                            ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/10 shadow-lg shadow-brand-500/10"
-                                                            : isCurrentPlan
-                                                                ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 opacity-60 cursor-not-allowed"
-                                                                : "border-gray-200 dark:border-gray-700 hover:border-brand-300 hover:shadow-md bg-white dark:bg-gray-800/50"
+                                                        ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/10 shadow-lg shadow-brand-500/10"
+                                                        : isCurrentPlan
+                                                            ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 opacity-60 cursor-not-allowed"
+                                                            : "border-gray-200 dark:border-gray-700 hover:border-brand-300 hover:shadow-md bg-white dark:bg-gray-800/50"
                                                         }`}
                                                 >
                                                     {/* Plan header */}
@@ -232,8 +258,67 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                         </div>
                     )}
 
-                    {/* ── STEP 2: Review & Submit ── */}
-                    {step === 2 && selectedPlan && (
+                    {/* ── STEP 2: Contact Information ── */}
+                    {step === 2 && (
+                        <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                            <div className="text-center space-y-1 pb-2">
+                                <h4 className="text-lg font-bold dark:text-white">Contact Details</h4>
+                                <p className="text-xs text-gray-500 italic">Please provide details for the Super Admin to reach you</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                                    <input
+                                        className="w-full p-4 rounded-2xl border border-gray-100 dark:border-gray-700 dark:bg-gray-900/50 focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm transition-all"
+                                        placeholder="Enter your name"
+                                        value={contactInfo.name}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                                    <input
+                                        className="w-full p-4 rounded-2xl border border-gray-100 dark:border-gray-700 dark:bg-gray-900/50 focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm transition-all"
+                                        placeholder="Enter your email"
+                                        type="email"
+                                        value={contactInfo.email}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label>
+                                    <input
+                                        className="w-full p-4 rounded-2xl border border-gray-100 dark:border-gray-700 dark:bg-gray-900/50 focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm transition-all"
+                                        placeholder="Enter your phone number"
+                                        value={contactInfo.phone}
+                                        onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row gap-3 pt-4">
+                                <Button variant="outline" onClick={() => setStep(1)} className="flex-1 rounded-xl font-bold border-gray-200 text-gray-500">
+                                    Back to Plans
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (!contactInfo.name || !contactInfo.email || !contactInfo.phone) {
+                                            toast.error("Please fill all contact fields");
+                                            return;
+                                        }
+                                        setStep(3);
+                                    }}
+                                    className="flex-[2] rounded-xl font-black uppercase text-[10px] tracking-widest bg-brand-600 hover:bg-brand-700 text-white"
+                                >
+                                    Proceed to Review
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── STEP 3: Review & Submit ── */}
+                    {step === 3 && selectedPlan && (
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                             <div className="text-center space-y-1 pb-2">
                                 <h4 className="text-lg font-bold dark:text-white">Review Request</h4>
@@ -248,6 +333,10 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                                 <div className="flex justify-between py-3">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Price</span>
                                     <span className="text-sm font-black text-brand-600">${selectedPlan.price} / {selectedPlan.billingCycle.toLowerCase()}</span>
+                                </div>
+                                <div className="flex justify-between py-3">
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact Info</span>
+                                    <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-right">{contactInfo.name}<br />{contactInfo.email}<br />{contactInfo.phone}</span>
                                 </div>
                                 {selectedPlan.features?.length > 0 && (
                                     <div className="py-4">
@@ -270,8 +359,8 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                             </div>
 
                             <div className="flex flex-col md:flex-row gap-3 pt-2">
-                                <Button variant="outline" onClick={() => setStep(1)} disabled={loading} className="flex-1 rounded-xl font-bold border-gray-200 text-gray-500">
-                                    Back to Plans
+                                <Button variant="outline" onClick={() => setStep(2)} disabled={loading} className="flex-1 rounded-xl font-bold border-gray-200 text-gray-500">
+                                    Back to Contact Info
                                 </Button>
                                 <Button
                                     onClick={handleSubmit}
@@ -285,8 +374,8 @@ const RenewModal = ({ isOpen, onClose, restaurantId, currentPlan }: RenewModalPr
                         </div>
                     )}
 
-                    {/* ── STEP 3: Success ── */}
-                    {step === 3 && (
+                    {/* ── STEP 4: Success ── */}
+                    {step === 4 && (
                         <div className="py-12 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-300">
                             <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-500 shadow-xl shadow-emerald-500/10">
                                 <CheckCircle2 size={48} />

@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 import {
   Building2,
   User,
@@ -26,6 +27,7 @@ import {
   Trash2,
   RefreshCcw,
   Bell,
+  Phone,
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -54,10 +56,25 @@ const centerDefault = {
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>("RESTAURANT_INFO");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
+
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      toast.success("Payment successful! Your subscription has been updated.");
+      refreshUser();
+      fetchData();
+      // Remove query param without refreshing
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (payment === "cancel") {
+      toast.error("Payment cancelled. Your subscription was not updated.");
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
 
   // Restaurant Form State
   const [restaurantForm, setRestaurantForm] = useState<any>({
@@ -108,6 +125,36 @@ export default function ProfilePage() {
   // Subscription Requests State (Super Admin only)
   const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
   const [subReqLoading, setSubReqLoading] = useState(false);
+
+  const getSubStatus = () => {
+    if (restaurantForm.subscription === 'FREE') return { label: "FREE PLAN", color: "info" };
+    if (!restaurantForm.subEndDate) return { label: "PENDING ACTIVATION", color: "warning" };
+    const expiry = new Date(restaurantForm.subEndDate);
+    if (expiry < new Date()) return { label: "EXPIRED", color: "error" };
+    return { label: "ACTIVE", color: "success" };
+  };
+
+  const handleDirectPayment = async () => {
+    try {
+      setLoading(true);
+      const res = await api.post("/payments/subscription", {
+        plan: restaurantForm.subscription,
+        billingCycle: restaurantForm.billingCycle,
+        amount: restaurantForm.price
+      });
+
+      if (res.data?.success && res.data.data?.url) {
+        window.location.href = res.data.data.url;
+      } else {
+        toast.error("Failed to initiate payment. Please try again or contact support.");
+      }
+    } catch (error: any) {
+      console.error("Payment Error:", error);
+      toast.error(error.response?.data?.message || "Failed to start payment process");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -949,9 +996,20 @@ export default function ProfilePage() {
                       <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-gray-400" /> Membership Details
                       </h3>
-                      <Badge variant="solid" color={restaurantForm.status === 'ACTIVE' ? 'success' : 'warning'} className="font-black px-4 py-1.5 rounded-lg uppercase text-[10px] tracking-widest">
-                        {restaurantForm.status}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Account</span>
+                          <Badge variant="light" color={restaurantForm.status === 'ACTIVE' ? 'success' : 'warning'} className="font-black px-2 py-0.5 rounded-md uppercase text-[9px] tracking-widest">
+                            {restaurantForm.status}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Subscription</span>
+                          <Badge variant="solid" color={getSubStatus().color as any} className="font-black px-4 py-1.5 rounded-lg uppercase text-[10px] tracking-widest">
+                            {getSubStatus().label}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700">
@@ -974,7 +1032,7 @@ export default function ProfilePage() {
 
                           {restaurantForm.subscription !== 'FREE' && (
                             <Button
-                              onClick={() => {/* Direct Payment Logic */ }}
+                              onClick={handleDirectPayment}
                               className="w-full md:w-fit bg-brand-600 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-all flex items-center justify-center"
                               style={{ background: 'linear-gradient(45deg, #ff6b35, #ff9f10)' }}
                             >
@@ -1191,6 +1249,26 @@ export default function ProfilePage() {
                               </div>
                             </div>
 
+                            <div className="mt-3 p-3 bg-[#5d69b9]/5 dark:bg-[#5d69b9]/10 rounded-xl border border-[#5d69b9]/10">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <Phone size={10} className="text-[#5d69b9]" /> Merchant Contact Info
+                              </p>
+                              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Name:</span>
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{req.contactName || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Email:</span>
+                                  <span className="text-xs font-bold text-[#5d69b9]">{req.contactEmail || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Phone:</span>
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{req.contactPhone || 'N/A'}</span>
+                                </div>
+                              </div>
+                            </div>
+
                             {req.description && (
                               <p className="mt-3 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 italic">
                                 &quot;{req.description}&quot;
@@ -1253,6 +1331,11 @@ export default function ProfilePage() {
         onClose={() => setIsRenewModalOpen(false)}
         restaurantId={user?.restaurantId || ""}
         currentPlan={restaurantForm.subscription}
+        initialContact={{
+          name: restaurantForm.contactName || user?.name || "",
+          email: restaurantForm.contactEmail || restaurantForm.notificationEmail || user?.email || "",
+          phone: restaurantForm.contactPhone || restaurantForm.phone || "",
+        }}
       />
     </div>
   );
