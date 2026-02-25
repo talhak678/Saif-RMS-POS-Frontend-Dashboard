@@ -219,7 +219,10 @@ export default function ProfilePage() {
   const handleUpdateRestaurant = async () => {
     try {
       setLoading(true);
-      const res = await api.put(`/restaurants/${user?.restaurantId}`, restaurantForm);
+      // Strip out subscription billing fields — backend validates and rejects them
+      // when passed in a regular restaurant update request
+      const { subStartDate, subEndDate, price, billingCycle, subscription, ...restPayload } = restaurantForm;
+      const res = await api.put(`/restaurants/${user?.restaurantId}`, restPayload);
       if (res.data?.success) {
         toast.success("Restaurant information updated!");
         refreshUser();
@@ -1135,8 +1138,8 @@ export default function ProfilePage() {
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status</p>
                                 <span className={`inline-block text-[9px] font-black uppercase mt-0.5 px-2 py-0.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                    : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                  : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                   }`}>
                                   {req.status}
                                 </span>
