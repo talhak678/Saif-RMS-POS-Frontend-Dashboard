@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import api from "@/services/api";
-import { Eye, Edit, Trash2, Plus, X, Star } from "lucide-react";
+import { Eye, Edit, Trash2, X, Star } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
@@ -43,7 +42,6 @@ interface Review {
 }
 
 export default function ReviewsPage() {
-    const searchParams = useSearchParams();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
 
