@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/services/api";
-import { Eye, Trash2, Plus, X, Edit, Filter } from "lucide-react";
+import { Eye, Trash2, Plus, X, Edit, Filter, Phone, Clock, MessageSquare, CheckCircle, XCircle } from "lucide-react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
@@ -146,26 +146,28 @@ function Branch() {
             {/* TABLE */}
             <div className="bg-white dark:bg-gray-800 rounded-lg overflow-x-auto border border-gray-100 dark:border-gray-700 shadow-sm">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-50 dark:bg-gray-700/50">
-                        <tr>
-                            <th className="px-4 py-3 text-left">#</th>
-                            <th className="px-4 py-3 text-left">Branch</th>
-                            <th className="px-4 py-3 text-left">Restaurant</th>
-                            <th className="px-4 py-3 text-left">Phone</th>
-                            <th className="px-4 py-3 text-left text-right">Actions</th>
+                    <thead className="bg-gray-50/50 dark:bg-gray-700/30">
+                        <tr className="border-b dark:border-gray-700 font-bold uppercase tracking-widest text-[10px] text-gray-400">
+                            <th className="px-4 py-4 text-left">#</th>
+                            <th className="px-4 py-4 text-left">Branch</th>
+                            <th className="px-4 py-4 text-left text-center">Status</th>
+                            <th className="px-4 py-4 text-left">Restaurant</th>
+                            <th className="px-4 py-4 text-left">Contact Info</th>
+                            <th className="px-4 py-4 text-left">Timing</th>
+                            <th className="px-4 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                         {loading ? (
                             <tr>
-                                <td colSpan={5} className="py-20 text-center">
+                                <td colSpan={7} className="py-20 text-center">
                                     <Loader size="md" />
                                 </td>
                             </tr>
                         ) : isSuperAdmin && !restaurantId ? (
                             <tr>
-                                <td colSpan={5} className="py-24 text-center">
+                                <td colSpan={7} className="py-24 text-center">
                                     <div className="flex flex-col items-center justify-center gap-3 text-gray-500">
                                         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
                                             <Filter size={24} />
@@ -177,7 +179,7 @@ function Branch() {
                             </tr>
                         ) : branches.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="py-20 text-center text-gray-500">
+                                <td colSpan={7} className="py-20 text-center text-gray-500">
                                     No branches found
                                 </td>
                             </tr>
@@ -185,50 +187,87 @@ function Branch() {
                             branches.map((branch: any, i: number) => (
                                 <tr
                                     key={branch.id}
-                                    className="border-b dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
-                                    onDoubleClick={() => {
+                                    className="group hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-all cursor-pointer"
+                                    onClick={() => {
                                         setViewBranch(branch);
                                         setIsViewModalOpen(true);
                                     }}
                                 >
-                                    <td className="px-4 py-3 text-gray-500 font-medium">{i + 1}</td>
-                                    <td className="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">{branch.name}</td>
-                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-brand-500"></span>
-                                            {branch.restaurant?.name}
+                                    <td className="px-4 py-4 font-black font-mono text-gray-300 text-xs">{String(i + 1).padStart(2, '0')}</td>
+                                    <td className="px-4 py-4">
+                                        <div>
+                                            <p className="font-black text-gray-800 dark:text-gray-200 tracking-tight">{branch.name}</p>
+                                            <p className="text-[10px] text-gray-400 font-bold truncate max-w-[150px]">{branch.address}</p>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{branch.phone}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end gap-2">
+                                    <td className="px-4 py-4">
+                                        <div className="flex justify-center">
+                                            {branch.isOpen ? (
+                                                <span className="flex items-center gap-1 text-[10px] font-black text-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-500/20 uppercase tracking-widest">
+                                                    <CheckCircle size={10} /> Open
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1 text-[10px] font-black text-rose-500 bg-rose-50/50 dark:bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-500/20 uppercase tracking-widest">
+                                                    <XCircle size={10} /> Closed
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-brand-500"></span>
+                                            <span className="text-xs font-bold truncate max-w-[120px]">{branch.restaurant?.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 min-w-[180px]">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-gray-300">
+                                                <Phone size={12} className="text-brand-500" />
+                                                {branch.phone}
+                                            </div>
+                                            {branch.whatsappNumber && (
+                                                <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
+                                                    <MessageSquare size={12} />
+                                                    {branch.whatsappNumber}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                                            <Clock size={12} className="text-brand-500" />
+                                            {branch.timing || "N/A"}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4">
+                                        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => {
                                                     setViewBranch(branch);
                                                     setIsViewModalOpen(true);
                                                 }}
-                                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                                                className="p-2 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-500/10 text-gray-400 hover:text-brand-500 transition-all border border-transparent hover:border-brand-100 dark:hover:border-brand-500/20"
                                                 title="View Details"
                                             >
-                                                <Eye size={16} />
+                                                <Eye size={18} />
                                             </button>
 
                                             <button
                                                 onClick={() => router.push(`/branches/edit/${branch.id}`)}
-                                                className="p-2 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 text-brand-600 transition-colors"
+                                                className="p-2 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-500/10 text-gray-400 hover:text-amber-600 transition-all border border-transparent hover:border-amber-100 dark:hover:border-amber-500/20"
                                                 title="Edit Branch"
                                             >
-                                                <Edit size={16} />
+                                                <Edit size={18} />
                                             </button>
                                             <button
                                                 onClick={() => {
                                                     setSelectedBranch(branch);
                                                     setDeleteModal(true);
                                                 }}
-                                                className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 transition-colors"
+                                                className="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 text-gray-400 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 dark:hover:border-rose-500/20"
                                                 title="Delete Branch"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={18} />
                                             </button>
                                         </div>
                                     </td>
@@ -275,12 +314,17 @@ function Branch() {
                 fields={[
                     { label: "Name", key: "name" },
                     { label: "Restaurant", render: (data: any) => data?.restaurant?.name },
+                    { label: "Branch Status", render: (data: any) => data?.isOpen ? '✅ Open' : '❌ Closed' },
                     { label: "Phone", key: "phone" },
+                    { label: "WhatsApp", key: "whatsappNumber" },
+                    { label: "Timing", key: "timing" },
                     { label: "Address", key: "address" },
                     { label: "Delivery Radius", render: (data: any) => `${data?.deliveryRadius || 0} km` },
                     { label: "Free Delivery Threshold", render: (data: any) => `$ ${data?.freeDeliveryThreshold || 0}` },
                     { label: "Delivery Charge", render: (data: any) => `$ ${data?.deliveryCharge || 0}` },
                     { label: "Delivery Off Time", key: "deliveryOffTime" },
+                    { label: "Latitude", key: "lat" },
+                    { label: "Longitude", key: "lng" },
                 ]}
             />
         </div>
