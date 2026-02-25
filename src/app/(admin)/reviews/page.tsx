@@ -51,16 +51,6 @@ export default function ReviewsPage() {
     const [viewReview, setViewReview] = useState<Review | null>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-    // Add Review Modal
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [addFormData, setAddFormData] = useState({
-        rating: 5,
-        comment: "",
-        orderId: "",
-        menuItemId: "",
-    });
-    const [adding, setAdding] = useState(false);
-
     // Edit Review Modal
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
@@ -77,20 +67,6 @@ export default function ReviewsPage() {
 
     useEffect(() => {
         fetchReviews();
-
-        // Check for URL params and auto-open add modal
-        const orderId = searchParams.get("orderId");
-        const menuItemId = searchParams.get("menuItemId");
-
-        if (orderId) {
-            setAddFormData({
-                rating: 5,
-                comment: "",
-                orderId: orderId,
-                menuItemId: menuItemId || "",
-            });
-            setShowAddModal(true);
-        }
     }, []);
 
     const fetchReviews = async () => {
@@ -108,42 +84,6 @@ export default function ReviewsPage() {
             toast.error("Failed to fetch reviews");
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleAddReview = async () => {
-        if (!addFormData.orderId || addFormData.rating < 1 || addFormData.rating > 5) {
-            toast.error("Please fill all required fields with valid data");
-            return;
-        }
-
-        try {
-            setAdding(true);
-            const payload: any = {
-                rating: addFormData.rating,
-                comment: addFormData.comment,
-                orderId: addFormData.orderId,
-            };
-
-            if (addFormData.menuItemId) {
-                payload.menuItemId = addFormData.menuItemId;
-            }
-
-            await api.post("/marketing/reviews", payload);
-            toast.success("Review added successfully!");
-            setShowAddModal(false);
-            setAddFormData({
-                rating: 5,
-                comment: "",
-                orderId: "",
-                menuItemId: "",
-            });
-            fetchReviews();
-        } catch (err) {
-            console.error("Failed to add review", err);
-            toast.error("Failed to add review");
-        } finally {
-            setAdding(false);
         }
     };
 
@@ -213,14 +153,6 @@ export default function ReviewsPage() {
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                         Customer Reviews
                     </h1>
-
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
-                    >
-                        <Plus size={18} />
-                        Add Review
-                    </button>
                 </div>
 
                 <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -305,78 +237,6 @@ export default function ReviewsPage() {
                         </tbody>
                     </table>
                 </div>
-
-                {/* ADD REVIEW MODAL */}
-                {showAddModal && (
-                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                            <div className="flex justify-between mb-4">
-                                <h2 className="font-semibold text-lg">Add New Review</h2>
-                                <button onClick={() => setShowAddModal(false)}>
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Rating</label>
-                                    <StarRating
-                                        rating={addFormData.rating}
-                                        interactive
-                                        onChange={(rating) => setAddFormData({ ...addFormData, rating })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Comment</label>
-                                    <textarea
-                                        value={addFormData.comment}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, comment: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="Amazing food and service!"
-                                        rows={3}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Order ID *</label>
-                                    <input
-                                        type="text"
-                                        value={addFormData.orderId}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, orderId: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="clxxx..."
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Menu Item ID (Optional)</label>
-                                    <input
-                                        type="text"
-                                        value={addFormData.menuItemId}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, menuItemId: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="clxxx..."
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={handleAddReview}
-                                    disabled={adding}
-                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
-                                >
-                                    {adding ? <Loader size="sm" className="space-y-0" /> : "Add Review"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* EDIT REVIEW MODAL */}
                 {showEditModal && selectedReview && (
