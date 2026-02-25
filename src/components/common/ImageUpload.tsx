@@ -10,9 +10,10 @@ interface ImageUploadProps {
     onChange: (url: string) => void;
     label?: string;
     isBanner?: boolean;
+    isLogo?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false, isLogo = false }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,11 +79,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
 
             <div className="relative w-full">
                 {value ? (
-                    <div className={`relative ${isBanner ? 'aspect-[21/9] w-full' : 'h-40 w-full max-w-sm'} rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg group`}>
+                    <div className={`relative group ${isBanner ? 'aspect-[21/9] w-full' : 'h-44 w-full'
+                        } rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md`}>
                         <img
                             src={value}
                             alt="Uploaded"
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-500"
+                            className={`w-full h-full ${isLogo
+                                    ? 'object-contain bg-gray-50 dark:bg-gray-800 p-4'
+                                    : 'object-cover transition-transform group-hover:scale-105 duration-500'
+                                }`}
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                             <button
@@ -106,7 +111,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                 ) : (
                     <div
                         onClick={() => fileInputRef.current?.click()}
-                        className={`${isBanner ? 'aspect-[21/9] w-full' : 'h-40 w-full max-w-sm'} rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative`}
+                        className={`${isBanner
+                            ? 'aspect-[21/9] w-full'
+                            : isLogo
+                                ? 'w-full h-40'
+                                : 'h-40 w-full'
+                            } rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative`}
                     >
                         {loading ? (
                             <Loader size="md" />

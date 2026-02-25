@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Edit, X } from "lucide-react";
+import { Edit, Plus, X } from "lucide-react";
 import api from "@/services/api";
 import { endpoints } from "@/types/environment";
 import { toast } from "sonner";
@@ -31,10 +31,24 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
         restaurantId: priceData.restaurantId,
         isActive: priceData.isActive,
     });
+    const [features, setFeatures] = useState<string[]>(priceData.features || []);
+    const [featureInput, setFeatureInput] = useState("");
     const [restaurants, setRestaurants] = useState<any[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
     const [loadingRestaurants, setLoadingRestaurants] = useState<boolean>(true);
+
+    const addFeature = () => {
+        const trimmed = featureInput.trim();
+        if (trimmed && !features.includes(trimmed)) {
+            setFeatures([...features, trimmed]);
+        }
+        setFeatureInput("");
+    };
+
+    const removeFeature = (idx: number) => {
+        setFeatures(features.filter((_, i) => i !== idx));
+    };
 
     const fetchRestaurants = async () => {
         try {
@@ -53,8 +67,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
         e.preventDefault();
         try {
             setSaving(true);
-            // Requirement: send changed data with other data wese hi jaega (all data)
-            const res = await api.put(`${endpoints.editSubscriptionPrice}${priceData.id}`, form);
+            const res = await api.put(`${endpoints.editSubscriptionPrice}${priceData.id}`, { ...form, features });
             if (res.data?.success) {
                 toast.success("Payment plan updated successfully!");
                 onAction?.();
@@ -73,7 +86,6 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
     useEffect(() => {
         if (modal) {
             fetchRestaurants();
-            // sync form state if priceData changes
             setForm({
                 plan: priceData.plan,
                 price: Number(priceData.price),
@@ -81,6 +93,8 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                 restaurantId: priceData.restaurantId,
                 isActive: priceData.isActive,
             });
+            setFeatures(priceData.features || []);
+            setFeatureInput("");
         }
     }, [modal, priceData]);
 
@@ -119,7 +133,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                     </div>
 
                     {/* Body */}
-                    <div className="p-6">
+                    <div className="p-6 overflow-y-auto max-h-[70vh]">
                         <form id="edit-plan-form" onSubmit={handleSubmit} className="space-y-5">
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                                 <div className="flex flex-col">
@@ -176,6 +190,42 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                                     />
                                 </div>
 
+                                {/* Features Input */}
+                                <div className="col-span-2">
+                                    <Label>Plan Features</Label>
+                                    <div className="flex gap-2 mt-1">
+                                        <input
+                                            type="text"
+                                            value={featureInput}
+                                            onChange={(e) => setFeatureInput(e.target.value)}
+                                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addFeature(); } }}
+                                            placeholder="e.g. Priority Support — press Enter or + to add"
+                                            disabled={saving}
+                                            className="flex-1 p-2.5 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={addFeature}
+                                            disabled={!featureInput.trim() || saving}
+                                            className="px-3 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-40 transition-colors"
+                                        >
+                                            <Plus size={16} />
+                                        </button>
+                                    </div>
+                                    {features.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {features.map((f, i) => (
+                                                <span key={i} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full border border-brand-200 dark:border-brand-800">
+                                                    {f}
+                                                    <button type="button" onClick={() => removeFeature(i)} className="text-brand-400 hover:text-brand-700">
+                                                        <X size={11} />
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="col-span-2">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -193,20 +243,10 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
 
                     {/* Footer */}
                     <div className="flex items-center justify-end gap-3 border-t bg-gray-50 px-6 py-4 dark:bg-gray-900/50 dark:border-gray-700">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={saving}
-                            onClick={() => setModal(false)}
-                        >
+                        <Button type="button" variant="outline" disabled={saving} onClick={() => setModal(false)}>
                             Cancel
                         </Button>
-                        <Button
-                            form="edit-plan-form"
-                            type="submit"
-                            disabled={saving}
-                            loading={saving}
-                        >
+                        <Button form="edit-plan-form" type="submit" disabled={saving} loading={saving}>
                             Save Changes
                         </Button>
                     </div>

@@ -15,6 +15,7 @@ import {
     MapPin,
     ChevronRight,
     CheckCircle2,
+    Printer,
 } from "lucide-react";
 import api from "@/services/api";
 import toast from "react-hot-toast";
@@ -246,6 +247,135 @@ function ItemSelectionModal({
     );
 }
 
+// ─── Thermal Receipt Printer ──────────────────────────────────────────────────
+function printReceipt({
+    cart,
+    subtotal,
+    tax,
+    total,
+    orderType,
+    paymentMethod,
+    customerDetails,
+    orderNo,
+}: {
+    cart: CartItem[];
+    subtotal: number;
+    tax: number;
+    total: number;
+    orderType: OrderType;
+    paymentMethod: PaymentMethod;
+    customerDetails: CustomerDetails;
+    orderNo?: string;
+}) {
+    const date = new Date().toLocaleString("en-PK", { hour12: true });
+    const receiptHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Order Receipt</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: 'Courier New', Courier, monospace;
+                    font-size: 12px;
+                    width: 80mm;
+                    padding: 4mm 3mm;
+                    color: #000;
+                    background: #fff;
+                }
+                .center { text-align: center; }
+                .bold { font-weight: bold; }
+                .lg { font-size: 16px; }
+                .md { font-size: 13px; }
+                .sm { font-size: 10px; }
+                .divider { border-top: 1px dashed #000; margin: 4px 0; }
+                .row { display: flex; justify-content: space-between; margin: 2px 0; }
+                .row-item { display: flex; justify-content: space-between; margin: 3px 0; }
+                .item-name { flex: 1; margin-right: 4px; }
+                .item-price { min-width: 50px; text-align: right; }
+                .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin: 4px 0; }
+                .thank-you { text-align: center; margin-top: 8px; font-size: 11px; }
+                @media print {
+                    body { width: 80mm; }
+                    @page { margin: 0; size: 80mm auto; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="center bold lg">RMS POS</div>
+            <div class="center sm">Order Receipt</div>
+            <div class="center sm">${date}</div>
+            ${orderNo ? `<div class="center bold">Order #${orderNo}</div>` : ''}
+            <div class="divider"></div>
+
+            <div class="row sm">
+                <span>Type: <b>${orderType.replace('_', ' ')}</b></span>
+                <span>Pay: <b>${paymentMethod}</b></span>
+            </div>
+            ${customerDetails.name ? `<div class="sm">Customer: <b>${customerDetails.name}</b></div>` : ''}
+            ${customerDetails.phone ? `<div class="sm">Phone: ${customerDetails.phone}</div>` : ''}
+            ${customerDetails.tableNumber ? `<div class="sm">Table: ${customerDetails.tableNumber}</div>` : ''}
+            ${customerDetails.address ? `<div class="sm">Address: ${customerDetails.address}</div>` : ''}
+
+            <div class="divider"></div>
+            <div class="row bold sm">
+                <span>ITEM</span><span>QTY</span><span>PRICE</span>
+            </div>
+            <div class="divider"></div>
+
+            ${cart.map(item => `
+                <div class="row-item">
+                    <span class="item-name">
+                        ${item.name}
+                        ${item.selectedVariation ? `<br/><span class="sm"> (${item.selectedVariation.name})</span>` : ''}
+                        ${item.selectedAddons.length > 0 ? `<br/><span class="sm"> +${item.selectedAddons.map(a => a.name).join(', ')}</span>` : ''}
+                    </span>
+                    <span style="min-width:20px;text-align:center">${item.quantity}</span>
+                    <span class="item-price">$${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('')}
+
+            <div class="divider"></div>
+            <div class="row">
+                <span>Subtotal</span><span>$${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="row">
+                <span>Tax (5%)</span><span>$${tax.toFixed(2)}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="total-row">
+                <span>TOTAL</span><span>$${total.toFixed(2)}</span>
+            </div>
+            <div class="divider"></div>
+
+            <div class="thank-you">
+                Thank you for your order!<br/>
+                Please come again.
+            </div>
+        </body>
+        </html>
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '80mm';
+    iframe.style.height = '0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
+    doc.open();
+    doc.write(receiptHtml);
+    doc.close();
+    iframe.contentWindow?.focus();
+    setTimeout(() => {
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 400);
+}
+
 // ─── Customer Details Modal ───────────────────────────────────────────────────
 function CustomerDetailsModal({
     orderType,
@@ -261,7 +391,7 @@ function CustomerDetailsModal({
     orderType: OrderType;
     branches: Branch[];
     onClose: () => void;
-    onConfirm: (details: CustomerDetails, branchId: string) => void;
+    onConfirm: (details: CustomerDetails, branchId: string, printAfter: boolean) => void;
     cart: CartItem[];
     subtotal: number;
     tax: number;
@@ -289,8 +419,8 @@ function CustomerDetailsModal({
         return Object.keys(e).length === 0;
     };
 
-    const handleConfirm = () => {
-        if (validate()) onConfirm(details, selectedBranchId);
+    const handleConfirm = (withPrint = false) => {
+        if (validate()) onConfirm(details, selectedBranchId, withPrint);
     };
 
     return (
@@ -440,19 +570,28 @@ function CustomerDetailsModal({
                     </div>
                 </div>
 
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={onClose}
+                            className="py-3 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Back
+                        </button>
+                        <button
+                            onClick={() => handleConfirm(false)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            <ShoppingCart className="w-4 h-4" />
+                            Place Order
+                        </button>
+                    </div>
                     <button
-                        onClick={onClose}
-                        className="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => handleConfirm(true)}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                        Back
-                    </button>
-                    <button
-                        onClick={handleConfirm}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
-                    >
-                        Place Order
-                        <ChevronRight className="w-4 h-4" />
+                        <Printer className="w-4 h-4" />
+                        Place Order &amp; Print Receipt
                     </button>
                 </div>
             </div>
@@ -691,7 +830,9 @@ export default function POSPage() {
     const total = subtotal + tax;
 
     // Place order
-    const handlePlaceOrder = async (customerDetails: CustomerDetails, branchId: string) => {
+    const [lastCustomerDetails, setLastCustomerDetails] = useState<CustomerDetails>({ name: "", phone: "", address: "", tableNumber: "" });
+
+    const handlePlaceOrder = async (customerDetails: CustomerDetails, branchId: string, printAfter = false) => {
         try {
             setPlacingOrder(true);
 
@@ -748,6 +889,9 @@ export default function POSPage() {
                 }
             } else {
                 toast.success("Order placed successfully!");
+                if (printAfter) {
+                    printReceipt({ cart, subtotal, tax, total, orderType, paymentMethod, customerDetails });
+                }
                 setCart([]);
                 setShowCustomerModal(false);
             }
@@ -782,7 +926,7 @@ export default function POSPage() {
                         total={total}
                         paymentMethod={paymentMethod}
                         onClose={() => setShowCustomerModal(false)}
-                        onConfirm={handlePlaceOrder}
+                        onConfirm={(details, branchId, printAfter) => handlePlaceOrder(details, branchId, printAfter)}
                     />
                 )}
 
@@ -1073,14 +1217,14 @@ export default function POSPage() {
                                 </div>
                             </div>
 
-                            {/* Place Order Button */}
+                            {/* Place Order Buttons */}
                             <button
                                 onClick={() => {
                                     if (cart.length === 0) { toast.error("Cart is empty!"); return; }
                                     setShowCustomerModal(true);
                                 }}
                                 disabled={cart.length === 0 || placingOrder}
-                                className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none"
+                                className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-3.5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none"
                             >
                                 <ShoppingCart className="w-5 h-5" />
                                 Place Order

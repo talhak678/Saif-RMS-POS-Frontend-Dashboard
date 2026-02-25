@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 function EditBranchForm() {
     const { user, loadingUser } = useAuth();
-    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
     const params = useParams();
     const id = params.id;
@@ -27,21 +26,16 @@ function EditBranchForm() {
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
         deliveryOffTime: '',
+        lat: "",
+        lng: "",
         restaurantId: "",
     });
 
     useEffect(() => {
-        if (!loadingUser && user && !isSuperAdmin) {
-            toast.error("Access denied. Only Super Admins can edit branches.");
-            router.push("/branches");
-        }
-    }, [user, loadingUser, isSuperAdmin, router]);
-
-    useEffect(() => {
-        if (id && isSuperAdmin) {
+        if (id) {
             fetchInitialData();
         }
-    }, [id, isSuperAdmin]);
+    }, [id]);
 
     const fetchInitialData = async () => {
         try {
@@ -65,6 +59,8 @@ function EditBranchForm() {
                     freeDeliveryThreshold: data.freeDeliveryThreshold || 0,
                     deliveryCharge: data.deliveryCharge || 0,
                     deliveryOffTime: data.deliveryOffTime || '',
+                    lat: data.lat || "",
+                    lng: data.lng || "",
                     restaurantId: data.restaurantId || "",
                 });
             }
@@ -119,7 +115,7 @@ function EditBranchForm() {
         }
     };
 
-    if (loadingUser || (loading && isSuperAdmin)) {
+    if (loadingUser || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
                 <Loader size="lg" />
@@ -127,20 +123,18 @@ function EditBranchForm() {
         );
     }
 
-    if (!isSuperAdmin) return null;
-
     return (
-        <div className="min-h-screen p-4 dark:bg-gray-900">
+        <div className="min-h-screen p-4 dark:bg-gray-900 bg-gray-50/30">
             {/* HEADER */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-6 max-w-4xl mx-auto">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300"
+                    className="p-2.5 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300 transition-all bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
                 >
                     <ArrowLeft size={18} />
                 </button>
 
-                <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
+                <h1 className="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">
                     Edit Branch
                 </h1>
             </div>
@@ -148,18 +142,18 @@ function EditBranchForm() {
             {/* FORM */}
             <form
                 onSubmit={handleSubmit}
-                className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md max-w-4xl mx-auto"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl shadow-gray-200/50 dark:shadow-none max-w-4xl mx-auto border border-gray-100 dark:border-gray-700"
             >
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-6">
                     {/* RESTAURANT */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Restaurant *</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Restaurant *</label>
                         <select
                             name="restaurantId"
                             value={form.restaurantId}
                             onChange={handleChange}
                             required
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         >
                             <option value="">Select Restaurant</option>
                             {restaurants.map((r: any) => (
@@ -172,106 +166,130 @@ function EditBranchForm() {
 
                     {/* BRANCH NAME */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Branch Name *</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Branch Name *</label>
                         <input
                             name="name"
                             value={form.name}
                             onChange={handleChange}
                             required
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
 
                     {/* PHONE */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Phone *</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Phone *</label>
                         <input
                             name="phone"
                             value={form.phone}
                             onChange={handleChange}
                             required
                             placeholder="+1 300 1234567"
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
 
                     {/* DELIVERY RADIUS */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Radius (km)</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Delivery Radius (km)</label>
                         <input
                             type="number"
                             name="deliveryRadius"
                             value={form.deliveryRadius}
                             onChange={handleChange}
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
 
                     {/* FREE DELIVERY */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Free Delivery Threshold ($)</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Free Delivery Threshold ($)</label>
                         <input
                             type="number"
                             name="freeDeliveryThreshold"
                             value={form.freeDeliveryThreshold}
                             onChange={handleChange}
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
 
                     {/* DELIVERY CHARGE */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Charge ($)</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Delivery Charge ($)</label>
                         <input
                             type="number"
                             name="deliveryCharge"
                             value={form.deliveryCharge}
                             onChange={handleChange}
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
 
                     {/* DELIVERY OFF TIME */}
                     <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Delivery Off Time</label>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Delivery Off Time</label>
                         <input
                             type="time"
                             name="deliveryOffTime"
                             value={form.deliveryOffTime}
                             onChange={handleChange}
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                        />
+                    </div>
+
+                    {/* LATITUDE */}
+                    <div>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Latitude</label>
+                        <input
+                            name="lat"
+                            value={form.lat}
+                            onChange={handleChange}
+                            placeholder="24.8607"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                        />
+                    </div>
+
+                    {/* LONGITUDE */}
+                    <div>
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Longitude</label>
+                        <input
+                            name="lng"
+                            value={form.lng}
+                            onChange={handleChange}
+                            placeholder="67.0011"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                         />
                     </div>
                 </div>
 
                 {/* ADDRESS */}
-                <div className="mt-4">
-                    <label className="text-sm font-medium dark:text-gray-300">Address *</label>
+                <div className="mt-6">
+                    <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Address *</label>
                     <textarea
                         name="address"
                         value={form.address}
                         onChange={handleChange}
                         required
                         rows={3}
-                        className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
                     />
                 </div>
 
                 {/* ACTIONS */}
-                <div className="mt-6 flex gap-3">
+                <div className="mt-8 flex gap-4">
                     <button
                         type="submit"
                         disabled={saving}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50"
+                        className="flex-1 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-200 dark:shadow-none flex items-center justify-center gap-2 group disabled:opacity-50"
                     >
-                        {saving ? <Loader size="sm" showText={false} className="space-y-0" /> : <Save size={18} />}
-                        {saving ? "Saving..." : "Save Changes"}
+                        {saving ? <Loader size="sm" showText={false} className="space-y-0" /> : <Save size={20} className="group-hover:scale-110 transition-transform" />}
+                        {saving ? "Updating Branch..." : "Update Branch Details"}
                     </button>
 
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="px-6 py-2 rounded border dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        className="px-8 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-bold"
                     >
                         Cancel
                     </button>

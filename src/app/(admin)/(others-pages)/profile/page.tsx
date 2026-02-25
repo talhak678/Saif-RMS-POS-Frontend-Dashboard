@@ -84,7 +84,8 @@ export default function ProfilePage() {
     subStartDate: null,
     subEndDate: null,
     price: 0,
-    billingCycle: "MONTHLY"
+    billingCycle: "MONTHLY",
+    features: [] as string[]
   });
 
   // User Form State
@@ -193,7 +194,8 @@ export default function ProfilePage() {
           subStartDate: data.subStartDate || null,
           subEndDate: data.subEndDate || null,
           price: planPrice?.price || 0,
-          billingCycle: planPrice?.billingCycle || "MONTHLY"
+          billingCycle: planPrice?.billingCycle || "MONTHLY",
+          features: planPrice?.features || []
         });
       }
 
@@ -1000,11 +1002,34 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
+                  {/* Plan Features */}
+                  {restaurantForm.features?.length > 0 && (
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/20 dark:bg-gray-900/10">
+                        <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-brand-500" /> Included Features
+                        </h3>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {restaurantForm.features.map((feature: string, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-brand-50/50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30">
+                              <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle2 className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Simple Health Bar */}
                   <div className="bg-emerald-50/30 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active & Secured</span>
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active &amp; Secured</span>
                     </div>
                     <span className="text-[10px] text-gray-400 font-medium">Last synced: Just now</span>
                   </div>
