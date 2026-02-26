@@ -1037,7 +1037,11 @@ export default function POSPage() {
                                                 key={item.id}
                                                 className={`bg-white dark:bg-gray-800 rounded-3xl p-3 shadow-sm hover:shadow-md transition-all duration-200 border-2 flex flex-col cursor-pointer ${quantity > 0 ? "border-brand-600 shadow-brand-100 dark:shadow-none" : "border-transparent"
                                                     }`}
-                                                onClick={() => setSelectedItem(item)}
+                                                onClick={() => {
+                                                    const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                    if (hasOptions) setSelectedItem(item);
+                                                    else handleAddToCart(item, undefined, []);
+                                                }}
                                             >
                                                 {/* Product Image */}
                                                 <div className="relative h-44 w-full mb-3 flex-shrink-0">
@@ -1090,7 +1094,11 @@ export default function POSPage() {
                                                                 {quantity}
                                                             </span>
                                                             <button
-                                                                onClick={() => setSelectedItem(item)}
+                                                                onClick={() => {
+                                                                    const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                                    if (hasOptions) setSelectedItem(item);
+                                                                    else handleAddToCart(item, undefined, []);
+                                                                }}
                                                                 className="w-8 h-8 flex items-center justify-center bg-brand-600 text-white rounded-full hover:bg-brand-700 transition-colors"
                                                             >
                                                                 <Plus className="w-4 h-4" />
@@ -1098,7 +1106,12 @@ export default function POSPage() {
                                                         </div>
                                                     ) : (
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                                if (hasOptions) setSelectedItem(item);
+                                                                else handleAddToCart(item, undefined, []);
+                                                            }}
                                                             className="w-full bg-brand-50 hover:bg-brand-100 text-brand-600 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center uppercase tracking-wider"
                                                         >
                                                             Add to Dish
