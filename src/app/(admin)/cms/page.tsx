@@ -24,10 +24,10 @@ const DEFAULT_CONFIG = {
             header: {
                 required: true, enabled: true,
                 content: {
-                    menuItems: "Home, Our Menu, Contact Us",
+                    logoUrl: "",
+                    menuItems: "Home, Our Menu, About Us, Contact Us, Blogs",
                     showCart: "true",
-                    showLogin: "true",
-                    logoUrl: ""
+                    showLogin: "true"
                 }
             },
             banner: {
