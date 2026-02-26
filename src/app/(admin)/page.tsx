@@ -598,6 +598,7 @@ export default function DashboardPage() {
             <SocialLinkRow name="Facebook" clicks="4%" count={33} icon={<Facebook size={22} />} color="bg-[#1877F2]" />
             <SocialLinkRow name="Instagram" clicks="7%" count={58} icon={<Instagram size={22} />} color="bg-gradient-to-tr from-[#f09433] 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%" />
             <SocialLinkRow name="Google Maps" clicks="0%" count={2} icon={<MapPin size={22} />} color="bg-[#EA4335]" />
+            <SocialLinkRow name="Website" clicks="12%" count={97} icon={<Globe size={22} />} color="bg-[#4f46e5]" />
           </div>
         </div>
 

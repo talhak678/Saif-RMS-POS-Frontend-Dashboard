@@ -12,6 +12,7 @@ import {
     X,
     User,
     Phone,
+    Mail,
     MapPin,
     ChevronRight,
     CheckCircle2,
@@ -76,6 +77,7 @@ interface CartItem {
 
 interface CustomerDetails {
     name: string;
+    email: string;
     phone: string;
     address: string;
     tableNumber: string;
@@ -400,6 +402,7 @@ function CustomerDetailsModal({
 }) {
     const [details, setDetails] = useState<CustomerDetails>({
         name: "",
+        email: "",
         phone: "",
         address: "",
         tableNumber: "",
@@ -522,6 +525,20 @@ function CustomerDetailsModal({
                                     />
                                 </div>
                                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        placeholder="Email (Optional)"
+                                        value={details.email}
+                                        onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                                        className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
                             </div>
 
                             {/* Phone */}
@@ -856,7 +873,7 @@ export default function POSPage() {
     const total = subtotal + tax;
 
     // Place order
-    const [lastCustomerDetails, setLastCustomerDetails] = useState<CustomerDetails>({ name: "", phone: "", address: "", tableNumber: "" });
+    const [lastCustomerDetails, setLastCustomerDetails] = useState<CustomerDetails>({ name: "", email: "", phone: "", address: "", tableNumber: "" });
 
     const handlePlaceOrder = async (customerDetails: CustomerDetails, branchId: string, printAfter = false) => {
         try {
@@ -891,7 +908,25 @@ export default function POSPage() {
                 })),
             };
 
-            // Add customer details if provided
+            // ── Create customer first if details provided ──
+            let customerId: string | null = null;
+            if (customerDetails.name) {
+                try {
+                    const customerPayload: any = { name: customerDetails.name };
+                    if (customerDetails.phone) customerPayload.phone = customerDetails.phone;
+                    if (customerDetails.email) customerPayload.email = customerDetails.email;
+                    const custRes = await api.post("/customers", customerPayload);
+                    if (custRes.data?.success) {
+                        customerId = custRes.data.data?.id || null;
+                    }
+                } catch (custErr: any) {
+                    // Non-blocking — order continues even if customer creation fails
+                    console.warn("Customer creation failed:", custErr?.response?.data?.message);
+                }
+            }
+
+            // Add customer details to payload
+            if (customerId) payload.customerId = customerId;
             if (customerDetails.name) payload.customerName = customerDetails.name;
             if (customerDetails.phone) payload.customerPhone = customerDetails.phone;
             if (customerDetails.address) payload.deliveryAddress = customerDetails.address;
