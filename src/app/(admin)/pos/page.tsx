@@ -529,7 +529,7 @@ function CustomerDetailsModal({
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <input
-                                        type="tel"
+                                        type="number"
                                         placeholder={`Phone Number${isDelivery ? " *" : ""}`}
                                         value={details.phone}
                                         onChange={(e) => setDetails({ ...details, phone: e.target.value })}
@@ -1086,7 +1086,7 @@ export default function POSPage() {
                                                             >
                                                                 <Minus className="w-4 h-4" />
                                                             </button>
-                                                            <span className="font-black text-sm text-gray-900 dark:text-gray-100">
+                                                            <span className="text-[#5d69b9] text-sm text-gray-900 dark:text-gray-100">
                                                                 {quantity}
                                                             </span>
                                                             <button
@@ -1175,14 +1175,14 @@ export default function POSPage() {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     $ {item.unitPrice} × {item.quantity}
                                                 </p>
-                                                <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                                                <p className="text-sm font-bold text-[#5d69b9] dark:text-blue-400 mt-0.5">
                                                     $ {(item.unitPrice * item.quantity).toFixed(0)}
                                                 </p>
                                             </div>
                                             <div className="flex flex-col gap-1 flex-shrink-0 items-center">
                                                 <button
                                                     onClick={() => updateQuantity(item.id, 1)}
-                                                    className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded text-white hover:bg-blue-700"
+                                                    className="w-6 h-6 flex items-center justify-center bg-[#5d69b9] rounded text-white hover:bg-blue-700"
                                                 >
                                                     <Plus className="w-3 h-3" />
                                                 </button>

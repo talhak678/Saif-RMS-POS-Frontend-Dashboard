@@ -160,15 +160,23 @@ function KeywordRow({ keyword, count, percentage }: { keyword: string; count: nu
   );
 }
 
-function SocialLinkRow({ name, clicks, icon, color }: { name: string; clicks: string; icon: React.ReactNode; color: string }) {
+function SocialLinkRow({ name, clicks, count, icon, color }: { name: string; clicks: string; count: number; icon: React.ReactNode; color: string }) {
   return (
-    <div className="flex items-center gap-4 py-3">
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${color} shadow-sm border-2 border-white dark:border-gray-800`}>
-        {icon}
+    <div className="flex items-center justify-between gap-4 py-3">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${color} shadow-sm border-2 border-white dark:border-gray-800 shrink-0`}>
+          {icon}
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100">{name}</h4>
+          <p className="text-xs text-gray-400 font-medium">Outbound clicks</p>
+        </div>
       </div>
-      <div>
-        <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100">{name}</h4>
-        <p className="text-xs text-gray-400 font-medium">{clicks} of clicks</p>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-sm font-black text-gray-700 dark:text-gray-200">{clicks}</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400">
+          {count.toLocaleString()}
+        </span>
       </div>
     </div>
   );
@@ -177,10 +185,10 @@ function SocialLinkRow({ name, clicks, icon, color }: { name: string; clicks: st
 // ─── Banner Section ───────────────────────────────────────────────────────────
 function BannerCarousel() {
   return (
-    <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 flex gap-1 h-[180px] md:h-[260px] border-b border-gray-100 dark:border-gray-800">
+    <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 flex gap-2 h-[180px] md:h-[260px] p-3 bg-gray-50 dark:bg-gray-900/30">
 
       {/* Left — big banner */}
-      <div className="relative flex-[2.5] overflow-hidden group">
+      <div className="relative flex-[2.5] overflow-hidden rounded-2xl group shadow-md">
         <Image
           src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
           alt="Dashboard Banner 1"
@@ -198,7 +206,7 @@ function BannerCarousel() {
       </div>
 
       {/* Right — small banner */}
-      <div className="relative flex-1 overflow-hidden group">
+      <div className="relative flex-1 overflow-hidden rounded-2xl group shadow-md">
         <Image
           src="/images/authentication-images/Dashboard-Banner 2.jpg.jpeg"
           alt="Dashboard Banner 2"
@@ -587,9 +595,9 @@ export default function DashboardPage() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
           <SectionHeader icon={<Globe size={18} />} title="Outbound Links" sub="Engagement with social media links" />
           <div className="mt-2 divide-y dark:divide-gray-700/50">
-            <SocialLinkRow name="Facebook" clicks="4%" icon={<Facebook size={22} />} color="bg-[#1877F2]" />
-            <SocialLinkRow name="Instagram" clicks="7%" icon={<Instagram size={22} />} color="bg-gradient-to-tr from-[#f09433] 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%" />
-            <SocialLinkRow name="Google Maps" clicks="0%" icon={<MapPin size={22} />} color="bg-[#EA4335]" />
+            <SocialLinkRow name="Facebook" clicks="4%" count={33} icon={<Facebook size={22} />} color="bg-[#1877F2]" />
+            <SocialLinkRow name="Instagram" clicks="7%" count={58} icon={<Instagram size={22} />} color="bg-gradient-to-tr from-[#f09433] 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%" />
+            <SocialLinkRow name="Google Maps" clicks="0%" count={2} icon={<MapPin size={22} />} color="bg-[#EA4335]" />
           </div>
         </div>
 

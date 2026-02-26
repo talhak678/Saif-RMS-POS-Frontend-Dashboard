@@ -28,6 +28,9 @@ import {
   RefreshCcw,
   Bell,
   Phone,
+  ExternalLink,
+  AlertTriangle,
+  ChevronDown
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -42,6 +45,81 @@ import RenewModal from "./renew-modal";
 type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY" | "SUBSCRIPTION_REQUESTS";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyAhwD5EE1C7J_K5qaqlPuBX6o0SjqJ2wYw";
+
+// ---- Custom Select Component ----
+interface SelectOption { label: string; value: string; }
+interface CustomSelectProps {
+  options: SelectOption[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+const CustomSelect = ({ options, value, onChange, placeholder = "Select..." }: CustomSelectProps) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.value === value);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 text-sm font-medium text-gray-800 dark:text-white hover:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
+      >
+        <span className={selected ? "" : "text-gray-400"}>{selected?.label || placeholder}</span>
+        <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="max-h-52 overflow-y-auto custom-scrollbar py-1.5">
+            {options.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${opt.value === value
+                  ? "bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 font-bold"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+              >
+                {opt.label}
+                {opt.value === value && <CheckCircle2 size={14} className="text-brand-500 shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+// ---- End Custom Select ----
+
+const COUNTRIES = [
+  { name: "Pakistan", code: "PK" },
+  { name: "United States", code: "US" },
+  { name: "United Kingdom", code: "GB" },
+  { name: "United Arab Emirates", code: "AE" },
+  { name: "Saudi Arabia", code: "SA" },
+  { name: "Canada", code: "CA" },
+  { name: "Australia", code: "AU" },
+  { name: "India", code: "IN" },
+  { name: "Germany", code: "DE" },
+  { name: "France", code: "FR" },
+  { name: "Turkey", code: "TR" },
+  { name: "Bangladesh", code: "BD" },
+  { name: "Malaysia", code: "MY" },
+  { name: "Qatar", code: "QA" },
+  { name: "Kuwait", code: "KW" },
+];
 
 const containerStyle = {
   width: '100%',
@@ -68,7 +146,6 @@ export default function ProfilePage() {
       toast.success("Payment successful! Your subscription has been updated.");
       refreshUser();
       fetchData();
-      // Remove query param without refreshing
       window.history.replaceState({}, '', window.location.pathname);
     } else if (payment === "cancel") {
       toast.error("Payment cancelled. Your subscription was not updated.");
@@ -76,10 +153,10 @@ export default function ProfilePage() {
     }
   }, [searchParams]);
 
-  // Restaurant Form State
   const [restaurantForm, setRestaurantForm] = useState<any>({
     name: "",
     slug: "",
+    customDomain: null,
     logo: "",
     description: "",
     phone: "",
@@ -106,28 +183,24 @@ export default function ProfilePage() {
     features: [] as string[]
   });
 
-  // User Form State
   const [userForm, setUserForm] = useState({
     name: "",
     email: ""
   });
 
-  // Password Form State
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
 
-  // Payment History State
   const [payments, setPayments] = useState<any[]>([]);
-
-  // Subscription Requests State (Super Admin only)
   const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
   const [subReqLoading, setSubReqLoading] = useState(false);
 
   const getSubStatus = () => {
     if (restaurantForm.subscription === 'FREE') return { label: "FREE PLAN", color: "info" };
+    if (restaurantForm.activePriceIsActive === false) return { label: "CANCELLED", color: "error" };
     if (!restaurantForm.subEndDate) return { label: "PENDING ACTIVATION", color: "warning" };
     const expiry = new Date(restaurantForm.subEndDate);
     if (expiry < new Date()) return { label: "EXPIRED", color: "error" };
@@ -151,6 +224,36 @@ export default function ProfilePage() {
     } catch (error: any) {
       console.error("Payment Error:", error);
       toast.error(error.response?.data?.message || "Failed to start payment process");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelMembership = async () => {
+    if (!confirm("Are you sure you want to cancel your membership? Your subscription will be marked as inactive.")) return;
+    const priceId = restaurantForm.activePriceId;
+    if (!priceId) {
+      toast.error("No active subscription found to cancel.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await api.put(`/subscription-prices/${priceId}`, {
+        plan: restaurantForm.subscription,
+        price: Number(restaurantForm.price),
+        billingCycle: restaurantForm.billingCycle,
+        features: restaurantForm.features,
+        restaurantId: user?.restaurantId,
+        isActive: false,
+      });
+      if (res.data?.success) {
+        toast.success("Membership cancelled successfully.");
+        fetchData();
+      } else {
+        toast.error(res.data?.message || "Failed to cancel membership.");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to cancel membership");
     } finally {
       setLoading(false);
     }
@@ -189,7 +292,6 @@ export default function ProfilePage() {
     if (user?.restaurantId) {
       fetchData();
     } else if (user) {
-      // Super Admin or user without restaurantId - just populate userForm from auth context
       setUserForm({
         name: user.name || "",
         email: user.email || ""
@@ -209,7 +311,6 @@ export default function ProfilePage() {
       if (restRes.data?.success) {
         const data = restRes.data.data;
 
-        // Determine effective plan: prioritized assigned price plan if current is FREE
         const hasPaidPlan = data.subscriptionPrices && data.subscriptionPrices.length > 0;
         const effectivePlan = (data.subscription === "FREE" && hasPaidPlan)
           ? data.subscriptionPrices[0].plan
@@ -220,6 +321,7 @@ export default function ProfilePage() {
         setRestaurantForm({
           name: data.name || "",
           slug: data.slug || "",
+          customDomain: data.customDomain || null,
           logo: data.logo || "",
           description: data.description || "",
           phone: data.phone || "",
@@ -243,7 +345,10 @@ export default function ProfilePage() {
           subEndDate: data.subEndDate || null,
           price: planPrice?.price || 0,
           billingCycle: planPrice?.billingCycle || "MONTHLY",
-          features: planPrice?.features || []
+          features: planPrice?.features || [],
+          activePriceId: planPrice?.id || null,
+          activePriceIsActive: planPrice?.isActive ?? true,
+          subscriptionPrices: data.subscriptionPrices || [],
         });
       }
 
@@ -269,8 +374,6 @@ export default function ProfilePage() {
   const handleUpdateRestaurant = async () => {
     try {
       setLoading(true);
-      // Strip out subscription billing fields — backend validates and rejects them
-      // when passed in a regular restaurant update request
       const { subStartDate, subEndDate, price, billingCycle, subscription, ...restPayload } = restaurantForm;
       const res = await api.put(`/restaurants/${user?.restaurantId}`, restPayload);
       if (res.data?.success) {
@@ -424,13 +527,16 @@ export default function ProfilePage() {
     { value: "Burgers", text: "Burgers", selected: false },
   ];
 
-  // Set default tab based on role
   useEffect(() => {
     if (isSuperAdmin) {
       setActiveTab("INFO");
       fetchSubscriptionRequests();
     }
   }, [isSuperAdmin]);
+
+  const restaurantUrl = restaurantForm.customDomain
+    ? `https://${restaurantForm.customDomain}`
+    : `https://${restaurantForm.slug}.platteros.com`;
 
   if (fetching) {
     return (
@@ -491,17 +597,48 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
+                  {/* Public URL Display */}
+                  <div className="flex items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
+                    <Label className="w-1/3 md:w-1/4 font-black text-gray-700 dark:text-gray-300">Your Website</Label>
+                    <div className="flex-1 flex items-center gap-2">
+                      <a href={restaurantUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 hover:underline font-medium flex items-center gap-1">
+                        {restaurantUrl} <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
                   {/* Logo Section */}
                   <div className="flex flex-col md:flex-row md:items-start py-4 border-b border-gray-50 dark:border-gray-700/50">
                     <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-2 md:mb-0">Restaurant Logo</Label>
-                    <div className="flex-1">
+                    <div className="flex-1 max-w-[200px]">
+                      {/* Note: You need to implement the actual validation logic in the ImageUpload component or here before uploading */}
                       <ImageUpload
                         value={restaurantForm.logo}
                         onChange={(url) => setRestaurantForm({ ...restaurantForm, logo: url })}
+                        isLogo={true}
                       />
-                      <p className="mt-2 text-xs text-gray-400 italic">This logo will be displayed on your invoices and website.</p>
+                      <p className="mt-2 text-xs text-gray-500 font-medium">Recommended size: 500x500 pixels (1:1 ratio).</p>
+                      <p className="text-xs text-gray-400 italic">This logo will be displayed on your invoices and website. Images not in 1:1 ratio may appear cropped.</p>
                     </div>
                   </div>
+
+                  {/* Website / Custom Domain */}
+                  {restaurantForm.customDomain && (
+                    <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
+                      <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Website URL</Label>
+                      <div className="flex-1">
+                        <a
+                          href={restaurantForm.customDomain.startsWith('http') ? restaurantForm.customDomain : `https://${restaurantForm.customDomain}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 font-bold text-sm hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors border border-brand-200 dark:border-brand-800"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          {restaurantForm.customDomain}
+                        </a>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Slug Field */}
                   <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
@@ -511,6 +648,19 @@ export default function ProfilePage() {
                         value={restaurantForm.slug}
                         onChange={(e) => setRestaurantForm({ ...restaurantForm, slug: e.target.value })}
                         className="bg-gray-50/50 border-gray-200 dark:border-gray-700"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Custom Domain Field */}
+                  <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
+                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Custom Domain</Label>
+                    <div className="flex-1">
+                      <Input
+                        value={restaurantForm.customDomain || ""}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, customDomain: e.target.value })}
+                        className="bg-gray-50/50 border-gray-200 dark:border-gray-700"
+                        placeholder="e.g. www.myrestaurant.com"
                       />
                     </div>
                   </div>
@@ -601,25 +751,30 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
                     <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Country</Label>
                     <div className="flex-1">
-                      <select
+                      <CustomSelect
                         value={restaurantForm.country}
-                        onChange={(e) => setRestaurantForm({ ...restaurantForm, country: e.target.value })}
-                        className="w-full p-2.5 border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 bg-gray-50/50"
-                      >
-                        <option value="Pakistan">Pakistan</option>
-                        <option value="Select Country">Select Country</option>
-                      </select>
+                        options={COUNTRIES.map(c => ({ value: c.name, label: c.name }))}
+                        onChange={(val) => {
+                          const selected = COUNTRIES.find(c => c.name === val);
+                          setRestaurantForm({ ...restaurantForm, country: val, countryCode: selected?.code || restaurantForm.countryCode });
+                        }}
+                        placeholder="Select Country"
+                      />
                     </div>
                   </div>
 
                   {/* Country Code Field */}
                   <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
-                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Country code</Label>
+                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Country Code</Label>
                     <div className="flex-1">
-                      <Input
+                      <CustomSelect
                         value={restaurantForm.countryCode}
-                        onChange={(e) => setRestaurantForm({ ...restaurantForm, countryCode: e.target.value })}
-                        className="bg-gray-50/50 border-gray-200 dark:border-gray-700"
+                        options={COUNTRIES.map(c => ({ value: c.code, label: `${c.code} — ${c.name}` }))}
+                        onChange={(val) => {
+                          const selected = COUNTRIES.find(c => c.code === val);
+                          setRestaurantForm({ ...restaurantForm, countryCode: val, country: selected?.name || restaurantForm.country });
+                        }}
+                        placeholder="Select Code"
                       />
                     </div>
                   </div>
@@ -632,7 +787,7 @@ export default function ProfilePage() {
                         value={restaurantForm.address}
                         onChange={(e) => setRestaurantForm({ ...restaurantForm, address: e.target.value })}
                         className="bg-gray-50/50 border-gray-200 dark:border-gray-700"
-                        placeholder="Masjid Rd,"
+                        placeholder="Mainland ,"
                       />
                     </div>
                   </div>
@@ -645,7 +800,7 @@ export default function ProfilePage() {
                         value={restaurantForm.city}
                         onChange={(e) => setRestaurantForm({ ...restaurantForm, city: e.target.value })}
                         className="bg-gray-50/50 border-gray-200 dark:border-gray-700"
-                        placeholder="Quetta"
+                        placeholder="New York"
                       />
                     </div>
                   </div>
@@ -691,15 +846,16 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row md:items-center py-2">
                     <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Pick Up or Delivery?</Label>
                     <div className="flex-1">
-                      <select
+                      <CustomSelect
                         value={restaurantForm.serviceType}
-                        onChange={(e) => setRestaurantForm({ ...restaurantForm, serviceType: e.target.value })}
-                        className="w-full p-2.5 border border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 bg-gray-50/50"
-                      >
-                        <option value="DELIVERY">Delivery Only</option>
-                        <option value="PICKUP">Pickup Only</option>
-                        <option value="BOTH">Delivery & Pickup</option>
-                      </select>
+                        options={[
+                          { value: "DELIVERY", label: "🚚  Delivery Only" },
+                          { value: "PICKUP", label: "🏃  Pickup Only" },
+                          { value: "BOTH", label: "🚚🏃  Delivery & Pickup" },
+                        ]}
+                        onChange={(val) => setRestaurantForm({ ...restaurantForm, serviceType: val })}
+                        placeholder="Select service type"
+                      />
                     </div>
                   </div>
 
@@ -784,7 +940,7 @@ export default function ProfilePage() {
                           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">User ID</p>
                           <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">{user?.id}</p>
                         </div>
-                        <Button onClick={handleUpdateUser} disabled={loading} className="w-full bg-[#5d69b9] hover:bg-[#4a56a8] font-bold mt-2">
+                        <Button onClick={handleUpdateUser} disabled={loading} className="w-full bg-[#5d69b9] hover:bg-[#4a56a8] font-bold mt-2 text-white">
                           {loading ? "Updating..." : "Update Profile"}
                         </Button>
                       </div>
@@ -862,6 +1018,7 @@ export default function ProfilePage() {
                       <Input
                         value={userForm.name}
                         onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                        className="text-sm"
                       />
                     </div>
                     <div>
@@ -869,10 +1026,11 @@ export default function ProfilePage() {
                       <Input
                         value={userForm.email}
                         onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                        className="text-sm"
                       />
                     </div>
                     <div className="pt-4">
-                      <Button onClick={handleUpdateUser} disabled={loading} className="w-full">
+                      <Button onClick={handleUpdateUser} disabled={loading} className="w-full text-white">
                         {loading ? "Updating..." : "Update Personal Info"}
                       </Button>
                     </div>
@@ -899,6 +1057,7 @@ export default function ProfilePage() {
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      className="text-sm"
                     />
                   </div>
                   <div>
@@ -907,10 +1066,11 @@ export default function ProfilePage() {
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      className="text-sm"
                     />
                   </div>
                   <div className="pt-4">
-                    <Button onClick={handleChangePassword} variant="destructive" disabled={loading} className="w-full">
+                    <Button onClick={handleChangePassword} variant="destructive" disabled={loading} className="w-full text-white">
                       {loading ? "Changing..." : "Change Password"}
                     </Button>
                   </div>
@@ -918,7 +1078,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* 5. MEMBERSHIP */}
+            {/* 4. MAP */}
             {activeTab === "MAP" && (
               <div className="space-y-6 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
@@ -948,7 +1108,7 @@ export default function ProfilePage() {
                         <input
                           type="text"
                           placeholder="Search your location (e.g. City, Street, Restaurant name)..."
-                          className="w-full p-3.5 pl-11 border border-gray-200 rounded-2xl shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
+                          className="w-full p-3.5 pl-11 border border-gray-200 rounded-2xl shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium text-sm"
                         />
                       </Autocomplete>
                       <MapPin className="absolute left-4 top-4 w-5 h-5 text-brand-500" />
@@ -972,14 +1132,14 @@ export default function ProfilePage() {
                       </GoogleMap>
                     ) : (
                       <div className="h-[400px] flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                        <p>Loading Map...</p>
+                        <p className="text-sm">Loading Map...</p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="flex justify-end pt-6">
-                  <Button onClick={handleUpdateRestaurant} disabled={loading} className="gap-2">
+                  <Button onClick={handleUpdateRestaurant} disabled={loading} className="gap-2 text-white">
                     <Save className="w-4 h-4" /> Update Coordinates
                   </Button>
                 </div>
@@ -988,44 +1148,60 @@ export default function ProfilePage() {
 
             {/* 5. MEMBERSHIP */}
             {activeTab === "MEMBERSHIP" && (
-              <div className="max-w-4xl mx-auto py-2 animate-in fade-in duration-500">
+              <div className="max-w-4xl mx-auto py-2 animate-in fade-in duration-500 font-outfit">
                 <div className="flex flex-col gap-6">
-                  {/* Subscription Summary Card */}
+
+                  {/* ── Subscription Summary Card ── */}
                   <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/20 dark:bg-gray-900/10">
-                      <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-gray-400" /> Membership Details
+
+                    {/* Card Header */}
+                    <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/30 dark:bg-gray-900/10">
+                      <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-brand-500" /> Membership Details
                       </h3>
                       <div className="flex items-center gap-3">
                         <div className="flex flex-col items-end">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Account</span>
-                          <Badge variant="light" color={restaurantForm.status === 'ACTIVE' ? 'success' : 'warning'} className="font-black px-2 py-0.5 rounded-md uppercase text-[9px] tracking-widest">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Account</span>
+                          <Badge variant="light" color={restaurantForm.status === 'ACTIVE' ? 'success' : 'warning'} className="font-bold px-2 py-0.5 rounded-md uppercase text-[10px] tracking-widest">
                             {restaurantForm.status}
                           </Badge>
                         </div>
                         <div className="flex flex-col items-end">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Subscription</span>
-                          <Badge variant="solid" color={getSubStatus().color as any} className="font-black px-4 py-1.5 rounded-lg uppercase text-[10px] tracking-widest">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Subscription</span>
+                          <Badge variant="solid" color={getSubStatus().color as any} className="font-bold px-3 py-1 rounded-lg uppercase text-[10px] tracking-widest">
                             {getSubStatus().label}
                           </Badge>
                         </div>
                       </div>
                     </div>
 
+                    {/* Card Body */}
                     <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700">
-                      <div className="p-8 space-y-6">
+
+                      {/* LEFT — Plan & Actions */}
+                      <div className="p-7 space-y-6">
                         <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Plan</p>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Active Plan</p>
                           <div className="flex items-baseline gap-3">
-                            <h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase">{restaurantForm.subscription || 'FREE'}</h4>
-                            <span className="text-lg font-bold text-brand-600">${restaurantForm.price} <span className="text-xs text-gray-400 font-medium capitalize">/{restaurantForm.billingCycle?.toLowerCase()}</span></span>
+                            <h4 className="text-4xl font-black text-gray-900 dark:text-white uppercase">
+                              {restaurantForm.subscription || 'FREE'}
+                            </h4>
+                            {restaurantForm.price && (
+                              <span className="text-lg font-bold text-brand-600">
+                                ${restaurantForm.price}
+                                <span className="text-xs text-gray-400 font-medium ml-1 capitalize">
+                                  /{restaurantForm.billingCycle?.toLowerCase()}
+                                </span>
+                              </span>
+                            )}
                           </div>
                         </div>
 
+                        {/* Action Buttons */}
                         <div className="flex flex-wrap gap-3">
                           <Button
                             onClick={() => setIsRenewModalOpen(true)}
-                            className="w-full md:w-fit bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-transform"
+                            className="bg-gray-900 dark:bg-white dark:text-gray-900 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-sm border-none hover:scale-[1.02] transition-transform"
                           >
                             Renew or Upgrade Plan
                           </Button>
@@ -1033,41 +1209,90 @@ export default function ProfilePage() {
                           {restaurantForm.subscription !== 'FREE' && (
                             <Button
                               onClick={handleDirectPayment}
-                              className="w-full md:w-fit bg-brand-600 text-white font-black px-8 py-4 rounded-xl shadow-md border-none gap-2 text-xs hover:scale-[1.02] transition-all flex items-center justify-center"
+                              className="text-white text-sm font-bold px-6 py-3 rounded-xl shadow-sm border-none hover:scale-[1.02] transition-all flex items-center gap-2"
                               style={{ background: 'linear-gradient(45deg, #ff6b35, #ff9f10)' }}
                             >
-                              <CreditCard size={14} /> Pay Now (Instant)
+                              <CreditCard size={15} /> Pay Now
                             </Button>
                           )}
                         </div>
 
+                        {/* ── Cancel Membership ── always visible */}
+                        <div className="pt-1 border-t border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Danger Zone</p>
+                          {restaurantForm.subscription !== 'FREE' ? (
+                            <div className="flex flex-col gap-2">
+                              <button
+                                onClick={handleCancelMembership}
+                                disabled={loading}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 active:bg-red-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed w-fit"
+                              >
+                                <XCircle size={16} />
+                                {loading ? 'Cancelling...' : 'Cancel Membership'}
+                              </button>
+                              <p className="text-xs text-gray-400 font-medium">
+                                A cancellation request will be sent to admin. You will keep access until the billing period ends.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-2">
+                              <button
+                                disabled
+                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed w-fit"
+                              >
+                                <XCircle size={16} />
+                                Cancel Membership
+                              </button>
+                              <p className="text-xs text-gray-400 font-medium">
+                                You are on the FREE plan — no active subscription to cancel.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Expired Warning */}
                         {restaurantForm.subEndDate && new Date(restaurantForm.subEndDate) < new Date() && (
-                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-3 mt-4 animate-pulse">
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-3 animate-pulse">
                             <Info size={18} className="text-red-500 mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-sm font-black text-red-600 dark:text-red-400">YOUR SUBSCRIPTION HAS EXPIRED!</p>
-                              <p className="text-[11px] text-red-500 font-medium">Please pay now to restore access to all features.</p>
+                              <p className="text-sm font-bold text-red-600 dark:text-red-400">SUBSCRIPTION EXPIRED!</p>
+                              <p className="text-xs text-red-500 font-medium mt-1">Please pay now to restore access.</p>
                             </div>
                           </div>
                         )}
                       </div>
 
-                      <div className="p-8 space-y-6 bg-gray-50/10 dark:bg-gray-900/5">
-                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Activation Date</span>
-                          <span className="text-sm font-black text-gray-800 dark:text-gray-200">
-                            {restaurantForm.subStartDate ? new Date(restaurantForm.subStartDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
-                          </span>
+                      {/* RIGHT — Dates & Info */}
+                      <div className="p-7 space-y-5 bg-gray-50/20 dark:bg-gray-900/5">
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center py-2.5 border-b border-gray-100 dark:border-gray-700">
+                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">Activation Date</span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                              {restaurantForm.subStartDate
+                                ? new Date(restaurantForm.subStartDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center py-2.5 border-b border-gray-100 dark:border-gray-700">
+                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">Expiry Date</span>
+                            <span className="text-sm font-bold text-error-600">
+                              {restaurantForm.subEndDate
+                                ? new Date(restaurantForm.subEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center py-2.5">
+                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">Billing Cycle</span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">
+                              {restaurantForm.billingCycle?.toLowerCase() || 'N/A'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Expiry Date</span>
-                          <span className="text-sm font-black text-error-600">
-                            {restaurantForm.subEndDate ? new Date(restaurantForm.subEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
-                          </span>
-                        </div>
-                        <div className="mt-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100/50 dark:border-blue-900/30">
-                          <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-relaxed font-medium">
-                            Your subscription is managed automatically. Please ensure your payment method is up to date to avoid service interruption.
+
+                        <div className="p-4 bg-blue-50/60 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 items-start mt-2">
+                          <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
+                            Your subscription is managed automatically. Keep your payment method up to date to avoid service interruption.
                           </p>
                         </div>
                       </div>
@@ -1078,7 +1303,7 @@ export default function ProfilePage() {
                   {restaurantForm.features?.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                       <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/20 dark:bg-gray-900/10">
-                        <h3 className="font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest text-[10px] flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4 text-brand-500" /> Included Features
                         </h3>
                       </div>
@@ -1089,7 +1314,7 @@ export default function ProfilePage() {
                               <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
                                 <CheckCircle2 className="w-3 h-3 text-white" />
                               </div>
-                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{feature}</span>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{feature}</span>
                             </div>
                           ))}
                         </div>
@@ -1097,17 +1322,19 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Simple Health Bar */}
+                  {/* Status Bar */}
                   <div className="bg-emerald-50/30 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active &amp; Secured</span>
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Account Status: Active &amp; Secured</span>
                     </div>
-                    <span className="text-[10px] text-gray-400 font-medium">Last synced: Just now</span>
+                    <span className="text-xs text-gray-400 font-medium">Last synced: Just now</span>
                   </div>
+
                 </div>
               </div>
             )}
+
 
             {/* 6. PAYMENT HISTORY */}
             {activeTab === "PAYMENT_HISTORY" && (
@@ -1121,12 +1348,12 @@ export default function ProfilePage() {
                   <table className="w-full text-sm text-left">
                     <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
                       <tr>
-                        <th className="px-6 py-4 font-black">Date</th>
-                        <th className="px-6 py-4 font-black">Order ID</th>
-                        <th className="px-6 py-4 font-black">Amount</th>
-                        <th className="px-6 py-4 font-black">Method</th>
-                        <th className="px-6 py-4 font-black">Status</th>
-                        <th className="px-6 py-4 font-black text-right">Action</th>
+                        <th className="px-6 py-4 font-bold">Date</th>
+                        <th className="px-6 py-4 font-bold">Order ID</th>
+                        <th className="px-6 py-4 font-bold">Amount</th>
+                        <th className="px-6 py-4 font-bold">Method</th>
+                        <th className="px-6 py-4 font-bold">Status</th>
+                        <th className="px-6 py-4 font-bold text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y dark:divide-gray-700">
@@ -1135,17 +1362,17 @@ export default function ProfilePage() {
                           <td className="px-6 py-4 dark:text-gray-300 font-medium">
                             {new Date(p.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 font-bold dark:text-white">
+                          <td className="px-6 py-4 font-medium dark:text-white">
                             #{p.order?.orderNo || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 font-black text-brand-600 dark:text-brand-400">
+                          <td className="px-6 py-4 font-bold text-brand-600 dark:text-brand-400">
                             $ {p.amount}
                           </td>
                           <td className="px-6 py-4">
-                            <Badge variant="light" color="info" className="uppercase text-[10px] font-black">{p.method}</Badge>
+                            <Badge variant="light" color="info" className="uppercase text-[10px] font-bold">{p.method}</Badge>
                           </td>
                           <td className="px-6 py-4">
-                            <Badge variant="solid" color={p.status === 'PAID' ? 'success' : 'warning'} className="uppercase text-[10px] font-black">
+                            <Badge variant="solid" color={p.status === 'PAID' ? 'success' : 'warning'} className="uppercase text-[10px] font-bold">
                               {p.status}
                             </Badge>
                           </td>
@@ -1162,7 +1389,7 @@ export default function ProfilePage() {
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={5} className="text-center py-20 text-gray-400 italic">No payment records found</td>
+                          <td colSpan={6} className="text-center py-20 text-gray-400 italic">No payment records found</td>
                         </tr>
                       )}
                     </tbody>
@@ -1176,15 +1403,15 @@ export default function ProfilePage() {
               <div className="space-y-6 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h2 className="text-lg font-black text-gray-800 dark:text-white">Subscription Requests</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">Review and manage all restaurant subscription upgrade requests</p>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">Subscription Requests</h2>
+                    <p className="text-sm text-gray-500 mt-0.5">Review and manage all restaurant subscription upgrade requests</p>
                   </div>
                   <button
                     onClick={fetchSubscriptionRequests}
                     disabled={subReqLoading}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5d69b9]/10 text-[#5d69b9] hover:bg-[#5d69b9]/20 font-bold text-xs transition-all"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5d69b9]/10 text-[#5d69b9] hover:bg-[#5d69b9]/20 font-bold text-sm transition-all"
                   >
-                    <RefreshCcw className={`w-3.5 h-3.5 ${subReqLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCcw className={`w-4 h-4 ${subReqLoading ? 'animate-spin' : ''}`} />
                     Refresh
                   </button>
                 </div>
@@ -1198,8 +1425,8 @@ export default function ProfilePage() {
                     <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                       <Bell className="w-8 h-8 text-gray-300" />
                     </div>
-                    <p className="text-gray-400 font-bold">No subscription requests found</p>
-                    <p className="text-xs text-gray-400 mt-1">Requests will appear here when restaurants submit upgrade requests</p>
+                    <p className="text-gray-400 font-bold text-lg">No subscription requests found</p>
+                    <p className="text-sm text-gray-400 mt-1">Requests will appear here when restaurants submit upgrade requests</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1216,25 +1443,25 @@ export default function ProfilePage() {
                                 <Building2 className="w-5 h-5 text-[#5d69b9]" />
                               </div>
                               <div>
-                                <p className="font-black text-gray-900 dark:text-white text-sm">
+                                <p className="font-bold text-gray-900 dark:text-white text-base">
                                   {req.restaurant?.name || 'Unknown Restaurant'}
                                 </p>
-                                <p className="text-xs text-gray-400">/{req.restaurant?.slug}</p>
+                                <p className="text-sm text-gray-400">/{req.restaurant?.slug}</p>
                               </div>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Plan</p>
-                                <p className="text-xs font-black text-[#5d69b9] mt-0.5">{req.plan}</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Plan</p>
+                                <p className="text-sm font-bold text-[#5d69b9] mt-0.5">{req.plan}</p>
                               </div>
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Billing</p>
-                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">{req.billingCycle}</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Billing</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-0.5">{req.billingCycle}</p>
                               </div>
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status</p>
-                                <span className={`inline-block text-[9px] font-black uppercase mt-0.5 px-2 py-0.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</p>
+                                <span className={`inline-block text-xs font-bold uppercase mt-0.5 px-2 py-0.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                   : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                     : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                   }`}>
@@ -1242,35 +1469,35 @@ export default function ProfilePage() {
                                 </span>
                               </div>
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Received</p>
-                                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Received</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-0.5">
                                   {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </p>
                               </div>
                             </div>
 
                             <div className="mt-3 p-3 bg-[#5d69b9]/5 dark:bg-[#5d69b9]/10 rounded-xl border border-[#5d69b9]/10">
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                <Phone size={10} className="text-[#5d69b9]" /> Merchant Contact Info
+                              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <Phone size={14} className="text-[#5d69b9]" /> Merchant Contact Info
                               </p>
                               <div className="flex flex-wrap gap-x-6 gap-y-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Name:</span>
-                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{req.contactName || 'N/A'}</span>
+                                  <span className="text-xs text-gray-400 font-medium uppercase">Name:</span>
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{req.contactName || 'N/A'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Email:</span>
-                                  <span className="text-xs font-bold text-[#5d69b9]">{req.contactEmail || 'N/A'}</span>
+                                  <span className="text-xs text-gray-400 font-medium uppercase">Email:</span>
+                                  <span className="text-sm font-medium text-[#5d69b9]">{req.contactEmail || 'N/A'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase">Phone:</span>
-                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{req.contactPhone || 'N/A'}</span>
+                                  <span className="text-xs text-gray-400 font-medium uppercase">Phone:</span>
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{req.contactPhone || 'N/A'}</span>
                                 </div>
                               </div>
                             </div>
 
                             {req.description && (
-                              <p className="mt-3 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 italic">
+                              <p className="mt-3 text-sm text-gray-500 bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 italic">
                                 &quot;{req.description}&quot;
                               </p>
                             )}
@@ -1282,25 +1509,25 @@ export default function ProfilePage() {
                               <button
                                 onClick={() => handleApproveReject(req.id, 'APPROVED')}
                                 disabled={loading}
-                                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/20"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <CheckCircle2 className="w-4 h-4" />
                                 Approve
                               </button>
                               <button
                                 onClick={() => handleApproveReject(req.id, 'REJECTED')}
                                 disabled={loading}
-                                className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-red-500/20"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-red-500/20"
                               >
-                                <XCircle className="w-3.5 h-3.5" />
+                                <XCircle className="w-4 h-4" />
                                 Reject
                               </button>
                               <button
                                 onClick={() => handleDeleteSubRequest(req.id)}
                                 disabled={loading}
-                                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-bold transition-all active:scale-95"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" />
                                 Delete
                               </button>
                             </div>
@@ -1308,9 +1535,9 @@ export default function ProfilePage() {
                             <button
                               onClick={() => handleDeleteSubRequest(req.id)}
                               disabled={loading}
-                              className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-black transition-all active:scale-95 shrink-0"
+                              className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-bold transition-all active:scale-95 shrink-0"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                               Delete
                             </button>
                           )}

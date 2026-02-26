@@ -114,9 +114,108 @@ export default function ReportsDashboard() {
         fetchReports(id);
     };
 
-    const handleDownload = async () => {
-        toast.success("Preparing download...");
+    const handleDownload = () => {
+        if (!reportData) {
+            toast.error("No report data to export. Please load reports first.");
+            return;
+        }
+
+        try {
+            const rows: string[][] = [];
+            const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+
+            // ── 1. Summary ──────────────────────────────────────────────────
+            rows.push(["=== SUMMARY ==="], ["Metric", "Total", "Change %"]);
+            const sum = reportData.summary || {};
+            Object.entries(sum).forEach(([key, val]: [string, any]) => {
+                rows.push([key, String(val?.total ?? ""), String(val?.change ?? "")]);
+            });
+            rows.push([]);
+
+            // ── 2. Sales Trend (daily) ───────────────────────────────────────
+            const trend = reportData.salesTrend?.daily || reportData.salesTrend?.weekly || [];
+            if (trend.length) {
+                rows.push(["=== SALES TREND (Daily) ==="], ["Date", "Sales ($)", "Orders"]);
+                trend.forEach((r: any) => rows.push([r.date ?? "", String(r.sales ?? ""), String(r.orders ?? "")]));
+                rows.push([]);
+            }
+
+            // ── 3. Orders & Customers ────────────────────────────────────────
+            if (reportData.ordersCustomers) {
+                const oc = reportData.ordersCustomers;
+                if (oc.orderSource?.length) {
+                    rows.push(["=== ORDER SOURCE ==="], ["Source", "Value"]);
+                    oc.orderSource.forEach((r: any) => rows.push([r.name ?? "", String(r.value ?? "")]));
+                    rows.push([]);
+                }
+                if (oc.customerLocations?.length) {
+                    rows.push(["=== CUSTOMER LOCATIONS ==="], ["Area", "Orders"]);
+                    oc.customerLocations.forEach((r: any) => rows.push([r.area ?? "", String(r.orders ?? "")]));
+                    rows.push([]);
+                }
+            }
+
+            // ── 4. Menu & Categories ─────────────────────────────────────────
+            if (reportData.menuCategories) {
+                const mc = reportData.menuCategories;
+                if (mc.topSellingItems?.length) {
+                    rows.push(["=== TOP SELLING ITEMS ==="], ["Item", "Sales ($)"]);
+                    mc.topSellingItems.forEach((r: any) => rows.push([r.item ?? "", String(r.sales ?? "")]));
+                    rows.push([]);
+                }
+                if (mc.salesByCategory?.length) {
+                    rows.push(["=== CATEGORY REVENUE ==="], ["Category", "Value"]);
+                    mc.salesByCategory.forEach((r: any) => rows.push([r.name ?? "", String(r.value ?? "")]));
+                    rows.push([]);
+                }
+            }
+
+            // ── 5. Inventory ─────────────────────────────────────────────────
+            if (reportData.inventory) {
+                const inv = reportData.inventory;
+                if (inv.stockConsumption?.length) {
+                    rows.push(["=== STOCK CONSUMPTION ==="], ["Ingredient", "Consumed"]);
+                    inv.stockConsumption.forEach((r: any) => rows.push([r.ingredient ?? "", String(r.consumed ?? "")]));
+                    rows.push([]);
+                }
+                if (inv.recipePopularity?.length) {
+                    rows.push(["=== RECIPE POPULARITY ==="], ["Recipe", "Revenue ($)"]);
+                    inv.recipePopularity.forEach((r: any) => rows.push([r.recipe ?? "", String(r.revenue ?? "")]));
+                    rows.push([]);
+                }
+            }
+
+            // ── 6. Branches ──────────────────────────────────────────────────
+            if (reportData.branches?.salesPerBranch?.length) {
+                rows.push(["=== BRANCH COMPARISON ==="], ["Branch", "Sales ($)", "Orders"]);
+                reportData.branches.salesPerBranch.forEach((r: any) =>
+                    rows.push([r.branch ?? "", String(r.sales ?? ""), String(r.orders ?? "")])
+                );
+                rows.push([]);
+            }
+
+            // ── Encode & download ────────────────────────────────────────────
+            const csv = rows.map(row =>
+                row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+            ).join("\n");
+
+            const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `report_${today}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            toast.success("Report exported successfully!");
+        } catch (err) {
+            console.error("Export failed", err);
+            toast.error("Failed to export report.");
+        }
     };
+
 
     const filteredTabs = isSuperAdmin
         ? TABS.filter(tab => tab === "Analytics" || tab === "Restaurant & Branches" || tab === "Order & Customers")
@@ -181,7 +280,7 @@ export default function ReportsDashboard() {
                             <div className="flex flex-wrap items-center gap-3">
                                 <div className="flex items-center gap-4 bg-white dark:bg-gray-800 px-6 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-all hover:border-brand-500 min-w-[320px]">
                                     <div className="flex flex-1 items-center gap-2">
-                                        <span className="text-[10px] uppercase font-black text-gray-400">From</span>
+                                        <span className="text-xs font-black text-gray-400">From</span>
                                         <DatePicker
                                             value={startDate}
                                             onChange={setStartDate}
@@ -191,7 +290,7 @@ export default function ReportsDashboard() {
                                     </div>
                                     <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-2"></div>
                                     <div className="flex flex-1 items-center gap-2">
-                                        <span className="text-[10px] uppercase font-black text-gray-400">To</span>
+                                        <span className="text-xs font-black text-gray-400">To</span>
                                         <DatePicker
                                             value={endDate}
                                             onChange={setEndDate}
