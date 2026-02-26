@@ -293,9 +293,11 @@ function printReceipt({
                 .sm { font-size: 10px; }
                 .divider { border-top: 1px dashed #000; margin: 4px 0; }
                 .row { display: flex; justify-content: space-between; margin: 2px 0; }
-                .row-item { display: flex; justify-content: space-between; margin: 3px 0; }
+                .row-item { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; }
                 .item-name { flex: 1; margin-right: 4px; }
-                .item-price { min-width: 50px; text-align: right; }
+                .item-right { min-width: 55px; text-align: right; }
+                .item-right .price { font-weight: bold; }
+                .item-right .qty { font-size: 10px; color: #555; margin-top: 1px; }
                 .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin: 4px 0; }
                 .thank-you { text-align: center; margin-top: 8px; font-size: 11px; }
                 @media print {
@@ -315,14 +317,15 @@ function printReceipt({
                 <span>Type: <b>${orderType.replace('_', ' ')}</b></span>
                 <span>Pay: <b>${paymentMethod}</b></span>
             </div>
-            ${customerDetails.name ? `<div class="sm">Customer: <b>${customerDetails.name}</b></div>` : ''}
+            <div class="sm">Customer: <b>${customerDetails.name ? customerDetails.name : 'POS'}</b></div>
             ${customerDetails.phone ? `<div class="sm">Phone: ${customerDetails.phone}</div>` : ''}
             ${customerDetails.tableNumber ? `<div class="sm">Table: ${customerDetails.tableNumber}</div>` : ''}
             ${customerDetails.address ? `<div class="sm">Address: ${customerDetails.address}</div>` : ''}
 
             <div class="divider"></div>
             <div class="row bold sm">
-                <span>ITEM</span><span>QTY</span><span>PRICE</span>
+                <span>ITEM</span>
+                <span style="text-align:right">PRICE<br/><span style="font-weight:normal">QTY</span></span>
             </div>
             <div class="divider"></div>
 
@@ -333,8 +336,10 @@ function printReceipt({
                         ${item.selectedVariation ? `<br/><span class="sm"> (${item.selectedVariation.name})</span>` : ''}
                         ${item.selectedAddons.length > 0 ? `<br/><span class="sm"> +${item.selectedAddons.map(a => a.name).join(', ')}</span>` : ''}
                     </span>
-                    <span style="min-width:20px;text-align:center">${item.quantity}</span>
-                    <span class="item-price">$${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                    <span class="item-right">
+                        <div class="price">$${(item.unitPrice * item.quantity).toFixed(2)}</div>
+                        <div class="qty">x${item.quantity}</div>
+                    </span>
                 </div>
             `).join('')}
 

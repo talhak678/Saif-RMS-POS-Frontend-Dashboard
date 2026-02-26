@@ -471,25 +471,8 @@ function OrderCard({ order, onChangeStatus, onView }: {
                 <StatusPill status={order.status} />
             </div>
 
-            {/* Thumbnails row */}
-            {thumbs.length > 0 && (
-                <div className="px-4 pb-2 flex gap-2 items-center">
-                    {thumbs.map((src: string, i: number) => (
-                        <img
-                            key={i}
-                            src={src}
-                            alt="item"
-                            className="w-12 h-12 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-sm"
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=80&h=80&fit=crop"; }}
-                        />
-                    ))}
-                    {extraItems > 0 && (
-                        <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400 border-2 border-white dark:border-gray-700">
-                            +{extraItems}
-                        </div>
-                    )}
-                </div>
-            )}
+
+
 
             {/* Info */}
             <div className="px-4 pb-3 flex-1 space-y-1.5">
@@ -503,8 +486,8 @@ function OrderCard({ order, onChangeStatus, onView }: {
                         </span>
                     ) : null}
                     {order.customer?.name ? (
-                        <span className="text-xs text-gray-600 dark:text-gray-300 font-semibold truncate">
-                            {order.customer.name}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm font-bold truncate">
+                            👤 {order.customer.name}
                         </span>
                     ) : order.source !== "POS" ? (
                         <span className="text-xs text-gray-400 italic">Guest</span>
