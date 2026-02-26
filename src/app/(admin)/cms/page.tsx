@@ -315,6 +315,10 @@ export default function CMSPage() {
                                         if (!mergedConfig[page].sections[sec].content.selectedCategoryIds)
                                             mergedConfig[page].sections[sec].content.selectedCategoryIds = [];
                                     }
+                                    // Remove redundant logo from header (centralized in branding)
+                                    if (page === 'home' && sec === 'header') {
+                                        delete mergedConfig[page].sections[sec].content.logoUrl;
+                                    }
                                 }
                             });
                         }
@@ -613,7 +617,7 @@ export default function CMSPage() {
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
 
 
-                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
+                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
 
                                                             const isBooleanField = field === 'showCart' || field === 'showLogin';
 
@@ -728,7 +732,7 @@ export default function CMSPage() {
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
+                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
                                                                         /* ── IMAGE UPLOAD ── */
                                                                         <div className="space-y-1.5">
                                                                             <div className="flex items-center justify-between">
