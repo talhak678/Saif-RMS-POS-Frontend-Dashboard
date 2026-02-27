@@ -7,7 +7,7 @@ import {
     ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check,
     Search, Info, Phone, MessageSquare, Plus, Trash2, List, Star, Quote, Copyright,
     Video, Type, FileText, HelpCircle, CreditCard, PanelTop, PanelBottom, MousePointer2,
-    Shield, ExternalLink,
+    Shield, ExternalLink, AlignLeft, AlignCenter, AlignRight,
     X
 } from "lucide-react";
 import BlogsPage from "./blogs/page";
@@ -33,23 +33,23 @@ const DEFAULT_CONFIG = {
             },
             banner: {
                 required: true, enabled: true,
-                content: { title: "Delicious Food For You", subtitle: "Best quality food in town", description: "Discover the best culinary experience with our expertly crafted dishes prepared with the freshest ingredients.", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
+                content: { title: "Delicious Food For You", textAlign: "center", subtitle: "Best quality food in town", description: "Discover the best culinary experience with our expertly crafted dishes prepared with the freshest ingredients.", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
             },
             browseMenu: {
                 required: false, enabled: true,
-                content: { title: "Browse Our Menu", selectedCategoryIds: [] }
+                content: { title: "Browse Our Menu", textAlign: "center", selectedCategoryIds: [] }
             },
             todaysSpecial: {
                 required: false, enabled: false,
-                content: { title: "Today's Special", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
+                content: { title: "Today's Special", textAlign: "center", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
             },
             ourMenu: {
                 required: true, enabled: true,
-                content: { title: "Our Regular Menu", selectedCategoryIds: [] }
+                content: { title: "Our Regular Menu", textAlign: "center", selectedCategoryIds: [] }
             },
             customerComments: {
                 required: false, enabled: false,
-                content: { title: "What Our Customers Say", selectedReviewIds: [] }
+                content: { title: "What Our Customers Say", textAlign: "center", selectedReviewIds: [] }
             },
             footer: {
                 required: true, enabled: true,
@@ -87,12 +87,13 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Menu", breadcrumb: "Delicious Selection", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Menu", textAlign: "center", breadcrumb: "Delicious Selection", imageUrl: "", showTitle: "true" }
             },
             menuGallery: {
                 required: true, enabled: true,
                 content: {
                     title: "Full Menu Gallery",
+                    textAlign: "center",
                     description: "Discover our wide variety of dishes",
                     selectedCategoryIds: [], // ENABLE SELECTION PICKER
                     showTitle: "true"
@@ -106,16 +107,17 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "About Us", breadcrumb: "Our Story", imageUrl: "", showTitle: "true" }
+                content: { title: "About Us", textAlign: "center", breadcrumb: "Our Story", imageUrl: "", showTitle: "true" }
             },
             video: {
                 required: false, enabled: false,
-                content: { videoUrl: "", title: "Discover Our Kitchen", subtitle: "A glimpse into our cooking process" }
+                content: { videoUrl: "", textAlign: "center", title: "Discover Our Kitchen", subtitle: "A glimpse into our cooking process" }
             },
             whatWeDo: {
                 required: true, enabled: true,
                 content: {
                     title: "What We Do",
+                    textAlign: "center",
                     showTitle: "true",
                     description: "We are committed to providing the best dining experience.",
                     cards: [
@@ -134,11 +136,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", breadcrumb: "Get In Touch", imageUrl: "", showTitle: "true" }
+                content: { title: "Contact Us", textAlign: "center", breadcrumb: "Get In Touch", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
                 content: {
+                    textAlign: "center",
                     phoneTitle: "Phone Number",
                     phoneValue: "+123 456 7890",
                     emailTitle: "Email Address",
@@ -151,7 +154,7 @@ const DEFAULT_CONFIG = {
             },
             form: {
                 required: true, enabled: true,
-                content: { title: "Make A Reservation", showTitle: "true", description: "Fill out the form below to book a table." }
+                content: { title: "Make A Reservation", textAlign: "center", showTitle: "true", description: "Fill out the form below to book a table." }
             },
         }
     },
@@ -161,11 +164,11 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Blogs", breadcrumb: "Latest News", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Blogs", textAlign: "center", breadcrumb: "Latest News", imageUrl: "", showTitle: "true" }
             },
             blogList: {
                 required: true, enabled: true,
-                content: { title: "Latest Articles", showTitle: "true" }
+                content: { title: "Latest Articles", textAlign: "center", showTitle: "true" }
             },
             // footer: {
             //     required: true, enabled: true,
@@ -193,11 +196,11 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Frequently Asked Questions", breadcrumb: "Help Center", imageUrl: "", showTitle: "true" }
+                content: { title: "Frequently Asked Questions", textAlign: "center", breadcrumb: "Help Center", imageUrl: "", showTitle: "true" }
             },
             faqList: {
                 required: true, enabled: true,
-                content: { title: "Common Questions", showTitle: "true" }
+                content: { title: "Common Questions", textAlign: "center", showTitle: "true" }
             },
             // footer: {
             //     required: true, enabled: true,
@@ -733,6 +736,27 @@ export default function CMSPage() {
                                                                                 className="flex-1 bg-transparent border-none outline-none text-xs font-mono uppercase"
                                                                                 placeholder="#000000"
                                                                             />
+                                                                        </div>
+                                                                    ) : field === 'textAlign' ? (
+                                                                        <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/[0.03] p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 w-fit">
+                                                                            {[
+                                                                                { value: 'left', icon: <AlignLeft className="w-4 h-4" /> },
+                                                                                { value: 'center', icon: <AlignCenter className="w-4 h-4" /> },
+                                                                                { value: 'right', icon: <AlignRight className="w-4 h-4" /> }
+                                                                            ].map((opt) => (
+                                                                                <button
+                                                                                    key={opt.value}
+                                                                                    type="button"
+                                                                                    onClick={() => handleContentChange(activeTab, sectionKey, field, opt.value)}
+                                                                                    className={`p-2 rounded-md transition-all ${section.content[field] === opt.value
+                                                                                        ? "bg-brand-500 text-white shadow-sm"
+                                                                                        : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                                        }`}
+                                                                                    title={opt.value.charAt(0).toUpperCase() + opt.value.slice(1)}
+                                                                                >
+                                                                                    {opt.icon}
+                                                                                </button>
+                                                                            ))}
                                                                         </div>
                                                                     ) : isBooleanField ? (
                                                                         /* ── BOOLEAN TOGGLE ── */
