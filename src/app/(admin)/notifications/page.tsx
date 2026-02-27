@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
     Bell,
     CheckCircle2,
     Clock,
     Trash2,
-    MoreVertical,
     Inbox,
     RefreshCw,
     AlertCircle
@@ -17,6 +16,7 @@ import { toast } from "sonner";
 import Badge from "@/components/ui/badge/Badge";
 import { Button } from "@/components/ui/button/Button";
 import Loader from "@/components/common/Loader";
+import { useSearchParams } from "next/navigation";
 
 interface Notification {
     id: string;
@@ -26,10 +26,15 @@ interface Notification {
     userId: string;
 }
 
-export default function NotificationsPage() {
+// ── Inner component that reads searchParams ──────────────────────────────────
+function NotificationsInner() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
+    const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+    const searchParams = useSearchParams();
+    const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     const fetchNotifications = async () => {
         try {
@@ -49,6 +54,29 @@ export default function NotificationsPage() {
     useEffect(() => {
         fetchNotifications();
     }, []);
+
+    // After notifications load, scroll to & highlight the targeted notification
+    useEffect(() => {
+        if (loading) return;
+        const id = searchParams.get("highlight");
+        if (!id) return;
+
+        setHighlightedId(id);
+        // Also make sure unread filter doesn't hide it
+        setFilter("ALL");
+
+        // Wait one tick for the DOM to settle, then scroll
+        setTimeout(() => {
+            const el = rowRefs.current[id];
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }, 100);
+
+        // Remove highlight ring after 3 seconds
+        const timer = setTimeout(() => setHighlightedId(null), 3000);
+        return () => clearTimeout(timer);
+    }, [loading, searchParams]);
 
     const markAsRead = async (id: string) => {
         try {
@@ -155,55 +183,78 @@ export default function NotificationsPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-50 dark:divide-gray-800">
-                        {filteredNotifications.map((notification) => (
-                            <div
-                                key={notification.id}
-                                className={`p-6 flex items-start gap-4 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/20 ${!notification.isRead ? "bg-brand-50/20 dark:bg-brand-900/5 border-l-4 border-l-brand-500" : ""}`}
-                            >
-                                <div className={`mt-1 w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${!notification.isRead ? "bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400" : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"}`}>
-                                    {notification.message.toLowerCase().includes("upgrade") ? (
-                                        <RefreshCw size={24} />
-                                    ) : (
-                                        <AlertCircle size={24} />
-                                    )}
-                                </div>
-
-                                <div className="flex-1 space-y-1">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <p className={`text-sm leading-relaxed ${!notification.isRead ? "font-black text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}`}>
-                                            {notification.message}
-                                        </p>
-                                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                            {!notification.isRead && (
-                                                <button
-                                                    onClick={() => markAsRead(notification.id)}
-                                                    className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors"
-                                                    title="Mark as read"
-                                                >
-                                                    <CheckCircle2 size={18} />
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => deleteNotification(notification.id)}
-                                                className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                                            <Clock size={12} /> {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                                        </span>
-                                        {!notification.isRead && (
-                                            <Badge variant="solid" color="warning" className="text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-tight">New</Badge>
+                        {filteredNotifications.map((notification) => {
+                            const isHighlighted = highlightedId === notification.id;
+                            return (
+                                <div
+                                    key={notification.id}
+                                    id={`notif-${notification.id}`}
+                                    ref={(el) => { rowRefs.current[notification.id] = el; }}
+                                    className={[
+                                        "p-6 flex items-start gap-4 transition-all duration-500",
+                                        // Highlighted ring (fades out after 3s via state reset)
+                                        isHighlighted
+                                            ? "bg-brand-50 dark:bg-brand-900/20 ring-2 ring-inset ring-brand-400 dark:ring-brand-500 rounded-2xl scale-[1.01]"
+                                            : !notification.isRead
+                                                ? "bg-brand-50/20 dark:bg-brand-900/5 border-l-4 border-l-brand-500 hover:bg-gray-50/50 dark:hover:bg-gray-800/20"
+                                                : "hover:bg-gray-50/50 dark:hover:bg-gray-800/20",
+                                    ].join(" ")}
+                                >
+                                    <div className={`mt-1 w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors duration-500 ${isHighlighted
+                                            ? "bg-brand-200 text-brand-700 dark:bg-brand-800 dark:text-brand-200"
+                                            : !notification.isRead
+                                                ? "bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
+                                                : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
+                                        }`}>
+                                        {notification.message.toLowerCase().includes("upgrade") ? (
+                                            <RefreshCw size={24} />
+                                        ) : (
+                                            <AlertCircle size={24} />
                                         )}
                                     </div>
+
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className={`text-sm leading-relaxed ${!notification.isRead ? "font-black text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}`}>
+                                                {notification.message}
+                                            </p>
+                                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                {!notification.isRead && (
+                                                    <button
+                                                        onClick={() => markAsRead(notification.id)}
+                                                        className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors"
+                                                        title="Mark as read"
+                                                    >
+                                                        <CheckCircle2 size={18} />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => deleteNotification(notification.id)}
+                                                    className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                <Clock size={12} /> {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                                            </span>
+                                            {!notification.isRead && (
+                                                <Badge variant="solid" color="warning" className="text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-tight">New</Badge>
+                                            )}
+                                            {isHighlighted && (
+                                                <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest animate-pulse">
+                                                    ← From notification
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -217,5 +268,18 @@ export default function NotificationsPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+// ── Root export wrapped in Suspense (required for useSearchParams) ────────────
+export default function NotificationsPage() {
+    return (
+        <Suspense fallback={
+            <div className="py-20 flex items-center justify-center">
+                <Loader />
+            </div>
+        }>
+            <NotificationsInner />
+        </Suspense>
     );
 }
