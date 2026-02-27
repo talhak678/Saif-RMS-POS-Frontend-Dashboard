@@ -48,7 +48,7 @@ const DEFAULT_CONFIG = {
             },
             customerComments: {
                 required: false, enabled: false,
-                content: { title: "What Our Customers Say" }
+                content: { title: "What Our Customers Say", selectedReviewIds: [] }
             },
             footer: {
                 required: true, enabled: true,
@@ -275,6 +275,7 @@ export default function CMSPage() {
     // Business Data
     const [categories, setCategories] = useState<any[]>([]);
     const [menuItems, setMenuItems] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
 
     useEffect(() => {
         const init = async () => {
@@ -315,6 +316,10 @@ export default function CMSPage() {
                                         if (!mergedConfig[page].sections[sec].content.selectedCategoryIds)
                                             mergedConfig[page].sections[sec].content.selectedCategoryIds = [];
                                     }
+                                    if (sec === 'customerComments') {
+                                        if (!mergedConfig[page].sections[sec].content.selectedReviewIds)
+                                            mergedConfig[page].sections[sec].content.selectedReviewIds = [];
+                                    }
                                     // Remove redundant logo from header (centralized in branding)
                                     if (page === 'home' && sec === 'header') {
                                         delete mergedConfig[page].sections[sec].content.logoUrl;
@@ -344,13 +349,22 @@ export default function CMSPage() {
 
     const fetchBusinessData = async () => {
         try {
-            const [catRes, itemRes] = await Promise.all([
+            const [catRes, itemRes, reviewRes] = await Promise.all([
                 api.get("/categories"),
-                api.get("/menu-items")
+                api.get("/menu-items"),
+                api.get("/customers/reviews")
             ]);
-            console.log("CMS Data Fetch:", { categories: catRes.data, items: itemRes.data });
+            console.log("CMS Data Fetch:", { categories: catRes.data, items: itemRes.data, reviews: reviewRes.data });
             if (catRes.data?.success) setCategories(catRes.data.data || []);
             if (itemRes.data?.success) setMenuItems(itemRes.data.data || []);
+            if (reviewRes.data?.success) {
+                // Map reviews to have a 'name' property for the searchable picker
+                const mappedReviews = (reviewRes.data.data?.reviews || []).map((r: any) => ({
+                    ...r,
+                    name: `${r.order?.customer?.name || 'Guest'}: ${r.comment?.substring(0, 30)}...`
+                }));
+                setReviews(mappedReviews);
+            }
         } catch (error) {
             console.error("Failed to fetch business data", error);
         }
@@ -602,7 +616,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
                                                     {/* Section Basic Fields */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds').map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
 
@@ -802,52 +816,102 @@ export default function CMSPage() {
                                                         </div>
                                                     )}
 
-                                                    {/* SPECIAL: Live Picker for Categories/Items */}
-                                                    {(section.content?.selectedCategoryIds || section.content?.selectedItemIds) && (
+                                                    {/* SPECIAL: Live Picker for Categories/Items/Reviews */}
+                                                    {(section.content?.selectedCategoryIds || section.content?.selectedItemIds || section.content?.selectedReviewIds) && (
                                                         <div className="space-y-8 pt-6 border-t border-gray-100 dark:border-gray-800">
                                                             {[
                                                                 ['selectedCategoryIds', categories, 'Pick Categories'],
-                                                                ['selectedItemIds', menuItems, 'Pick Menu Items']
+                                                                ['selectedItemIds', menuItems, 'Pick Menu Items'],
+                                                                ['selectedReviewIds', reviews, 'Pick Customer Reviews']
                                                             ]
                                                                 .filter(([field]) => section.content[field as string])
-                                                                .map(([field, data, label]) => (
-                                                                    <div key={field as string} className="space-y-4">
-                                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 dark:bg-white/[0.03] p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <List className="w-5 h-5 text-brand-500" />
-                                                                                <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{label as string}</label>
+                                                                .map(([field, data, label]) => {
+                                                                    const isReviewPicker = field === 'selectedReviewIds';
+                                                                    return (
+                                                                        <div key={field as string} className="space-y-4">
+                                                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 dark:bg-white/[0.03] p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                                                                                <div className="flex items-center gap-3">
+                                                                                    {isReviewPicker ? <Quote className="w-5 h-5 text-brand-500" /> : <List className="w-5 h-5 text-brand-500" />}
+                                                                                    <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{label as string}</label>
+                                                                                </div>
+                                                                                {!isReviewPicker && (
+                                                                                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                                                                                        <Search className="w-3.5 h-3.5 text-gray-400" />
+                                                                                        <input placeholder="Search..." className="bg-transparent border-none outline-none text-xs w-40 font-medium" onChange={(e) => setSearchTerm(e.target.value)} />
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
-                                                                                <Search className="w-3.5 h-3.5 text-gray-400" />
-                                                                                <input placeholder="Search..." className="bg-transparent border-none outline-none text-xs w-40 font-medium" onChange={(e) => setSearchTerm(e.target.value)} />
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-64 overflow-y-auto p-1 custom-scrollbar">
-                                                                            {(data as any[])
-                                                                                .filter(item => (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()))
-                                                                                .map(item => {
-                                                                                    const isSelected = section.content[field as string]?.includes(item.id);
-                                                                                    return (
-                                                                                        <div
-                                                                                            key={item.id}
-                                                                                            onClick={() => toggleSelection(activeTab, sectionKey, field as string, item.id)}
-                                                                                            className={`px-3 py-2.5 rounded-xl cursor-pointer transition-all border text-xs font-semibold flex items-center justify-between gap-2 ${isSelected ? "bg-brand-500 border-brand-500 text-white shadow-sm" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-brand-500"
-                                                                                                }`}
-                                                                                        >
-                                                                                            <span className="truncate">{item.name}</span>
-                                                                                            {isSelected && <Check className="w-3 h-3 shrink-0" />}
-                                                                                        </div>
-                                                                                    );
-                                                                                })
-                                                                            }
+
+                                                                            {isReviewPicker ? (
+                                                                                /* ── REVIEW CARD GRID ── */
+                                                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar">
+                                                                                    {(data as any[]).map(review => {
+                                                                                        const isSelected = section.content[field as string]?.includes(review.id);
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={review.id}
+                                                                                                onClick={() => toggleSelection(activeTab, sectionKey, field as string, review.id)}
+                                                                                                className={`p-4 rounded-2xl cursor-pointer transition-all border-2 relative flex flex-col gap-3 h-full group ${isSelected
+                                                                                                    ? "bg-brand-50 border-brand-500 scale-[0.98] shadow-sm shadow-brand-500/10"
+                                                                                                    : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-brand-200"
+                                                                                                    }`}
+                                                                                            >
+                                                                                                <div className="flex items-start justify-between">
+                                                                                                    <div className="flex gap-0.5">
+                                                                                                        {[...Array(5)].map((_, i) => (
+                                                                                                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                                                                                                        ))}
+                                                                                                    </div>
+                                                                                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isSelected ? "bg-brand-500 text-white" : "bg-gray-100 dark:bg-gray-700 text-transparent border border-gray-200 dark:border-gray-600 group-hover:border-brand-500 group-hover:text-brand-500"}`}>
+                                                                                                        <Check className="w-3 h-3" />
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <p className="text-xs text-gray-600 dark:text-gray-400 italic font-medium line-clamp-3 leading-relaxed">
+                                                                                                    "{review.comment || 'No comment provided'}"
+                                                                                                </p>
+                                                                                                <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                                                                                                    <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200">
+                                                                                                        {review.order?.customer?.name || "Verified Guest"}
+                                                                                                    </p>
+                                                                                                    <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold">
+                                                                                                        Customer
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
+                                                                            ) : (
+                                                                                /* ── NORMAL LIST GRID (Items/Categories) ── */
+                                                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-64 overflow-y-auto p-1 custom-scrollbar">
+                                                                                    {(data as any[])
+                                                                                        .filter(item => (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()))
+                                                                                        .map(item => {
+                                                                                            const isSelected = section.content[field as string]?.includes(item.id);
+                                                                                            return (
+                                                                                                <div
+                                                                                                    key={item.id}
+                                                                                                    onClick={() => toggleSelection(activeTab, sectionKey, field as string, item.id)}
+                                                                                                    className={`px-3 py-2.5 rounded-xl cursor-pointer transition-all border text-xs font-semibold flex items-center justify-between gap-2 ${isSelected ? "bg-brand-500 border-brand-500 text-white shadow-sm" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-brand-500"
+                                                                                                        }`}
+                                                                                                >
+                                                                                                    <span className="truncate">{item.name}</span>
+                                                                                                    {isSelected && <Check className="w-3 h-3 shrink-0" />}
+                                                                                                </div>
+                                                                                            );
+                                                                                        })
+                                                                                    }
+                                                                                </div>
+                                                                            )}
+
                                                                             {(data as any[]).length === 0 && (
-                                                                                <div className="col-span-full py-8 text-center text-gray-400 text-xs border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
-                                                                                    No data found.
+                                                                                <div className="py-8 text-center text-gray-400 text-xs border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                                                                                    No {label} found.
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                    </div>
-                                                                ))}
+                                                                    );
+                                                                })}
                                                         </div>
                                                     )}
                                                     {/* SPECIAL: Embedded Managers */}
