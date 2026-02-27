@@ -80,7 +80,15 @@ export default function BlogsPage({ embedded = false }: Props) {
             setIsModalOpen(false);
             setCurrentBlog({});
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to save blog");
+            const data = error.response?.data;
+            if (data?.error && typeof data.error === 'object') {
+                const errorMessages = Object.entries(data.error)
+                    .map(([field, messages]: [string, any]) => `${field}: ${messages.join(', ')}`)
+                    .join('\n');
+                toast.error(`Validation Failed:\n${errorMessages}`);
+            } else {
+                toast.error(data?.message || "Failed to save blog");
+            }
         } finally {
             setSaving(false);
         }
@@ -252,7 +260,15 @@ export default function BlogsPage({ embedded = false }: Props) {
                                                         setCurrentBlog({});
                                                     }
                                                 }).catch(error => {
-                                                    toast.error(error.response?.data?.message || "Failed to save blog");
+                                                    const data = error.response?.data;
+                                                    if (data?.error && typeof data.error === 'object') {
+                                                        const errorMessages = Object.entries(data.error)
+                                                            .map(([field, messages]: [string, any]) => `${field}: ${messages.join(', ')}`)
+                                                            .join('\n');
+                                                        toast.error(`Validation Failed:\n${errorMessages}`);
+                                                    } else {
+                                                        toast.error(data?.message || "Failed to save blog");
+                                                    }
                                                 }).finally(() => {
                                                     setSaving(false);
                                                 });
