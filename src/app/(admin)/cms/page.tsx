@@ -652,19 +652,20 @@ export default function CMSPage() {
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
 
 
-                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
+                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube', 'video'].some(social => field.toLowerCase().includes(social)));
 
                                                             const isBooleanField = field === 'showCart' || field === 'showLogin' || field === 'showTitle';
 
                                                             const displayLabel =
                                                                 field === 'title' ? 'Heading' :
                                                                     field === 'subtitle' ? 'Subheading' :
-                                                                        field === 'backgroundColor' ? 'Section Background Color' :
-                                                                            field === 'backgroundImageUrl' ? 'Section Background Image' :
-                                                                                field === 'showCart' ? 'Show Cart Button' :
-                                                                                    field === 'showLogin' ? 'Show Login Button' :
-                                                                                        field === 'showTitle' ? 'Show Heading on Banner' :
-                                                                                            field.replace(/([A-Z])/g, ' $1');
+                                                                        field === 'videoUrl' ? 'Video' :
+                                                                            field === 'backgroundColor' ? 'Section Background Color' :
+                                                                                field === 'backgroundImageUrl' ? 'Section Background Image' :
+                                                                                    field === 'showCart' ? 'Show Cart Button' :
+                                                                                        field === 'showLogin' ? 'Show Login Button' :
+                                                                                            field === 'showTitle' ? 'Show Heading on Banner' :
+                                                                                                field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
@@ -796,8 +797,8 @@ export default function CMSPage() {
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social))) ? (
-                                                                        /* ── IMAGE UPLOAD ── */
+                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin'].some(social => field.toLowerCase().includes(social))) ? (
+                                                                        /* ── ASSET UPLOAD (IMAGE/VIDEO) ── */
                                                                         <div className="space-y-1.5">
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
@@ -810,8 +811,9 @@ export default function CMSPage() {
                                                                                 value={section.content[field]}
                                                                                 onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
                                                                                 isBanner={sectionKey === 'banner'}
+                                                                                isVideo={field === 'videoUrl'}
                                                                                 isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
-                                                                                recommendedSize={field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : '400×200'}
+                                                                                recommendedSize={field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200')}
                                                                             />
                                                                         </div>
                                                                     ) : (
@@ -819,8 +821,8 @@ export default function CMSPage() {
                                                                             type="text"
                                                                             value={section.content[field]}
                                                                             onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400"
-                                                                            placeholder={`Enter ${field}...`}
+                                                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 font-medium"
+                                                                            placeholder={`Enter ${displayLabel.toLowerCase()}...`}
                                                                         />
                                                                     )}
                                                                 </div>
