@@ -121,10 +121,10 @@ const DEFAULT_CONFIG = {
                     showTitle: "true",
                     description: "We are committed to providing the best dining experience.",
                     cards: [
-                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients." },
-                        { title: "Expert Chefs", description: "Our chefs have years of experience." },
-                        { title: "Professional Service", description: "Customer satisfaction is our top priority." },
-                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment." }
+                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients.", icon: "flaticon-fast-food" },
+                        { title: "Expert Chefs", description: "Our chefs have years of experience.", icon: "flaticon-chef" },
+                        { title: "Professional Service", description: "Customer satisfaction is our top priority.", icon: "flaticon-customer-service" },
+                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment.", icon: "flaticon-restaurant" }
                     ]
                 }
             },
@@ -463,7 +463,7 @@ export default function CMSPage() {
     const addArrayItem = (page: string, section: string, arrayField: string) => {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            const newItem = { title: "New Item", description: "Enter description here..." };
+            const newItem = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food" };
             newConfig[page].sections[section].content[arrayField] = [...(newConfig[page].sections[section].content[arrayField] || []), newItem];
             return newConfig;
         });
@@ -848,9 +848,15 @@ export default function CMSPage() {
                                                                     <div key={idx} className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl border border-gray-200 dark:border-gray-700 relative group/card">
                                                                         <button onClick={() => removeArrayItem(activeTab, sectionKey, 'cards', idx)} className="absolute top-3 right-3 text-red-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover/card:opacity-100"><Trash2 className="w-4 h-4" /></button>
                                                                         <div className="space-y-4">
-                                                                            <div className="space-y-1">
-                                                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Title</label>
-                                                                                <input value={item.title} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'title', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm" />
+                                                                            <div className="grid grid-cols-2 gap-3">
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Title</label>
+                                                                                    <input value={item.title} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'title', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm" />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Icon Class</label>
+                                                                                    <input value={item.icon} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'icon', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm" placeholder="flaticon-..." />
+                                                                                </div>
                                                                             </div>
                                                                             <div className="space-y-1">
                                                                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</label>
