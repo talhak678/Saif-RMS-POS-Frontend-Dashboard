@@ -144,17 +144,37 @@ const DEFAULT_CONFIG = {
                     textAlign: "center",
                     phoneTitle: "Phone Number",
                     phoneValue: "+123 456 7890",
+                    phoneIcon: "flaticon-telephone",
                     emailTitle: "Email Address",
                     emailValue: "info@example.com",
+                    emailIcon: "flaticon-email-1",
                     addressTitle: "Location",
                     addressValue: "123 Main Street, City",
+                    addressIcon: "flaticon-placeholder",
                     hoursTitle: "Opening Hours",
-                    hoursValue: "9:00 AM - 11:00 PM"
+                    hoursValue: "9:00 AM - 11:00 PM",
+                    hoursIcon: "flaticon-clock"
                 }
             },
             form: {
                 required: true, enabled: true,
-                content: { title: "Make A Reservation", textAlign: "center", showTitle: "true", description: "Fill out the form below to book a table." }
+                content: {
+                    title: "Make A Reservation",
+                    textAlign: "center",
+                    showTitle: "true",
+                    description: "Fill out the form below to book a table.",
+                    nameLabel: "Your Name",
+                    namePlaceholder: "John Doe",
+                    emailLabel: "Your Email",
+                    emailPlaceholder: "info@example.com",
+                    phoneLabel: "Your Number",
+                    phonePlaceholder: "9876543210",
+                    membersLabel: "Members",
+                    membersPlaceholder: "1 Person",
+                    messageLabel: "Message",
+                    messagePlaceholder: "Hi, let's talk!",
+                    buttonText: "Book A Table"
+                }
             },
         }
     },
@@ -666,7 +686,11 @@ export default function CMSPage() {
                                                                                         field === 'showCart' ? 'Show Cart Button' :
                                                                                             field === 'showLogin' ? 'Show Login Button' :
                                                                                                 field === 'showTitle' ? 'Show Heading on Banner' :
-                                                                                                    field.replace(/([A-Z])/g, ' $1');
+                                                                                                    field === 'phoneIcon' ? 'Phone Icon Class' :
+                                                                                                        field === 'emailIcon' ? 'Email Icon Class' :
+                                                                                                            field === 'addressIcon' ? 'Location Icon Class' :
+                                                                                                                field === 'hoursIcon' ? 'Hours Icon Class' :
+                                                                                                                    field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
