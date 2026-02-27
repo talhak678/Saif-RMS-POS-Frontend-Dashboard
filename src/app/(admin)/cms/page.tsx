@@ -111,7 +111,7 @@ const DEFAULT_CONFIG = {
             },
             video: {
                 required: false, enabled: false,
-                content: { videoUrl: "", textAlign: "center", title: "Discover Our Kitchen", subtitle: "A glimpse into our cooking process" }
+                content: { videoUrl: "", textAlign: "center", title: "We Invite you to Visit Our Restaurant", description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book." }
             },
             whatWeDo: {
                 required: true, enabled: true,
