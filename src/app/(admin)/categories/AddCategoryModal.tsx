@@ -3,11 +3,13 @@
 import { useState } from "react";
 import api from "@/services/api";
 import { X } from "lucide-react";
+import ImageUpload from "@/components/common/ImageUpload";
 
 export default function AddCategoryModal({ onClose, onSuccess, restaurantId }: any) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    image: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +46,7 @@ export default function AddCategoryModal({ onClose, onSuccess, restaurantId }: a
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Category Name
@@ -55,7 +57,18 @@ export default function AddCategoryModal({ onClose, onSuccess, restaurantId }: a
               placeholder="e.g. Appetizers"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Category Icon (Optional)
+            </label>
+            <ImageUpload
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
+              recommendedSize="90x90"
             />
           </div>
 

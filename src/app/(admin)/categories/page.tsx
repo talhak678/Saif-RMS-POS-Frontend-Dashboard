@@ -21,7 +21,7 @@ export default function CategoriesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const [editCategory, setEditCategory] = useState<{ id: string; name: string; description?: string } | null>(null);
+    const [editCategory, setEditCategory] = useState<{ id: string; name: string; description?: string; image?: string } | null>(null);
 
     useEffect(() => {
         fetchCategories();
@@ -117,7 +117,7 @@ export default function CategoriesPage() {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        setEditCategory({ id: cat.id, name: cat.name, description: cat.description });
+                                        setEditCategory({ id: cat.id, name: cat.name, description: cat.description, image: cat.image });
                                     }}
                                     className="absolute top-2 left-2 p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-all"
                                     title="Edit"
@@ -137,9 +137,13 @@ export default function CategoriesPage() {
                                     <Trash2 size={13} />
                                 </button>
 
-                                {/* Icon */}
-                                <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center group-hover:bg-brand-100 dark:group-hover:bg-brand-900/50 transition-colors">
-                                    <Utensils className="w-7 h-7 text-brand-500 dark:text-brand-400" />
+                                {/* Icon / Image */}
+                                <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center group-hover:bg-brand-100 dark:group-hover:bg-brand-900/50 transition-colors overflow-hidden">
+                                    {cat.image ? (
+                                        <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Utensils className="w-7 h-7 text-brand-500 dark:text-brand-400" />
+                                    )}
                                 </div>
 
                                 {/* Name */}

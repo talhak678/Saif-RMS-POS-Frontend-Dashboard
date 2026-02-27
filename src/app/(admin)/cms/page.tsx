@@ -7,7 +7,7 @@ import {
     ChevronDown, Save, Layout, Palette, Image as ImageIcon, Settings as SettingsIcon, Check,
     Search, Info, Phone, MessageSquare, Plus, Trash2, List, Star, Quote, Copyright,
     Video, Type, FileText, HelpCircle, CreditCard, PanelTop, PanelBottom, MousePointer2,
-    Shield,
+    Shield, ExternalLink,
     X
 } from "lucide-react";
 import BlogsPage from "./blogs/page";
@@ -852,9 +852,24 @@ export default function CMSPage() {
                                                                                     <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{label as string}</label>
                                                                                 </div>
                                                                                 {!isReviewPicker && (
-                                                                                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
-                                                                                        <Search className="w-3.5 h-3.5 text-gray-400" />
-                                                                                        <input placeholder="Search..." className="bg-transparent border-none outline-none text-xs w-40 font-medium" onChange={(e) => setSearchTerm(e.target.value)} />
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm text-gray-500">
+                                                                                            <Search className="w-3.5 h-3.5" />
+                                                                                            <input placeholder="Search..." className="bg-transparent border-none outline-none text-xs w-28 sm:w-40 font-medium" onChange={(e) => setSearchTerm(e.target.value)} />
+                                                                                        </div>
+
+                                                                                        {(field === 'selectedCategoryIds' || field === 'selectedItemIds') && (
+                                                                                            <a
+                                                                                                href={field === 'selectedCategoryIds' ? "/categories" : "/menu-items"}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="flex items-center gap-2 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-600 rounded-lg text-xs font-bold transition-all border border-brand-200 shadow-sm"
+                                                                                            >
+                                                                                                <Plus className="w-3 h-3" />
+                                                                                                Add New {field === 'selectedCategoryIds' ? "Category" : "Item"}
+                                                                                                <ExternalLink className="w-3 h-3 ml-1 opacity-50" />
+                                                                                            </a>
+                                                                                        )}
                                                                                     </div>
                                                                                 )}
                                                                             </div>
