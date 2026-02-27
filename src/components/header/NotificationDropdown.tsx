@@ -1,9 +1,7 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import api from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
 
@@ -126,12 +124,13 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
           ) : (
             notifications.map((notification) => (
               <li key={notification.id}>
-                <DropdownItem
-                  onItemClick={() => {
+                <Link
+                  href="/notifications"
+                  onClick={() => {
                     markAsRead(notification.id);
                     close();
                   }}
-                  className={`flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 ${!notification.isRead ? "bg-orange-50/50 dark:bg-orange-900/10" : ""
+                  className={`flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 cursor-pointer ${!notification.isRead ? "bg-orange-50/50 dark:bg-orange-900/10" : ""
                     }`}
                 >
                   <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
@@ -152,7 +151,7 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
                       <span>{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</span>
                     </span>
                   </span>
-                </DropdownItem>
+                </Link>
               </li>
             ))
           )}
