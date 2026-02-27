@@ -246,6 +246,33 @@ const DEFAULT_CONFIG = {
             // },
         }
     },
+    cart: {
+        enabled: true,
+        required: false,
+        sections: {
+            banner: {
+                required: false, enabled: true,
+                content: { title: "Shop Cart", textAlign: "center", breadcrumb: "Your Selection", imageUrl: "", showTitle: "true" }
+            },
+            cartContent: {
+                required: true, enabled: true,
+                content: {
+                    title: "Your Selection",
+                    textAlign: "center",
+                    emptyCartText: "Your cart is empty",
+                    exploreMenuText: "Explore Menu",
+                    billDetailsTitle: "Bill Details",
+                    itemTotalLabel: "Item Total",
+                    deliveryLabel: "Delivery Charges",
+                    taxLabel: "Tax",
+                    totalLabel: "Total",
+                    orderNowText: "Order Now",
+                    kitchenClosedText: "Kitchen Closed",
+                    addItemsText: "Add Items First"
+                }
+            }
+        }
+    },
     theme: {
         enabled: true,
         required: false,
@@ -562,9 +589,10 @@ export default function CMSPage() {
                                             {p === 'menu' && <List className="w-4 h-4" />}
                                             {p === 'blogs' && <MessageSquare className="w-4 h-4" />}
                                             {p === 'faq' && <Check className="w-4 h-4" />}
+                                            {p === 'cart' && <CreditCard className="w-4 h-4" />}
                                             {p === 'theme' && <Palette className="w-4 h-4" />}
                                             <div className="flex flex-col items-start leading-none">
-                                                <span>{p === 'theme' ? 'Branding' : p === 'faq' ? 'FAQs' : p}</span>
+                                                <span>{p === 'theme' ? 'Branding' : p === 'faq' ? 'FAQs' : p === 'cart' ? 'Shop Cart' : p}</span>
                                                 {!config[p].enabled && <span className="text-[9px] font-bold text-red-500 mt-0.5">Hidden</span>}
                                             </div>
                                         </div>
@@ -664,13 +692,57 @@ export default function CMSPage() {
                                                         {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds').map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
+                                                            const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
 
                                                             const fieldDescriptions: any = {
-                                                                primaryColor: "Primary brand color",
-                                                                secondaryColor: "Accent color",
-                                                                accentColor: "Subtle highlight color",
-                                                                backgroundColor: "Site background",
-                                                                textColor: "Main text color",
+                                                                primaryColor: {
+                                                                    label: "Brand Primary Color",
+                                                                    desc: "Used for buttons, active links, and main branding elements.",
+                                                                    example: "Primary Button"
+                                                                },
+                                                                secondaryColor: {
+                                                                    label: "Footer & Dark Backgrounds",
+                                                                    desc: "Used for the footer background and other dark section highlights.",
+                                                                    example: "Footer / Dark Sections"
+                                                                },
+                                                                accentColor: {
+                                                                    label: "Accent (Soft) Background",
+                                                                    desc: "Used for subtle backgrounds, dividers, and secondary elements.",
+                                                                    example: "Background Accents"
+                                                                },
+                                                                backgroundColor: {
+                                                                    label: "Global Site Background",
+                                                                    desc: "The main background color for all pages.",
+                                                                    example: "Main Background"
+                                                                },
+                                                                textColor: {
+                                                                    label: "Main Content Text",
+                                                                    desc: "Primary color for all body text, paragraphs and descriptions.",
+                                                                    example: "Body Text"
+                                                                },
+                                                                mainLogo: {
+                                                                    label: "Main Website Logo",
+                                                                    desc: "Displayed in the top navigation bar of all pages.",
+                                                                    size: "180 × 60 px"
+                                                                },
+                                                                favicon: {
+                                                                    label: "Browser Tab Icon",
+                                                                    desc: "The small icon (32x32) shown next to your site name in browser tabs.",
+                                                                    size: "32 × 32 px"
+                                                                },
+                                                                footerLogo: {
+                                                                    label: "Footer Logo",
+                                                                    desc: "Optional logo displayed in the footer section.",
+                                                                    size: "180 × 60 px"
+                                                                },
+                                                                primaryFont: {
+                                                                    label: "Main Body Font",
+                                                                    desc: "Used for paragraphs, buttons, and most text content."
+                                                                },
+                                                                secondaryFont: {
+                                                                    label: "Headings Font",
+                                                                    desc: "Used for titles (H1, H2, etc.) to give a distinct look."
+                                                                },
                                                             };
 
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
@@ -737,35 +809,98 @@ export default function CMSPage() {
                                                                             })}
                                                                         </div>
                                                                     ) : isThemeFont ? (
-                                                                        <select
-                                                                            value={section.content[field]}
-                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all"
-                                                                        >
-                                                                            {fontOptions.map(font => (
-                                                                                <option key={font} value={font}>{font}</option>
-                                                                            ))}
-                                                                        </select>
-                                                                    ) : field.toLowerCase().includes('color') ? (
-                                                                        <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/[0.03] p-2 rounded-lg border border-gray-200 dark:border-gray-700">
-                                                                            <div
-                                                                                className="h-8 w-8 rounded-md border border-gray-200 dark:border-gray-600 relative overflow-hidden shrink-0"
-                                                                                style={{ backgroundColor: section.content[field] }}
-                                                                            >
-                                                                                <input
-                                                                                    type="color"
-                                                                                    value={section.content[field]}
-                                                                                    onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                                    className="absolute inset-0 opacity-0 cursor-pointer h-full w-full scale-150"
-                                                                                />
+                                                                        <div className="space-y-3">
+                                                                            <div className="relative">
+                                                                                <select
+                                                                                    value={fontOptions.includes(section.content[field]) ? section.content[field] : "Custom"}
+                                                                                    onChange={(e) => {
+                                                                                        const val = e.target.value;
+                                                                                        handleContentChange(activeTab, sectionKey, field, val);
+                                                                                    }}
+                                                                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-all shadow-sm appearance-none pr-10"
+                                                                                >
+                                                                                    {fontOptions.map(font => (
+                                                                                        <option key={font} value={font}>{font}</option>
+                                                                                    ))}
+                                                                                    <option value="Custom">Custom / Add New...</option>
+                                                                                </select>
+                                                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                value={section.content[field]}
-                                                                                onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                                className="flex-1 bg-transparent border-none outline-none text-xs font-mono uppercase"
-                                                                                placeholder="#000000"
-                                                                            />
+                                                                            {(!fontOptions.includes(section.content[field]) || section.content[field] === "Custom") && (
+                                                                                <div className="p-3 bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                                                                                    <label className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase mb-2 block tracking-wider">Type Google Font Name</label>
+                                                                                    <div className="flex gap-2">
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            autoFocus
+                                                                                            value={section.content[field] === "Custom" ? "" : section.content[field]}
+                                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                            placeholder="e.g. Open Sans, Lato, etc."
+                                                                                            className="w-full bg-white dark:bg-gray-800 border border-brand-200 dark:border-brand-500/30 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <p className="text-[9px] text-gray-400 mt-2">Enter any valid Google Font name to apply it.</p>
+                                                                                </div>
+                                                                            )}
+                                                                            {fieldDescriptions[field]?.desc && (
+                                                                                <p className="text-[10px] text-gray-500 italic mt-1 px-1 leading-relaxed">
+                                                                                    {fieldDescriptions[field].desc}
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : field.toLowerCase().includes('color') ? (
+                                                                        <div className="space-y-3 p-4 bg-gray-50 dark:bg-white/[0.03] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                                                                            <div className="flex items-center justify-between gap-4">
+                                                                                <div className="flex items-center gap-3 flex-1">
+                                                                                    <div
+                                                                                        className="h-12 w-12 rounded-xl border-2 border-white dark:border-gray-600 shadow-sm relative overflow-hidden shrink-0 transition-transform hover:scale-105"
+                                                                                        style={{ backgroundColor: section.content[field] }}
+                                                                                    >
+                                                                                        <input
+                                                                                            type="color"
+                                                                                            value={section.content[field]}
+                                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                            className="absolute inset-0 opacity-0 cursor-pointer h-full w-full scale-150"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="flex-1 min-w-0">
+                                                                                        <h4 className="text-[13px] font-bold text-gray-800 dark:text-gray-200 truncate">
+                                                                                            {isThemeColor ? fieldDescriptions[field]?.label : displayLabel}
+                                                                                        </h4>
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            value={section.content[field]}
+                                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                            className="bg-transparent border-none outline-none text-[11px] font-mono uppercase text-gray-500 w-full"
+                                                                                            placeholder="#000000"
+                                                                                        />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            {isThemeColor && (
+                                                                                <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+                                                                                    <p className="text-[11px] text-gray-500 leading-relaxed italic mb-3">
+                                                                                        {fieldDescriptions[field]?.desc}
+                                                                                    </p>
+                                                                                    {/* Visual Preview */}
+                                                                                    <div className="rounded-lg p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                                                                                        <div className="flex items-center gap-3">
+                                                                                            {field === 'primaryColor' ? (
+                                                                                                <div className="px-4 py-1.5 rounded-md text-[10px] font-bold text-white shadow-sm" style={{ backgroundColor: section.content[field] }}>Sample Button</div>
+                                                                                            ) : field === 'textColor' ? (
+                                                                                                <div className="text-[11px] font-medium" style={{ color: section.content[field] }}>Sample sentence for content readability...</div>
+                                                                                            ) : field === 'backgroundColor' ? (
+                                                                                                <div className="w-full h-8 rounded border border-gray-100" style={{ backgroundColor: section.content[field] }}></div>
+                                                                                            ) : field === 'secondaryColor' ? (
+                                                                                                <div className="w-full h-8 rounded flex items-center justify-center text-[9px] font-bold text-white" style={{ backgroundColor: section.content[field] }}>FOOTER PREVIEW</div>
+                                                                                            ) : (
+                                                                                                <div className="w-full h-8 rounded-md border-2 border-dashed" style={{ borderColor: section.content[field], backgroundColor: section.content[field] + '11' }}></div>
+                                                                                            )}
+                                                                                            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-tighter">Preview</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     ) : field === 'textAlign' ? (
                                                                         <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/[0.03] p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 w-fit">
@@ -831,8 +966,8 @@ export default function CMSPage() {
                                                                         <div className="space-y-1.5">
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
-                                                                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
-                                                                                    {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : sectionKey === 'banner' ? (activeTab === 'home' ? '(1920×1080)' : '(1920×800)') : '(400×200)'}
+                                                                                <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">
+                                                                                    {isThemeLogo ? (fieldDescriptions[field]?.size || 'Recommended') : (field === 'logoUrl' ? '90×90 px' : field.toLowerCase().includes('favicon') ? '32×32 px' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920×1080 px' : '1920×800 px') : '400×200 px')}
                                                                                 </span>
                                                                             </div>
                                                                             <ImageUpload
@@ -842,8 +977,13 @@ export default function CMSPage() {
                                                                                 isBanner={sectionKey === 'banner'}
                                                                                 isVideo={field === 'videoUrl'}
                                                                                 isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
-                                                                                recommendedSize={field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200')}
+                                                                                recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
                                                                             />
+                                                                            {fieldDescriptions[field]?.desc && (
+                                                                                <p className="text-[10px] text-gray-500 italic mt-1.5 px-1">
+                                                                                    {fieldDescriptions[field].desc}
+                                                                                </p>
+                                                                            )}
                                                                         </div>
                                                                     ) : (
                                                                         <input
