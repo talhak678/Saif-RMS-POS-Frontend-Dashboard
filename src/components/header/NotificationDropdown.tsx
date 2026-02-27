@@ -125,7 +125,7 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
             notifications.map((notification) => (
               <li key={notification.id}>
                 <Link
-                  href="/notifications"
+                  href={`/notifications?highlight=${notification.id}`}
                   onClick={() => {
                     markAsRead(notification.id);
                     close();
