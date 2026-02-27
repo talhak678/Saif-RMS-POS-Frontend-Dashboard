@@ -40,7 +40,7 @@ const DEFAULT_CONFIG = {
             },
             todaysSpecial: {
                 required: false, enabled: false,
-                content: { title: "Today's Special", description: "Special items for today only", selectedItemIds: [] }
+                content: { title: "Today's Special", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
             },
             ourMenu: {
                 required: true, enabled: true,
@@ -621,7 +621,14 @@ export default function CMSPage() {
 
                                                             const isBooleanField = field === 'showCart' || field === 'showLogin';
 
-                                                            const displayLabel = field === 'title' ? 'Heading' : field === 'subtitle' ? 'Subheading' : field === 'showCart' ? 'Show Cart Button' : field === 'showLogin' ? 'Show Login Button' : field.replace(/([A-Z])/g, ' $1');
+                                                            const displayLabel =
+                                                                field === 'title' ? 'Heading' :
+                                                                    field === 'subtitle' ? 'Subheading' :
+                                                                        field === 'backgroundColor' ? 'Section Background Color' :
+                                                                            field === 'backgroundImageUrl' ? 'Section Background Image' :
+                                                                                field === 'showCart' ? 'Show Cart Button' :
+                                                                                    field === 'showLogin' ? 'Show Login Button' :
+                                                                                        field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
@@ -737,11 +744,9 @@ export default function CMSPage() {
                                                                         <div className="space-y-1.5">
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
-                                                                                {sectionKey !== 'banner' && (
-                                                                                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
-                                                                                        {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : '(400×200)'}
-                                                                                    </span>
-                                                                                )}
+                                                                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
+                                                                                    {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : sectionKey === 'banner' ? '(1920×1080)' : '(400×200)'}
+                                                                                </span>
                                                                             </div>
                                                                             <ImageUpload
                                                                                 label=""

@@ -85,8 +85,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                             src={value}
                             alt="Uploaded"
                             className={`w-full h-full ${isLogo
-                                    ? 'object-contain bg-gray-50 dark:bg-gray-800 p-4'
-                                    : 'object-cover transition-transform group-hover:scale-105 duration-500'
+                                ? 'object-contain bg-gray-50 dark:bg-gray-800 p-4'
+                                : 'object-cover transition-transform group-hover:scale-105 duration-500'
                                 }`}
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
@@ -116,10 +116,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                             : isLogo
                                 ? 'w-full h-40'
                                 : 'h-40 w-full'
-                            } rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group overflow-hidden relative`}
+                            } rounded-xl border-2 ${loading ? 'border-solid border-brand-200 bg-white z-10' : 'border-dashed border-gray-300 dark:border-gray-600'} flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 ${loading ? '' : 'transition-all'} group overflow-hidden relative`}
                     >
                         {loading ? (
-                            <Loader size="md" />
+                            <Loader size="md" showText={false} />
                         ) : (
                             <>
                                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-500 group-hover:scale-110 transition-transform duration-300">
@@ -130,7 +130,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                                         Click to upload {isBanner ? 'banner' : 'image'}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        PNG, JPG, WEBP up to 5MB
+                                        {isBanner ? 'Recommended size: 1920 x 1080' : 'PNG, JPG, WEBP up to 5MB'}
                                     </p>
                                 </div>
                             </>

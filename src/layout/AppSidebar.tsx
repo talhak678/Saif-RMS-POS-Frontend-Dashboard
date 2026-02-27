@@ -116,6 +116,7 @@ const navItems: NavItem[] = [
     name: "CMS & Website",
     subItems: [
       { name: "Page Sections", path: "/cms", pro: false, permission: "cms-website:page-sections" },
+      { name: "Connect Domain", path: "/cms/domain", pro: true },
       { name: "Banners", path: "/cms/banners", pro: false, permission: "cms-website:banners" },
       { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms-website:faqs" },
     ],

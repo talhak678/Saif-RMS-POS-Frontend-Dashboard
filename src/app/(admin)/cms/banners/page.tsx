@@ -149,9 +149,10 @@ export default function BannersPage() {
                             </div>
                             <div className="md:col-span-2 space-y-1.5">
                                 <ImageUpload
-                                    label="Banner Image"
+                                    label="Banner Image (Recommended: 1920 x 1080)"
                                     value={newBanner.imageUrl}
                                     onChange={(url) => setNewBanner({ ...newBanner, imageUrl: url })}
+                                    isBanner
                                 />
                             </div>
                         </div>
