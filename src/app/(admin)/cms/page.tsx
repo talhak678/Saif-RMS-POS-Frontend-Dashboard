@@ -32,7 +32,7 @@ const DEFAULT_CONFIG = {
             },
             banner: {
                 required: true, enabled: true,
-                content: { title: "Delicious Food For You", subtitle: "Best quality food in town", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
+                content: { title: "Delicious Food For You", subtitle: "Best quality food in town", description: "Discover the best culinary experience with our expertly crafted dishes prepared with the freshest ingredients.", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
             },
             browseMenu: {
                 required: false, enabled: true,
@@ -53,15 +53,25 @@ const DEFAULT_CONFIG = {
             footer: {
                 required: true, enabled: true,
                 content: {
+                    backgroundColor: "#0d0d0d",
+                    logoTitle: "Saif RMS",
+                    description: "Quality food delivered to your doorstep. Experience the best culinary delights with us.",
+                    newsletterTitle: "Subscribe To Our Newsletter",
+                    newsletterPlaceholder: "Enter Your Email",
+                    newsletterButtonText: "Subscribe",
+                    contactTitle: "CONTACT",
                     address: "123 Street, City, Country",
-                    description: "Quality food delivered to your doorstep.",
+                    contactPhone: "+123 456 789",
                     contactEmail: "info@example.com",
-                    contactPhone: "+123456789",
+                    linksTitle: "OUR LINKS",
+                    links: "Home, About Us, Our Menu, Contact Us, FAQ",
+                    servicesTitle: "OUR SERVICES",
+                    services: "Fast Delivery, Seat Reservation, Pickup In Store, Online Order, Table Booking",
+                    helpCenterTitle: "HELP CENTER",
+                    helpCenter: "Support, Terms & Conditions, Privacy Policy, Account, Feedback",
                     facebook: "",
                     instagram: "",
-                    tiktok: "",
-                    openHours: "Mon-Sun: 9AM - 11PM",
-                    menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
+                    tiktok: ""
                 }
             },
             copyrightBar: {
