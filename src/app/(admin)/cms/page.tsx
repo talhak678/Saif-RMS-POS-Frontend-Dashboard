@@ -173,6 +173,10 @@ const DEFAULT_CONFIG = {
                     membersPlaceholder: "1 Person",
                     messageLabel: "Message",
                     messagePlaceholder: "Hi, let's talk!",
+                    dateLabel: "Date",
+                    datePlaceholder: "Select Date",
+                    timeLabel: "Time",
+                    timePlaceholder: "Select Time",
                     buttonText: "Book A Table"
                 }
             },
@@ -843,9 +847,15 @@ export default function CMSPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <input
-                                                                            type="text"
+                                                                            type={field.toLowerCase().includes('phone') ? 'tel' : 'text'}
                                                                             value={section.content[field]}
-                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                            onChange={(e) => {
+                                                                                let val = e.target.value;
+                                                                                if (field.toLowerCase().includes('phone')) {
+                                                                                    val = val.replace(/[^0-9]/g, '');
+                                                                                }
+                                                                                handleContentChange(activeTab, sectionKey, field, val)
+                                                                            }}
                                                                             className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 font-medium"
                                                                             placeholder={`Enter ${displayLabel.toLowerCase()}...`}
                                                                         />
