@@ -15,6 +15,7 @@ import FaqsPage from "./faqs/page";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
+import { useAuth } from "@/services/permission.service";
 
 const DEFAULT_CONFIG = {
     home: {
@@ -274,6 +275,9 @@ const getSectionIcon = (key: string) => {
 };
 
 export default function CMSPage() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role?.name === "SUPER_ADMIN";
+
     const [config, setConfig] = useState<any>(null);
     const [theme, setTheme] = useState({ backgroundColor: "#ffffff", primaryColor: "#ff0000" });
     const [loading, setLoading] = useState(true);
@@ -582,6 +586,8 @@ export default function CMSPage() {
 
                             <div className="space-y-6">
                                 {Object.keys(config[activeTab].sections).map((sectionKey) => {
+                                    if (sectionKey === 'copyrightBar' && !isSuperAdmin) return null;
+
                                     const section = config[activeTab].sections[sectionKey];
                                     const isExpanded = expandedSection === sectionKey;
                                     return (
