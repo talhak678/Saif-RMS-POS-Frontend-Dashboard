@@ -196,7 +196,7 @@ function Branch() {
                                     <td className="px-4 py-4 font-black font-mono text-gray-300 text-xs">{String(i + 1).padStart(2, '0')}</td>
                                     <td className="px-4 py-4">
                                         <div>
-                                            <p className="font-black text-gray-800 dark:text-gray-200 tracking-tight">{branch.name}</p>
+                                            <p className="font-semibold text-gray-800 dark:text-gray-200 tracking-tight">{branch.name}</p>
                                             <p className="text-[10px] text-gray-400 font-bold truncate max-w-[150px]">{branch.address}</p>
                                         </div>
                                     </td>

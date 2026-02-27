@@ -3,6 +3,8 @@ import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
+import { useAuth } from "@/services/permission.service";
+import { Globe } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -12,6 +14,16 @@ const AppHeader: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<"notification" | "user" | null>(null);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role?.name === "SUPER_ADMIN";
+
+  // Build website URL same way as profile page
+  const restaurant = (user as any)?.restaurant;
+  const websiteUrl = restaurant?.customDomain
+    ? `https://${restaurant.customDomain}`
+    : restaurant?.slug
+      ? `https://${restaurant.slug}.platteros.com`
+      : null;
 
   const toggleDropdown = (dropdown: "notification" | "user") => {
     setActiveDropdown((prev) => (prev === dropdown ? null : dropdown));
@@ -167,7 +179,24 @@ const AppHeader: React.FC = () => {
             } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-6 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
+            {/* View Website */}
+            {!isSuperAdmin && websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="View Website"
+                className="group relative flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:border-brand-300 dark:hover:border-brand-700 transition-all shadow-sm"
+              >
+                <Globe className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors" />
+                {/* Tooltip */}
+                <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-700 px-2 py-1 text-[11px] font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                  View Website
+                </span>
+              </a>
+            )}
+
+            {/* Dark Mode Toggler */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
 

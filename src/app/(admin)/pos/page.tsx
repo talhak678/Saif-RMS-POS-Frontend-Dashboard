@@ -12,6 +12,7 @@ import {
     X,
     User,
     Phone,
+    Mail,
     MapPin,
     ChevronRight,
     CheckCircle2,
@@ -76,6 +77,7 @@ interface CartItem {
 
 interface CustomerDetails {
     name: string;
+    email: string;
     phone: string;
     address: string;
     tableNumber: string;
@@ -291,9 +293,11 @@ function printReceipt({
                 .sm { font-size: 10px; }
                 .divider { border-top: 1px dashed #000; margin: 4px 0; }
                 .row { display: flex; justify-content: space-between; margin: 2px 0; }
-                .row-item { display: flex; justify-content: space-between; margin: 3px 0; }
+                .row-item { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; }
                 .item-name { flex: 1; margin-right: 4px; }
-                .item-price { min-width: 50px; text-align: right; }
+                .item-right { min-width: 55px; text-align: right; }
+                .item-right .price { font-weight: bold; }
+                .item-right .qty { font-size: 10px; color: #555; margin-top: 1px; }
                 .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin: 4px 0; }
                 .thank-you { text-align: center; margin-top: 8px; font-size: 11px; }
                 @media print {
@@ -313,14 +317,15 @@ function printReceipt({
                 <span>Type: <b>${orderType.replace('_', ' ')}</b></span>
                 <span>Pay: <b>${paymentMethod}</b></span>
             </div>
-            ${customerDetails.name ? `<div class="sm">Customer: <b>${customerDetails.name}</b></div>` : ''}
+            <div class="sm">Customer: <b>${customerDetails.name ? customerDetails.name : 'POS'}</b></div>
             ${customerDetails.phone ? `<div class="sm">Phone: ${customerDetails.phone}</div>` : ''}
             ${customerDetails.tableNumber ? `<div class="sm">Table: ${customerDetails.tableNumber}</div>` : ''}
             ${customerDetails.address ? `<div class="sm">Address: ${customerDetails.address}</div>` : ''}
 
             <div class="divider"></div>
             <div class="row bold sm">
-                <span>ITEM</span><span>QTY</span><span>PRICE</span>
+                <span>ITEM</span>
+                <span style="text-align:right">PRICE<br/><span style="font-weight:normal">QTY</span></span>
             </div>
             <div class="divider"></div>
 
@@ -331,8 +336,10 @@ function printReceipt({
                         ${item.selectedVariation ? `<br/><span class="sm"> (${item.selectedVariation.name})</span>` : ''}
                         ${item.selectedAddons.length > 0 ? `<br/><span class="sm"> +${item.selectedAddons.map(a => a.name).join(', ')}</span>` : ''}
                     </span>
-                    <span style="min-width:20px;text-align:center">${item.quantity}</span>
-                    <span class="item-price">$${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                    <span class="item-right">
+                        <div class="price">$${(item.unitPrice * item.quantity).toFixed(2)}</div>
+                        <div class="qty">x${item.quantity}</div>
+                    </span>
                 </div>
             `).join('')}
 
@@ -400,6 +407,7 @@ function CustomerDetailsModal({
 }) {
     const [details, setDetails] = useState<CustomerDetails>({
         name: "",
+        email: "",
         phone: "",
         address: "",
         tableNumber: "",
@@ -524,12 +532,26 @@ function CustomerDetailsModal({
                                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                             </div>
 
+                            {/* Email */}
+                            <div>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        placeholder="Email (Optional)"
+                                        value={details.email}
+                                        onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                                        className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            </div>
+
                             {/* Phone */}
                             <div>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <input
-                                        type="tel"
+                                        type="number"
                                         placeholder={`Phone Number${isDelivery ? " *" : ""}`}
                                         value={details.phone}
                                         onChange={(e) => setDetails({ ...details, phone: e.target.value })}
@@ -856,7 +878,7 @@ export default function POSPage() {
     const total = subtotal + tax;
 
     // Place order
-    const [lastCustomerDetails, setLastCustomerDetails] = useState<CustomerDetails>({ name: "", phone: "", address: "", tableNumber: "" });
+    const [lastCustomerDetails, setLastCustomerDetails] = useState<CustomerDetails>({ name: "", email: "", phone: "", address: "", tableNumber: "" });
 
     const handlePlaceOrder = async (customerDetails: CustomerDetails, branchId: string, printAfter = false) => {
         try {
@@ -891,7 +913,25 @@ export default function POSPage() {
                 })),
             };
 
-            // Add customer details if provided
+            // ── Create customer first if details provided ──
+            let customerId: string | null = null;
+            if (customerDetails.name) {
+                try {
+                    const customerPayload: any = { name: customerDetails.name };
+                    if (customerDetails.phone) customerPayload.phone = customerDetails.phone;
+                    if (customerDetails.email) customerPayload.email = customerDetails.email;
+                    const custRes = await api.post("/customers", customerPayload);
+                    if (custRes.data?.success) {
+                        customerId = custRes.data.data?.id || null;
+                    }
+                } catch (custErr: any) {
+                    // Non-blocking — order continues even if customer creation fails
+                    console.warn("Customer creation failed:", custErr?.response?.data?.message);
+                }
+            }
+
+            // Add customer details to payload
+            if (customerId) payload.customerId = customerId;
             if (customerDetails.name) payload.customerName = customerDetails.name;
             if (customerDetails.phone) payload.customerPhone = customerDetails.phone;
             if (customerDetails.address) payload.deliveryAddress = customerDetails.address;
@@ -1037,7 +1077,11 @@ export default function POSPage() {
                                                 key={item.id}
                                                 className={`bg-white dark:bg-gray-800 rounded-3xl p-3 shadow-sm hover:shadow-md transition-all duration-200 border-2 flex flex-col cursor-pointer ${quantity > 0 ? "border-brand-600 shadow-brand-100 dark:shadow-none" : "border-transparent"
                                                     }`}
-                                                onClick={() => setSelectedItem(item)}
+                                                onClick={() => {
+                                                    const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                    if (hasOptions) setSelectedItem(item);
+                                                    else handleAddToCart(item, undefined, []);
+                                                }}
                                             >
                                                 {/* Product Image */}
                                                 <div className="relative h-44 w-full mb-3 flex-shrink-0">
@@ -1086,11 +1130,15 @@ export default function POSPage() {
                                                             >
                                                                 <Minus className="w-4 h-4" />
                                                             </button>
-                                                            <span className="font-black text-sm text-gray-900 dark:text-gray-100">
+                                                            <span className="text-[#5d69b9] text-sm text-gray-900 dark:text-gray-100">
                                                                 {quantity}
                                                             </span>
                                                             <button
-                                                                onClick={() => setSelectedItem(item)}
+                                                                onClick={() => {
+                                                                    const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                                    if (hasOptions) setSelectedItem(item);
+                                                                    else handleAddToCart(item, undefined, []);
+                                                                }}
                                                                 className="w-8 h-8 flex items-center justify-center bg-brand-600 text-white rounded-full hover:bg-brand-700 transition-colors"
                                                             >
                                                                 <Plus className="w-4 h-4" />
@@ -1098,7 +1146,12 @@ export default function POSPage() {
                                                         </div>
                                                     ) : (
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const hasOptions = item.variations.length > 0 || item.addons.length > 0;
+                                                                if (hasOptions) setSelectedItem(item);
+                                                                else handleAddToCart(item, undefined, []);
+                                                            }}
                                                             className="w-full bg-brand-50 hover:bg-brand-100 text-brand-600 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center uppercase tracking-wider"
                                                         >
                                                             Add to Dish
@@ -1175,14 +1228,14 @@ export default function POSPage() {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     $ {item.unitPrice} × {item.quantity}
                                                 </p>
-                                                <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                                                <p className="text-sm font-bold text-[#5d69b9] dark:text-blue-400 mt-0.5">
                                                     $ {(item.unitPrice * item.quantity).toFixed(0)}
                                                 </p>
                                             </div>
                                             <div className="flex flex-col gap-1 flex-shrink-0 items-center">
                                                 <button
                                                     onClick={() => updateQuantity(item.id, 1)}
-                                                    className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded text-white hover:bg-blue-700"
+                                                    className="w-6 h-6 flex items-center justify-center bg-[#5d69b9] rounded text-white hover:bg-blue-700"
                                                 >
                                                     <Plus className="w-3 h-3" />
                                                 </button>

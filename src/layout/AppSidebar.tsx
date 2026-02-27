@@ -392,34 +392,29 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="py-8 flex justify-center items-center w-full overflow-hidden">
-        <Link href="/" className="flex justify-center items-center w-full px-6">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <div className="relative w-full h-24 lg:h-28 flex justify-center items-center">
-              <Image
-                src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
-                alt="Logo"
-                fill
-                className="dark:hidden object-contain"
-                priority
-              />
-              <Image
-                src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
-                alt="Logo"
-                fill
-                className="hidden dark:block object-contain"
-                priority
-              />
-            </div>
-          ) : (
-            <div className="relative w-12 h-12">
-              <Image
-                src={user?.restaurant?.logo || "/images/logo/logo-icon.svg"}
-                alt="Logo"
-                fill
-                className="object-contain transition-all duration-300"
-              />
-            </div>
-          )}
+        <Link href="/" className="flex justify-center items-center w-full px-2">
+          <div
+            className={`relative flex justify-center items-center transition-all duration-300 overflow-hidden ${
+              isExpanded || isHovered || isMobileOpen
+                ? "w-full h-24 lg:h-28 px-4"
+                : "w-12 h-12"
+            }`}
+          >
+            <Image
+              src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}
+              alt="Logo"
+              fill
+              className="dark:hidden object-contain"
+              priority
+            />
+            <Image
+              src={user?.restaurant?.logo || "/images/authentication-images/logo-white.png"}
+              alt="Logo"
+              fill
+              className="hidden dark:block object-contain"
+              priority
+            />
+          </div>
         </Link>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import api from "@/services/api";
 import {
     Eye, X, RefreshCw, Clock, ChevronRight, LayoutGrid, List, Bell, BellOff,
@@ -136,9 +137,26 @@ function OrderDetailModal({
     };
     const typeBannerColor = typeColors[order.type] || "bg-brand-600";
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden">
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+            document.documentElement.style.overflow = "";
+        };
+    }, []);
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
+            <div
+                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden"
+                style={{ maxHeight: "90vh" }}
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* ── TOP ACTION BAR ── */}
                 <div className="flex items-center gap-2 px-5 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -289,8 +307,8 @@ function OrderDetailModal({
                                 <div className="p-3 border-r border-b border-gray-200 dark:border-gray-700">
                                     <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Source</p>
                                     <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-black ${order.source === "POS"
-                                            ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
-                                            : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
+                                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
                                         }`}>{order.source || "N/A"}</span>
                                 </div>
                                 <div className="p-3 border-r border-b border-gray-200 dark:border-gray-700">
@@ -315,16 +333,16 @@ function OrderDetailModal({
                                         <CreditCard className="w-3.5 h-3.5 text-gray-400" />
                                         <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{order.payment?.method || "—"}</p>
                                         <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-black ${order.payment?.status === "PAID"
-                                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                                             }`}>{order.payment?.status || "PENDING"}</span>
                                     </div>
                                 </div>
                                 <div className="p-3 border-r border-gray-200 dark:border-gray-700">
                                     <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Order Type</p>
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-black text-white ${order.type === "DELIVERY" ? "bg-orange-500"
-                                            : order.type === "DINE_IN" ? "bg-purple-600"
-                                                : "bg-cyan-600"
+                                        : order.type === "DINE_IN" ? "bg-purple-600"
+                                            : "bg-cyan-600"
                                         }`}>
                                         <TypeIcon className="w-3 h-3" />
                                         {(order.type || "N/A").replace("_", " ")}
@@ -417,7 +435,8 @@ function OrderDetailModal({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 
@@ -452,35 +471,31 @@ function OrderCard({ order, onChangeStatus, onView }: {
                 <StatusPill status={order.status} />
             </div>
 
-            {/* Thumbnails row */}
-            {thumbs.length > 0 && (
-                <div className="px-4 pb-2 flex gap-2 items-center">
-                    {thumbs.map((src: string, i: number) => (
-                        <img
-                            key={i}
-                            src={src}
-                            alt="item"
-                            className="w-12 h-12 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-sm"
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=80&h=80&fit=crop"; }}
-                        />
-                    ))}
-                    {extraItems > 0 && (
-                        <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400 border-2 border-white dark:border-gray-700">
-                            +{extraItems}
-                        </div>
-                    )}
-                </div>
-            )}
+
+
 
             {/* Info */}
             <div className="px-4 pb-3 flex-1 space-y-1.5">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">{order.branch?.name || "—"}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {order.customer
-                        ? `${order.customer.name}${order.source && order.source !== "WEBSITE" ? ` (${order.source})` : ""}`
-                        : order.source === "POS" ? "POS Order" : "Guest"
-                    }
-                </p>
+
+                {/* Customer / Source row */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    {order.source === "POS" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-black uppercase tracking-wide border border-indigo-200 dark:border-indigo-700">
+                            🖥 POS
+                        </span>
+                    ) : null}
+                    {order.customer?.name ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm font-bold truncate">
+                            👤 {order.customer.name}
+                        </span>
+                    ) : order.source !== "POS" ? (
+                        <span className="text-xs text-gray-400 italic">Guest</span>
+                    ) : null}
+                    {order.source && order.source !== "POS" && order.source !== "WEBSITE" && (
+                        <span className="text-[10px] text-gray-400 font-bold uppercase">({order.source})</span>
+                    )}
+                </div>
 
                 {/* Items list */}
                 <div className="pt-1 space-y-1">
@@ -1067,7 +1082,7 @@ export default function IncomingOrdersPage() {
 
                 {/* STATUS MODAL */}
                 {statusModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <div>
