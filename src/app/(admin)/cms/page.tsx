@@ -111,7 +111,7 @@ const DEFAULT_CONFIG = {
             },
             video: {
                 required: false, enabled: false,
-                content: { videoUrl: "", textAlign: "center", title: "We Invite you to Visit Our Restaurant", description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book." }
+                content: { videoUrl: "", thumbnailUrl: "", textAlign: "center", title: "We Invite you to Visit Our Restaurant", description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book." }
             },
             whatWeDo: {
                 required: true, enabled: true,
@@ -660,12 +660,13 @@ export default function CMSPage() {
                                                                 field === 'title' ? 'Heading' :
                                                                     field === 'subtitle' ? 'Subheading' :
                                                                         field === 'videoUrl' ? 'Video' :
-                                                                            field === 'backgroundColor' ? 'Section Background Color' :
-                                                                                field === 'backgroundImageUrl' ? 'Section Background Image' :
-                                                                                    field === 'showCart' ? 'Show Cart Button' :
-                                                                                        field === 'showLogin' ? 'Show Login Button' :
-                                                                                            field === 'showTitle' ? 'Show Heading on Banner' :
-                                                                                                field.replace(/([A-Z])/g, ' $1');
+                                                                            field === 'thumbnailUrl' ? 'Video Thumbnail' :
+                                                                                field === 'backgroundColor' ? 'Section Background Color' :
+                                                                                    field === 'backgroundImageUrl' ? 'Section Background Image' :
+                                                                                        field === 'showCart' ? 'Show Cart Button' :
+                                                                                            field === 'showLogin' ? 'Show Login Button' :
+                                                                                                field === 'showTitle' ? 'Show Heading on Banner' :
+                                                                                                    field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
