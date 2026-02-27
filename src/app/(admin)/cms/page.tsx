@@ -775,7 +775,7 @@ export default function CMSPage() {
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
                                                                                 <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
-                                                                                    {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : sectionKey === 'banner' ? '(1920×1080)' : '(400×200)'}
+                                                                                    {field === 'logoUrl' ? '(90×90)' : field.toLowerCase().includes('favicon') ? '(32×32)' : sectionKey === 'banner' ? (activeTab === 'home' ? '(1920×1080)' : '(1920×800)') : '(400×200)'}
                                                                                 </span>
                                                                             </div>
                                                                             <ImageUpload
@@ -784,6 +784,7 @@ export default function CMSPage() {
                                                                                 onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
                                                                                 isBanner={sectionKey === 'banner'}
                                                                                 isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
+                                                                                recommendedSize={field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : '400×200'}
                                                                             />
                                                                         </div>
                                                                     ) : (

@@ -11,9 +11,10 @@ interface ImageUploadProps {
     label?: string;
     isBanner?: boolean;
     isLogo?: boolean;
+    recommendedSize?: string;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false, isLogo = false }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false, isLogo = false, recommendedSize }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -146,7 +147,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                                         Click to upload {isLogo ? "logo" : isBanner ? "banner" : "image"}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {isBanner ? "Recommended size: 1920 x 1080" : "PNG, JPG, WEBP up to 5MB"}
+                                        {recommendedSize ? `Recommended size: ${recommendedSize}` : isBanner ? "Recommended size: 1920 x 1080" : "PNG, JPG, WEBP up to 5MB"}
                                     </p>
                                     {isLogo ? (
                                         <div className="mt-2 space-y-1">
