@@ -87,14 +87,15 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Menu", breadcrumb: "Delicious Selection", imageUrl: "" }
+                content: { title: "Our Menu", breadcrumb: "Delicious Selection", imageUrl: "", showTitle: "true" }
             },
             menuGallery: {
                 required: true, enabled: true,
                 content: {
                     title: "Full Menu Gallery",
                     description: "Discover our wide variety of dishes",
-                    selectedCategoryIds: [] // ENABLE SELECTION PICKER
+                    selectedCategoryIds: [], // ENABLE SELECTION PICKER
+                    showTitle: "true"
                 }
             }
         }
@@ -105,7 +106,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "About Us", breadcrumb: "Our Story", imageUrl: "" }
+                content: { title: "About Us", breadcrumb: "Our Story", imageUrl: "", showTitle: "true" }
             },
             video: {
                 required: false, enabled: false,
@@ -115,6 +116,7 @@ const DEFAULT_CONFIG = {
                 required: true, enabled: true,
                 content: {
                     title: "What We Do",
+                    showTitle: "true",
                     description: "We are committed to providing the best dining experience.",
                     cards: [
                         { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients." },
@@ -132,7 +134,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", breadcrumb: "Get In Touch", imageUrl: "" }
+                content: { title: "Contact Us", breadcrumb: "Get In Touch", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
@@ -149,7 +151,7 @@ const DEFAULT_CONFIG = {
             },
             form: {
                 required: true, enabled: true,
-                content: { title: "Make A Reservation", description: "Fill out the form below to book a table." }
+                content: { title: "Make A Reservation", showTitle: "true", description: "Fill out the form below to book a table." }
             },
         }
     },
@@ -159,11 +161,11 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Blogs", breadcrumb: "Latest News", imageUrl: "" }
+                content: { title: "Our Blogs", breadcrumb: "Latest News", imageUrl: "", showTitle: "true" }
             },
             blogList: {
                 required: true, enabled: true,
-                content: { title: "Latest Articles" }
+                content: { title: "Latest Articles", showTitle: "true" }
             },
             // footer: {
             //     required: true, enabled: true,
@@ -191,11 +193,11 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Frequently Asked Questions", breadcrumb: "Help Center", imageUrl: "" }
+                content: { title: "Frequently Asked Questions", breadcrumb: "Help Center", imageUrl: "", showTitle: "true" }
             },
             faqList: {
                 required: true, enabled: true,
-                content: { title: "Common Questions" }
+                content: { title: "Common Questions", showTitle: "true" }
             },
             // footer: {
             //     required: true, enabled: true,
@@ -649,7 +651,7 @@ export default function CMSPage() {
 
                                                             const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube'].some(social => field.toLowerCase().includes(social)));
 
-                                                            const isBooleanField = field === 'showCart' || field === 'showLogin';
+                                                            const isBooleanField = field === 'showCart' || field === 'showLogin' || field === 'showTitle';
 
                                                             const displayLabel =
                                                                 field === 'title' ? 'Heading' :
@@ -658,7 +660,8 @@ export default function CMSPage() {
                                                                             field === 'backgroundImageUrl' ? 'Section Background Image' :
                                                                                 field === 'showCart' ? 'Show Cart Button' :
                                                                                     field === 'showLogin' ? 'Show Login Button' :
-                                                                                        field.replace(/([A-Z])/g, ' $1');
+                                                                                        field === 'showTitle' ? 'Show Heading on Banner' :
+                                                                                            field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
