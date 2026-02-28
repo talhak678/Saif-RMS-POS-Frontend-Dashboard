@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
             },
             banner: {
                 required: true, enabled: true,
-                content: { title: "We believe Good Food Offer Great Smile", subtitle: "High Quality Test Station", description: "Discover the best culinary experience with our expertly crafted dishes.", bgImage: "", rightImage: "", textAlign: "center", items: [] }
+                content: { title: "We believe Good Food Offer Great Smile", subtitle: "High Quality Test Station", description: "Discover the best culinary experience with our expertly crafted dishes.", bgImage: "", rightImage: "", textAlign: "center", items: [], selectedReviewId: "", showReview: "false" }
             },
             browseMenu: {
                 required: false, enabled: true,
@@ -299,7 +299,9 @@ const DEFAULT_CONFIG = {
                 content: {
                     mainLogo: "",
                     favicon: "",
-                    footerLogo: ""
+                    footerLogo: "",
+                    websiteTitle: "Saif Kitchen",
+                    websiteDescription: "Quality food delivered to your doorstep. Experience the best culinary delights with us."
                 }
             }
         }
@@ -542,11 +544,19 @@ export default function CMSPage() {
     const toggleSelection = (page: string, section: string, field: string, id: string) => {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            const currentList = newConfig[page].sections[section].content[field] || [];
-            if (currentList.includes(id)) {
-                newConfig[page].sections[section].content[field] = currentList.filter((x: string) => x !== id);
+            // Check if it's an array field (plural) or single field (singular)
+            const isArray = field.endsWith('s');
+
+            if (isArray) {
+                const currentList = newConfig[page].sections[section].content[field] || [];
+                if (currentList.includes(id)) {
+                    newConfig[page].sections[section].content[field] = currentList.filter((x: string) => x !== id);
+                } else {
+                    newConfig[page].sections[section].content[field] = [...currentList, id];
+                }
             } else {
-                newConfig[page].sections[section].content[field] = [...currentList, id];
+                // Single selection
+                newConfig[page].sections[section].content[field] = newConfig[page].sections[section].content[field] === id ? "" : id;
             }
             return newConfig;
         });
@@ -700,7 +710,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
                                                     {/* Section Basic Fields */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'items' && k !== 'imageUrl' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'items' && k !== 'imageUrl' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId').map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
@@ -754,6 +764,14 @@ export default function CMSPage() {
                                                                     label: "Headings Font",
                                                                     desc: "Used for titles (H1, H2, etc.) to give a distinct look."
                                                                 },
+                                                                websiteTitle: {
+                                                                    label: "Website SEO Title",
+                                                                    desc: "This title appears in the browser tab and search engine results."
+                                                                },
+                                                                websiteDescription: {
+                                                                    label: "Website Meta Description",
+                                                                    desc: "A brief summary of your restaurant for search engines and social sharing."
+                                                                },
                                                             };
 
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
@@ -761,7 +779,7 @@ export default function CMSPage() {
 
                                                             const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('image') || field.toLowerCase().includes('img') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube', 'video'].some(social => field.toLowerCase().includes(social)));
 
-                                                            const isBooleanField = field === 'showCart' || field === 'showLogin' || field === 'showTitle';
+                                                            const isBooleanField = field === 'showCart' || field === 'showLogin' || field === 'showTitle' || field === 'showReview';
 
                                                             const displayLabel =
                                                                 field === 'title' ? 'Heading' :
@@ -779,12 +797,13 @@ export default function CMSPage() {
                                                                                                                 field === 'emailIcon' ? 'Email Icon Class' :
                                                                                                                     field === 'addressIcon' ? 'Location Icon Class' :
                                                                                                                         field === 'hoursIcon' ? 'Hours Icon Class' :
-                                                                                                                            field.replace(/([A-Z])/g, ' $1');
+                                                                                                                            field === 'showReview' ? 'Show Review on Banner' :
+                                                                                                                                field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
                                                                     {!isImageField && <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>}
-                                                                    {field === 'description' || field === 'address' ? (
+                                                                    {field === 'description' || field === 'address' || field === 'websiteDescription' ? (
                                                                         <textarea
                                                                             rows={3}
                                                                             value={section.content[field]}
@@ -1122,16 +1141,17 @@ export default function CMSPage() {
                                                     )}
 
                                                     {/* SPECIAL: Live Picker for Categories/Items/Reviews */}
-                                                    {(section.content?.selectedCategoryIds || section.content?.selectedItemIds || section.content?.selectedReviewIds) && (
+                                                    {(section.content?.selectedCategoryIds || section.content?.selectedItemIds || section.content?.selectedReviewIds || section.content?.selectedReviewId !== undefined) && (
                                                         <div className="space-y-8 pt-6 border-t border-gray-100 dark:border-gray-800">
                                                             {[
                                                                 ['selectedCategoryIds', categories, 'Pick Categories'],
                                                                 ['selectedItemIds', menuItems, 'Pick Menu Items'],
+                                                                ['selectedReviewId', reviews, 'Pick Banner Review'],
                                                                 ['selectedReviewIds', reviews, 'Pick Customer Reviews']
                                                             ]
-                                                                .filter(([field]) => section.content[field as string])
+                                                                .filter(([field]) => section.content[field as string] !== undefined)
                                                                 .map(([field, data, label]) => {
-                                                                    const isReviewPicker = field === 'selectedReviewIds';
+                                                                    const isReviewPicker = field === 'selectedReviewIds' || field === 'selectedReviewId';
                                                                     return (
                                                                         <div key={field as string} className="space-y-4">
                                                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 dark:bg-white/[0.03] p-4 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -1139,11 +1159,16 @@ export default function CMSPage() {
                                                                                     {isReviewPicker ? <Quote className="w-5 h-5 text-brand-500" /> : <List className="w-5 h-5 text-brand-500" />}
                                                                                     <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{label as string}</label>
                                                                                 </div>
-                                                                                {!isReviewPicker && (
+                                                                                {(field === 'selectedCategoryIds' || field === 'selectedItemIds' || field === 'selectedReviewIds' || field === 'selectedReviewId') && (
                                                                                     <div className="flex items-center gap-3">
                                                                                         <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm text-gray-500">
                                                                                             <Search className="w-3.5 h-3.5" />
-                                                                                            <input placeholder="Search..." className="bg-transparent border-none outline-none text-xs w-28 sm:w-40 font-medium" onChange={(e) => setSearchTerm(e.target.value)} />
+                                                                                            <input
+                                                                                                placeholder="Search..."
+                                                                                                className="bg-transparent border-none outline-none text-xs w-28 sm:w-40 font-medium"
+                                                                                                value={searchTerm}
+                                                                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                                                            />
                                                                                         </div>
 
                                                                                         {(field === 'selectedCategoryIds' || field === 'selectedItemIds') && (
@@ -1166,7 +1191,9 @@ export default function CMSPage() {
                                                                                 /* ── REVIEW CARD GRID ── */
                                                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar">
                                                                                     {(data as any[]).map(review => {
-                                                                                        const isSelected = section.content[field as string]?.includes(review.id);
+                                                                                        const isSelected = field === 'selectedReviewId'
+                                                                                            ? section.content[field] === review.id
+                                                                                            : section.content[field as string]?.includes(review.id);
                                                                                         return (
                                                                                             <div
                                                                                                 key={review.id}
