@@ -174,7 +174,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                                         </div>
                                     ) : (
                                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            {isVideo ? "MP4, WebM, MOV up to 20MB" : "PNG, JPG, WEBP up to 5MB"}
+                                            {isVideo ? "MP4, WebM, MOV up to 20MB" : ""}
                                         </p>
                                     )}
                                 </div>

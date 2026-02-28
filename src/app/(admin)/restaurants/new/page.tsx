@@ -38,6 +38,30 @@ export default function AddRestaurantPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    // Per-field social URL errors
+    const [socialErrors, setSocialErrors] = useState({
+        facebookUrl: "",
+        instagramUrl: "",
+        tiktokUrl: "",
+    });
+
+    const validateSocialUrl = (
+        field: "facebookUrl" | "instagramUrl" | "tiktokUrl",
+        value: string
+    ): string => {
+        if (!value) return ""; // optional – empty is fine
+        try { new URL(value); } catch { return "Please enter a valid URL (e.g. https://...)"; }
+        const rules: Record<string, { domain: string; label: string }> = {
+            facebookUrl: { domain: "facebook.com", label: "Facebook" },
+            instagramUrl: { domain: "instagram.com", label: "Instagram" },
+            tiktokUrl: { domain: "tiktok.com", label: "TikTok" },
+        };
+        const { domain, label } = rules[field];
+        if (!value.includes(domain))
+            return `URL must be a valid ${label} link (must contain ${domain})`;
+        return "";
+    };
+
     useEffect(() => {
         if (!loadingUser && user && !isSuperAdmin) {
             toast.error("Access denied. Only Super Admins can add restaurants.");
@@ -48,7 +72,12 @@ export default function AddRestaurantPage() {
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+        // Real-time social URL validation
+        if (name === "facebookUrl" || name === "instagramUrl" || name === "tiktokUrl") {
+            setSocialErrors(prev => ({ ...prev, [name]: validateSocialUrl(name as any, value) }));
+        }
     };
 
     const validate = () => {
@@ -56,6 +85,14 @@ export default function AddRestaurantPage() {
             return "Restaurant name must be at least 2 characters";
         if (!form.slug || form.slug.length < 2)
             return "Slug must be at least 2 characters";
+
+        const fbErr = validateSocialUrl("facebookUrl", form.facebookUrl);
+        const igErr = validateSocialUrl("instagramUrl", form.instagramUrl);
+        const ttErr = validateSocialUrl("tiktokUrl", form.tiktokUrl);
+        if (fbErr || igErr || ttErr) {
+            setSocialErrors({ facebookUrl: fbErr, instagramUrl: igErr, tiktokUrl: ttErr });
+            return "Please fix the social media URL errors below";
+        }
         return "";
     };
 
@@ -79,12 +116,18 @@ export default function AddRestaurantPage() {
                 toast.success("Restaurant created successfully");
                 router.push("/restaurants");
             } else {
-                toast.error(res.data?.message || "Failed to create restaurant");
+                const msg = res.data?.message || "Failed to create restaurant";
+                setError(msg);
+                toast.error(msg);
             }
         } catch (err: any) {
             console.error("Create restaurant failed", err);
-            setError("Failed to create restaurant");
-            toast.error("Failed to create restaurant");
+            const msg =
+                err?.response?.data?.message ||
+                err?.message ||
+                "Failed to create restaurant";
+            setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -232,35 +275,56 @@ export default function AddRestaurantPage() {
 
                 {/* SOCIAL LINKS */}
                 <div className="grid md:grid-cols-3 gap-4 mt-4">
+                    {/* Facebook */}
                     <div>
                         <label className="text-xs text-gray-500 font-medium">Facebook URL</label>
                         <input
                             name="facebookUrl"
                             value={form.facebookUrl}
                             onChange={handleChange}
-                            placeholder="Facebook URL"
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            placeholder="https://facebook.com/yourpage"
+                            className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.facebookUrl
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
+                                }`}
                         />
+                        {socialErrors.facebookUrl && (
+                            <p className="mt-1 text-xs text-red-500">{socialErrors.facebookUrl}</p>
+                        )}
                     </div>
+                    {/* Instagram */}
                     <div>
                         <label className="text-xs text-gray-500 font-medium">Instagram URL</label>
                         <input
                             name="instagramUrl"
                             value={form.instagramUrl}
                             onChange={handleChange}
-                            placeholder="Instagram URL"
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            placeholder="https://instagram.com/yourpage"
+                            className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.instagramUrl
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
+                                }`}
                         />
+                        {socialErrors.instagramUrl && (
+                            <p className="mt-1 text-xs text-red-500">{socialErrors.instagramUrl}</p>
+                        )}
                     </div>
+                    {/* TikTok */}
                     <div>
                         <label className="text-xs text-gray-500 font-medium">TikTok URL</label>
                         <input
                             name="tiktokUrl"
                             value={form.tiktokUrl}
                             onChange={handleChange}
-                            placeholder="TikTok URL"
-                            className="w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                            placeholder="https://tiktok.com/@yourpage"
+                            className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.tiktokUrl
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
+                                }`}
                         />
+                        {socialErrors.tiktokUrl && (
+                            <p className="mt-1 text-xs text-red-500">{socialErrors.tiktokUrl}</p>
+                        )}
                     </div>
                 </div>
 
