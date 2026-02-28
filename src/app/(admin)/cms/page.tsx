@@ -8,7 +8,7 @@ import {
     Search, Info, Phone, MessageSquare, Plus, Trash2, List, Star, Quote, Copyright,
     Video, Type, FileText, HelpCircle, CreditCard, PanelTop, PanelBottom, MousePointer2,
     Shield, ExternalLink, AlignLeft, AlignCenter, AlignRight,
-    X
+    X, PlusCircle
 } from "lucide-react";
 import BlogsPage from "./blogs/page";
 import FaqsPage from "./faqs/page";
@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
             },
             banner: {
                 required: true, enabled: true,
-                content: { title: "Delicious Food For You", textAlign: "center", subtitle: "Best quality food in town", description: "Discover the best culinary experience with our expertly crafted dishes prepared with the freshest ingredients.", imageUrl: "", buttonText: "Order Now", buttonLink: "/our-menu-1" }
+                content: { title: "We believe Good Food Offer Great Smile", subtitle: "High Quality Test Station", description: "Discover the best culinary experience with our expertly crafted dishes.", bgImage: "", rightImage: "", textAlign: "center", items: [] }
             },
             browseMenu: {
                 required: false, enabled: true,
@@ -514,7 +514,18 @@ export default function CMSPage() {
     const addArrayItem = (page: string, section: string, arrayField: string) => {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            const newItem = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food" };
+            let newItem: any = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food" };
+
+            if (arrayField === 'items' && section === 'banner') {
+                newItem = {
+                    title: "New Banner Title",
+                    subtitle: "New Subtitle",
+                    description: "Enter banner description here...",
+                    bgImage: "",
+                    rightImage: ""
+                };
+            }
+
             newConfig[page].sections[section].content[arrayField] = [...(newConfig[page].sections[section].content[arrayField] || []), newItem];
             return newConfig;
         });
@@ -689,7 +700,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
                                                     {/* Section Basic Fields */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'cards' && k !== 'items' && k !== 'imageUrl' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds').map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
@@ -748,7 +759,7 @@ export default function CMSPage() {
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
 
 
-                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube', 'video'].some(social => field.toLowerCase().includes(social)));
+                                                            const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('image') || field.toLowerCase().includes('img') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube', 'video'].some(social => field.toLowerCase().includes(social)));
 
                                                             const isBooleanField = field === 'showCart' || field === 'showLogin' || field === 'showTitle';
 
@@ -759,14 +770,16 @@ export default function CMSPage() {
                                                                             field === 'thumbnailUrl' ? 'Video Thumbnail' :
                                                                                 field === 'backgroundColor' ? 'Section Background Color' :
                                                                                     field === 'backgroundImageUrl' ? 'Section Background Image' :
-                                                                                        field === 'showCart' ? 'Show Cart Button' :
-                                                                                            field === 'showLogin' ? 'Show Login Button' :
-                                                                                                field === 'showTitle' ? 'Show Heading on Banner' :
-                                                                                                    field === 'phoneIcon' ? 'Phone Icon Class' :
-                                                                                                        field === 'emailIcon' ? 'Email Icon Class' :
-                                                                                                            field === 'addressIcon' ? 'Location Icon Class' :
-                                                                                                                field === 'hoursIcon' ? 'Hours Icon Class' :
-                                                                                                                    field.replace(/([A-Z])/g, ' $1');
+                                                                                        field === 'bgImage' ? 'Banner Image' :
+                                                                                            field === 'rightImage' ? 'Banner Dish Image' :
+                                                                                                field === 'showCart' ? 'Show Cart Button' :
+                                                                                                    field === 'showLogin' ? 'Show Login Button' :
+                                                                                                        field === 'showTitle' ? 'Show Heading on Banner' :
+                                                                                                            field === 'phoneIcon' ? 'Phone Icon Class' :
+                                                                                                                field === 'emailIcon' ? 'Email Icon Class' :
+                                                                                                                    field === 'addressIcon' ? 'Location Icon Class' :
+                                                                                                                        field === 'hoursIcon' ? 'Hours Icon Class' :
+                                                                                                                            field.replace(/([A-Z])/g, ' $1');
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
@@ -961,13 +974,13 @@ export default function CMSPage() {
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                    ) : (field.toLowerCase().includes('url') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin'].some(social => field.toLowerCase().includes(social))) ? (
+                                                                    ) : isImageField ? (
                                                                         /* ── ASSET UPLOAD (IMAGE/VIDEO) ── */
                                                                         <div className="space-y-1.5">
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
                                                                                 <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">
-                                                                                    {isThemeLogo ? (fieldDescriptions[field]?.size || 'Recommended') : (field === 'logoUrl' ? '90×90 px' : field.toLowerCase().includes('favicon') ? '32×32 px' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920×1080 px' : '1920×800 px') : '400×200 px')}
+                                                                                    {isThemeLogo ? (fieldDescriptions[field]?.size || 'Recommended') : (field === 'logoUrl' ? '90×90 px' : field.toLowerCase().includes('favicon') ? '32×32 px' : field === 'rightImage' ? '800×800 px' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920×1080 px' : '1920×800 px') : '400×200 px')}
                                                                                 </span>
                                                                             </div>
                                                                             <ImageUpload
@@ -977,7 +990,7 @@ export default function CMSPage() {
                                                                                 isBanner={sectionKey === 'banner'}
                                                                                 isVideo={field === 'videoUrl'}
                                                                                 isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
-                                                                                recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
+                                                                                recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : field === 'rightImage' ? '800x800' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
                                                                             />
                                                                             {fieldDescriptions[field]?.desc && (
                                                                                 <p className="text-[10px] text-gray-500 italic mt-1.5 px-1">
@@ -1035,6 +1048,71 @@ export default function CMSPage() {
                                                                             <div className="space-y-1">
                                                                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</label>
                                                                                 <textarea rows={2} value={item.description} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'description', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none resize-none shadow-sm" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {sectionKey === 'banner' && activeTab === 'home' && (
+                                                        <div className="space-y-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <PlusCircle className="w-5 h-5 text-brand-500" />
+                                                                    <h3 className="text-sm font-bold text-gray-800 dark:text-white">Additional Banners</h3>
+                                                                </div>
+                                                                <button onClick={() => addArrayItem(activeTab, sectionKey, 'items')} className="flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm active:scale-95">
+                                                                    <Plus className="w-3.5 h-3.5" /> Add More
+                                                                </button>
+                                                            </div>
+                                                            <div className="space-y-6">
+                                                                {(section.content.items || []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="bg-white dark:bg-white/5 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 relative group/banner shadow-sm">
+                                                                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50 dark:border-gray-800">
+                                                                            <div className="flex items-center gap-4">
+                                                                                <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-sm">#{idx + 2}</div>
+                                                                                <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Extra Slide</h4>
+                                                                            </div>
+                                                                            <button onClick={() => removeArrayItem(activeTab, sectionKey, 'items', idx)} className="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm border border-red-100 dark:border-red-900/20 bg-white dark:bg-gray-800"><Trash2 className="w-4 h-4" /></button>
+                                                                        </div>
+
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                                                            {/* Subheading */}
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Subheading</label>
+                                                                                <input value={item.subtitle} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'subtitle', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400" placeholder="High Quality Test Station" />
+                                                                            </div>
+
+                                                                            {/* Heading */}
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Heading</label>
+                                                                                <input value={item.title} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'title', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 font-bold" placeholder="Delicious Food For You" />
+                                                                            </div>
+
+                                                                            {/* Description (Full Width) */}
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Description</label>
+                                                                                <textarea rows={2} value={item.description} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'description', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 resize-none leading-relaxed" placeholder="Enter banner details..." />
+                                                                            </div>
+
+                                                                            {/* Banner Image (Full Width) */}
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Image</label>
+                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">1920×1080 px</span>
+                                                                                </div>
+                                                                                <ImageUpload label="" value={item.bgImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'bgImage', url)} isBanner={true} recommendedSize="1920x1080" />
+                                                                            </div>
+
+                                                                            {/* Banner Dish Image (Full Width) */}
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Dish Image</label>
+                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">800×800 px</span>
+                                                                                </div>
+                                                                                <ImageUpload label="" value={item.rightImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'rightImage', url)} recommendedSize="800x800" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
