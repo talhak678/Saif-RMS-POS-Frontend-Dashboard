@@ -247,7 +247,7 @@ export default function ReportsDashboard() {
                                         key={tab}
                                         onClick={() => setActiveTab(originalIndex)}
                                         className={`pb-4 text-sm font-bold transition-all relative ${isSelected
-                                            ? "text-blue-600 border-b-2 border-blue-600"
+                                            ? "text-[#5d69b9] border-b-2 border-[#5d69b9]"
                                             : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                                             }`}
                                     >
@@ -304,7 +304,7 @@ export default function ReportsDashboard() {
 
                         <button
                             onClick={handleDownload}
-                            className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-widest"
+                            className="flex items-center gap-2 text-[#5d69b9] font-bold text-xs uppercase tracking-widest"
                         >
                             <Download size={16} />
                             Export
