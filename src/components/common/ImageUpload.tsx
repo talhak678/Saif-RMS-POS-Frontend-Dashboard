@@ -11,18 +11,19 @@ interface ImageUploadProps {
     label?: string;
     isBanner?: boolean;
     isLogo?: boolean;
+    isFavicon?: boolean;
     isVideo?: boolean;
     recommendedSize?: string;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false, isLogo = false, isVideo = false, recommendedSize }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", isBanner = false, isLogo = false, isFavicon = false, isVideo = false, recommendedSize }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "durh1yv4o";
     const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "saif_pos_preset";
 
-    const validateLogoImage = (file: File): Promise<boolean> => {
+    const validateDimensions = (file: File): Promise<boolean> => {
         return new Promise((resolve) => {
             // GIFs cannot be read as Image easily — skip dimension check
             if (file.type === "image/gif") { resolve(true); return; }
@@ -30,12 +31,24 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
             const url = URL.createObjectURL(file);
             img.onload = () => {
                 URL.revokeObjectURL(url);
-                if (img.width < 100 || img.height < 100) {
-                    toast.error(`Logo too small (${img.width}×${img.height}px). Minimum: 100×100px.`);
-                    resolve(false);
-                } else if (Math.abs(img.width - img.height) / Math.max(img.width, img.height) > 0.5) {
-                    toast.error(`Logo should be roughly square. Current ratio: ${img.width}×${img.height}px is too wide/tall.`);
-                    resolve(false);
+
+                if (isFavicon) {
+                    if (img.width > 50 || img.height > 50) {
+                        toast.error(`Favicon too large (${img.width}×${img.height}px). Maximum allowed: 50×50px.`);
+                        resolve(false);
+                    } else {
+                        resolve(true);
+                    }
+                } else if (isLogo) {
+                    if (img.width < 50 || img.height < 50) {
+                        toast.error(`Logo too small (${img.width}×${img.height}px). Minimum: 50×50px.`);
+                        resolve(false);
+                    } else if (img.width > 400 || img.height > 400) {
+                        toast.error(`Logo too large (${img.width}×${img.height}px). Maximum: 400×400px.`);
+                        resolve(false);
+                    } else {
+                        resolve(true);
+                    }
                 } else {
                     resolve(true);
                 }
@@ -49,19 +62,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const maxImageSize = isLogo ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+        const maxImageSize = (isLogo || isFavicon) ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
         const maxVideoSize = 20 * 1024 * 1024; // 20MB for video
         const maxSize = isVideo ? maxVideoSize : maxImageSize;
-        const maxSizeLabel = isVideo ? "20MB" : (isLogo ? "2MB" : "5MB");
+        const maxSizeLabel = isVideo ? "20MB" : ((isLogo || isFavicon) ? "2MB" : "5MB");
 
         if (file.size > maxSize) {
-            toast.error(`File too large. Max ${maxSizeLabel} for ${isVideo ? "videos" : (isLogo ? "logos" : "images")}.`);
+            toast.error(`File too large. Max ${maxSizeLabel} for ${isVideo ? "videos" : ((isLogo || isFavicon) ? "logos" : "images")}.`);
             if (fileInputRef.current) fileInputRef.current.value = "";
             return;
         }
 
-        if (isLogo) {
-            const valid = await validateLogoImage(file);
+        if (isLogo || isFavicon) {
+            const valid = await validateDimensions(file);
             if (!valid) {
                 if (fileInputRef.current) fileInputRef.current.value = "";
                 return;
@@ -82,7 +95,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
             const data = await response.json();
             if (data.secure_url) {
                 onChange(data.secure_url);
-                toast.success(`${isVideo ? "Video" : "Image"} uploaded successfully!`);
+                toast.success(`${isVideo ? "Video" : (isFavicon ? "Favicon" : (isLogo ? "Logo" : "Image"))} uploaded successfully!`);
             } else {
                 toast.error(data.error?.message || "Upload failed.");
             }
@@ -107,7 +120,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
             <div className="relative w-full">
                 {value ? (
                     <div className={`relative group ${isBanner ? "aspect-[16/9] w-full"
-                        : isLogo ? "w-full aspect-square max-h-52"
+                        : (isLogo || isFavicon) ? "w-full aspect-square max-h-52"
                             : "h-44 w-full"
                         } rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md bg-gray-50 dark:bg-gray-800`}>
                         {isVideo ? (
@@ -120,7 +133,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                             <img
                                 src={value}
                                 alt="Uploaded"
-                                className={`w-full h-full ${isLogo
+                                className={`w-full h-full ${(isLogo || isFavicon)
                                     ? "object-contain bg-gray-50 dark:bg-gray-800 p-4"
                                     : "object-cover transition-transform group-hover:scale-105 duration-500"
                                     }`}
@@ -142,7 +155,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                         onClick={() => fileInputRef.current?.click()}
                         className={`${isBanner
                             ? "aspect-[16/9] w-full"
-                            : isLogo
+                            : (isLogo || isFavicon)
                                 ? "w-full h-40"
                                 : "h-40 w-full"
                             } rounded-xl border-2 ${loading ? "border-solid border-brand-200 bg-white z-10" : "border-dashed border-gray-300 dark:border-gray-600"} flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 ${loading ? "" : "transition-all"} group overflow-hidden relative`}
@@ -156,16 +169,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                                 </div>
                                 <div className="text-center px-6">
                                     <p className="text-base font-bold text-gray-800 dark:text-gray-100">
-                                        Click to upload {isVideo ? "video" : (isLogo ? "logo" : isBanner ? "banner" : "image")}
+                                        Click to upload {isVideo ? "video" : (isFavicon ? "favicon" : (isLogo ? "logo" : isBanner ? "banner" : "image"))}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                         {recommendedSize ? `Recommended size: ${recommendedSize}` : isBanner ? "Recommended size: 1920 x 1080" : (isVideo ? "MP4, WebM up to 20MB" : "PNG, JPG, WEBP up to 5MB")}
                                     </p>
-                                    {isLogo ? (
+                                    {(isLogo || isFavicon) ? (
                                         <div className="mt-2 space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
                                                 <CheckCircle2 size={11} className="text-emerald-500" />
-                                                Square (1:1) recommended — min 100×100px
+                                                {isFavicon ? "Maximum: 50×50px" : "Size: 50×50px to 400×400px"}
                                             </p>
                                             <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
                                                 <AlertCircle size={11} className="text-amber-400" />
