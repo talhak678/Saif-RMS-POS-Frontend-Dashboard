@@ -87,7 +87,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Menu", textAlign: "center", breadcrumb: "Delicious Selection", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Menu", textAlign: "center", breadcrumb: "Delicious Selection", description: "Discover our wide variety of delicious dishes.", imageUrl: "", showTitle: "true" }
             },
             menuGallery: {
                 required: true, enabled: true,
@@ -107,7 +107,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "About Us", textAlign: "center", breadcrumb: "Our Story", imageUrl: "", showTitle: "true" }
+                content: { title: "About Us", textAlign: "center", breadcrumb: "Our Story", description: "Learn more about our heritage and commitment to quality.", imageUrl: "", showTitle: "true" }
             },
             video: {
                 required: false, enabled: false,
@@ -136,7 +136,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", textAlign: "center", breadcrumb: "Get In Touch", imageUrl: "", showTitle: "true" }
+                content: { title: "Contact Us", textAlign: "center", breadcrumb: "Get In Touch", description: "Have questions? We're here to help you.", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
@@ -188,7 +188,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Blogs", textAlign: "center", breadcrumb: "Latest News", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Blogs", textAlign: "center", breadcrumb: "Latest News", description: "Read the latest news and stories from our kitchen.", imageUrl: "", showTitle: "true" }
             },
             blogList: {
                 required: true, enabled: true,
@@ -220,7 +220,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Frequently Asked Questions", textAlign: "center", breadcrumb: "Help Center", imageUrl: "", showTitle: "true" }
+                content: { title: "Frequently Asked Questions", textAlign: "center", breadcrumb: "Help Center", description: "Find answers to your common questions here.", imageUrl: "", showTitle: "true" }
             },
             faqList: {
                 required: true, enabled: true,
@@ -252,7 +252,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Shop Cart", textAlign: "center", breadcrumb: "Your Selection", imageUrl: "", showTitle: "true" }
+                content: { title: "Shop Cart", textAlign: "center", breadcrumb: "Your Selection", description: "Review your items before proceeding to checkout.", imageUrl: "", showTitle: "true" }
             },
             cartContent: {
                 required: true, enabled: true,
