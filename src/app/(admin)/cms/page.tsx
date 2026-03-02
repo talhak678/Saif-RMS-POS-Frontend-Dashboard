@@ -33,7 +33,7 @@ const DEFAULT_CONFIG = {
             },
             banner: {
                 required: true, enabled: true,
-                content: { title: "We believe Good Food Offer Great Smile", subtitle: "High Quality Test Station", description: "Discover the best culinary experience with our expertly crafted dishes.", bgImage: "", rightImage: "", textAlign: "center", items: [], selectedReviewId: "", showReview: "false" }
+                content: { title: "We believe Good Food Offer Great Smile", subtitle: "High Quality Test Station", description: "", bgImage: "", rightImage: "", textAlign: "center", items: [], selectedReviewId: "", showReview: "false" }
             },
             browseMenu: {
                 required: false, enabled: true,
@@ -87,14 +87,13 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Menu", textAlign: "center", breadcrumb: "Delicious Selection", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Menu", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             menuGallery: {
                 required: true, enabled: true,
                 content: {
                     title: "Full Menu Gallery",
                     textAlign: "center",
-                    description: "Discover our wide variety of dishes",
                     selectedCategoryIds: [], // ENABLE SELECTION PICKER
                     showTitle: "true"
                 }
@@ -107,7 +106,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "About Us", textAlign: "center", breadcrumb: "Our Story", imageUrl: "", showTitle: "true" }
+                content: { title: "About Us", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             video: {
                 required: false, enabled: false,
@@ -121,10 +120,10 @@ const DEFAULT_CONFIG = {
                     showTitle: "true",
                     description: "We are committed to providing the best dining experience.",
                     cards: [
-                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients.", icon: "flaticon-fast-food" },
-                        { title: "Expert Chefs", description: "Our chefs have years of experience.", icon: "flaticon-chef" },
-                        { title: "Professional Service", description: "Customer satisfaction is our top priority.", icon: "flaticon-customer-service" },
-                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment.", icon: "flaticon-restaurant" }
+                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients.", icon: "flaticon-fast-food", iconUrl: "" },
+                        { title: "Expert Chefs", description: "Our chefs have years of experience.", icon: "flaticon-chef", iconUrl: "" },
+                        { title: "Professional Service", description: "Customer satisfaction is our top priority.", icon: "flaticon-customer-service", iconUrl: "" },
+                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment.", icon: "flaticon-restaurant", iconUrl: "" }
                     ]
                 }
             },
@@ -136,7 +135,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", textAlign: "center", breadcrumb: "Get In Touch", imageUrl: "", showTitle: "true" }
+                content: { title: "Contact Us", description: "", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
@@ -145,15 +144,19 @@ const DEFAULT_CONFIG = {
                     phoneTitle: "Phone Number",
                     phoneValue: "+123 456 7890",
                     phoneIcon: "flaticon-telephone",
+                    phoneIconUrl: "",
                     emailTitle: "Email Address",
                     emailValue: "info@example.com",
                     emailIcon: "flaticon-email-1",
+                    emailIconUrl: "",
                     addressTitle: "Location",
                     addressValue: "123 Main Street, City",
                     addressIcon: "flaticon-placeholder",
+                    addressIconUrl: "",
                     hoursTitle: "Opening Hours",
                     hoursValue: "9:00 AM - 11:00 PM",
-                    hoursIcon: "flaticon-clock"
+                    hoursIcon: "flaticon-clock",
+                    hoursIconUrl: ""
                 }
             },
             form: {
@@ -188,30 +191,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Blogs", textAlign: "center", breadcrumb: "Latest News", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Blogs", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             blogList: {
                 required: true, enabled: true,
                 content: { title: "Latest Articles", textAlign: "center", showTitle: "true" }
             },
-            // footer: {
-            //     required: true, enabled: true,
-            //     content: {
-            //         address: "123 Street, City, Country",
-            //         description: "Quality food delivered to your doorstep.",
-            //         contactEmail: "info@example.com",
-            //         contactPhone: "+123456789",
-            //         facebook: "",
-            //         instagram: "",
-            //         tiktok: "",
-            //         openHours: "Mon-Sun: 9AM - 11PM",
-            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-            //     }
-            // },
-            // copyrightBar: {
-            //     required: false, enabled: false,
-            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            // },
         }
     },
     faq: {
@@ -220,30 +205,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Frequently Asked Questions", textAlign: "center", breadcrumb: "Help Center", imageUrl: "", showTitle: "true" }
+                content: { title: "Frequently Asked Questions", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             faqList: {
                 required: true, enabled: true,
                 content: { title: "Common Questions", textAlign: "center", showTitle: "true" }
             },
-            // footer: {
-            //     required: true, enabled: true,
-            //     content: {
-            //         address: "123 Street, City, Country",
-            //         description: "Quality food delivered to your doorstep.",
-            //         contactEmail: "info@example.com",
-            //         contactPhone: "+123456789",
-            //         facebook: "",
-            //         instagram: "",
-            //         tiktok: "",
-            //         openHours: "Mon-Sun: 9AM - 11PM",
-            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-            //     }
-            // },
-            // copyrightBar: {
-            //     required: false, enabled: false,
-            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            // },
         }
     },
     cart: {
@@ -252,7 +219,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Shop Cart", textAlign: "center", breadcrumb: "Your Selection", imageUrl: "", showTitle: "true" }
+                content: { title: "Shop Cart", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             cartContent: {
                 required: true, enabled: true,
@@ -519,7 +486,7 @@ export default function CMSPage() {
     const addArrayItem = (page: string, section: string, arrayField: string) => {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            let newItem: any = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food" };
+            let newItem: any = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food", iconUrl: "" };
 
             if (arrayField === 'items' && section === 'banner') {
                 newItem = {
@@ -713,7 +680,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
                                                     {/* Section Basic Fields */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description')).map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
@@ -802,6 +769,7 @@ export default function CMSPage() {
                                                                                                                         field === 'hoursIcon' ? 'Hours Icon Class' :
                                                                                                                             field === 'showReview' ? 'Show Review on Banner' :
                                                                                                                                 field.replace(/([A-Z])/g, ' $1');
+                                                            if (activeTab === 'contact' && sectionKey === 'banner' && field === 'textAlign') return null;
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
@@ -1067,6 +1035,15 @@ export default function CMSPage() {
                                                                                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Icon Class</label>
                                                                                     <input value={item.icon} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'icon', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm" placeholder="flaticon-..." />
                                                                                 </div>
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Icon Upload (Alternative to Class)</label>
+                                                                                <ImageUpload
+                                                                                    label=""
+                                                                                    value={item.iconUrl || ""}
+                                                                                    onChange={(url) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'iconUrl', url)}
+                                                                                    recommendedSize="64x64"
+                                                                                />
                                                                             </div>
                                                                             <div className="space-y-1">
                                                                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</label>

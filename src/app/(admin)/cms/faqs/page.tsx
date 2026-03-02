@@ -8,10 +8,13 @@ import { createPortal } from "react-dom";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 
+import { useAuth } from "@/services/permission.service";
+
 type Faq = {
     id: string;
     question: string;
     answer: string;
+    restaurantId: string;
 };
 
 type Props = {
@@ -44,7 +47,8 @@ export default function FaqsPage({ embedded = false }: Props) {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
         if (!confirm("Are you sure you want to delete this FAQ?")) return;
         try {
             await api.delete(`/cms/faq/${id}`);
@@ -55,18 +59,22 @@ export default function FaqsPage({ embedded = false }: Props) {
         }
     };
 
+    const { user } = useAuth();
+    const restaurantId = user?.restaurantId;
+
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
+            const payload = { ...currentFaq, restaurantId };
             if (currentFaq.id) {
-                const res = await api.put(`/cms/faq/${currentFaq.id}`, currentFaq);
+                const res = await api.put(`/cms/faq/${currentFaq.id}`, payload);
                 if (res.data.success) {
                     setFaqs(prev => prev.map(f => f.id === currentFaq.id ? res.data.data : f));
                     toast.success("FAQ updated successfully");
                 }
             } else {
-                const res = await api.post("/cms/faq", currentFaq);
+                const res = await api.post("/cms/faq", payload);
                 if (res.data.success) {
                     setFaqs(prev => [res.data.data, ...prev]);
                     toast.success("FAQ created successfully");
@@ -75,7 +83,15 @@ export default function FaqsPage({ embedded = false }: Props) {
             setIsModalOpen(false);
             setCurrentFaq({});
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to save FAQ");
+            const data = error.response?.data;
+            if (data?.error && typeof data.error === 'object') {
+                const errorMessages = Object.entries(data.error)
+                    .map(([field, messages]: [string, any]) => `${field}: ${messages.join(', ')}`)
+                    .join('\n');
+                toast.error(`Validation Failed:\n${errorMessages}`);
+            } else {
+                toast.error(data?.message || "Failed to save FAQ");
+            }
         } finally {
             setSaving(false);
         }
@@ -149,13 +165,13 @@ export default function FaqsPage({ embedded = false }: Props) {
                                                     onClick={(e) => { e.stopPropagation(); setCurrentFaq(faq); setIsModalOpen(true); }}
                                                     className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors"
                                                 >
-                                                    Edit FAQ
+                                                    <Edit2 className="w-3 h-3 inline-block mr-1" /> Edit FAQ
                                                 </button>
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDelete(faq.id); }}
+                                                    onClick={(e) => handleDelete(e, faq.id)}
                                                     className="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors"
                                                 >
-                                                    Delete
+                                                    <Trash2 className="w-3 h-3 inline-block mr-1" /> Delete
                                                 </button>
                                             </div>
                                         </div>
@@ -214,14 +230,23 @@ export default function FaqsPage({ embedded = false }: Props) {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setSaving(true);
-                                                api.post("/cms/faq", currentFaq).then(res => {
+                                                const payload = { ...currentFaq, restaurantId };
+                                                api.post("/cms/faq", payload).then(res => {
                                                     if (res.data.success) {
                                                         setFaqs(prev => [res.data.data, ...prev]);
                                                         toast.success("FAQ created successfully");
                                                         setCurrentFaq({});
                                                     }
                                                 }).catch(error => {
-                                                    toast.error(error.response?.data?.message || "Failed to save FAQ");
+                                                    const data = error.response?.data;
+                                                    if (data?.error && typeof data.error === 'object') {
+                                                        const errorMessages = Object.entries(data.error)
+                                                            .map(([field, messages]: [string, any]) => `${field}: ${messages.join(', ')}`)
+                                                            .join('\n');
+                                                        toast.error(`Validation Failed:\n${errorMessages}`);
+                                                    } else {
+                                                        toast.error(data?.message || "Failed to save FAQ");
+                                                    }
                                                 }).finally(() => {
                                                     setSaving(false);
                                                 });
