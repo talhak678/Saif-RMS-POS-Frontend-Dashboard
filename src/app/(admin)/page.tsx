@@ -300,11 +300,11 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <StatCard label="Total Restaurants" value={data.totalRestaurants} icon={<Building2 size={18} className="text-violet-600" />} accent="bg-violet-50 dark:bg-violet-900/30" />
-        <StatCard label="Active" value={data.activeRestaurants} sub="Restaurants" icon={<BadgeCheck size={18} className="text-emerald-600" />} accent="bg-emerald-50 dark:bg-emerald-900/30" />
-        <StatCard label="Platform Revenue" value={`Rs. ${Number(data.platformRevenue).toLocaleString()}`} icon={<DollarSign size={18} className="text-indigo-600" />} accent="bg-indigo-50 dark:bg-indigo-900/30" growth={data.growth.revenue} />
-        {/* <StatCard label="Platform Orders" value={data.platformOrders.toLocaleString()} icon={<ShoppingBag size={18} className="text-amber-600" />} accent="bg-amber-50 dark:bg-amber-900/30" growth={data.growth.orders} /> */}
         <StatCard label="Total Users" value={data.totalUsers.toLocaleString()} icon={<Users size={18} className="text-blue-600" />} accent="bg-blue-50 dark:bg-blue-900/30" />
+        <StatCard label="Total Restaurants" value={data.totalRestaurants} icon={<Building2 size={18} className="text-violet-600" />} accent="bg-violet-50 dark:bg-violet-900/30" />
+        <StatCard label="Platform Revenue" value={`USD. ${Number(data.platformRevenue).toLocaleString()}`} icon={<DollarSign size={18} className="text-indigo-600" />} accent="bg-indigo-50 dark:bg-indigo-900/30" growth={data.growth.revenue} />
+        <StatCard label="Active" value={data.activeRestaurants} sub="Restaurants" icon={<BadgeCheck size={18} className="text-emerald-600" />} accent="bg-emerald-50 dark:bg-emerald-900/30" />
+        {/* <StatCard label="Platform Orders" value={data.platformOrders.toLocaleString()} icon={<ShoppingBag size={18} className="text-amber-600" />} accent="bg-amber-50 dark:bg-amber-900/30" growth={data.growth.orders} /> */}
       </div>
 
       {/* Subscription Revenue + Plans */}
