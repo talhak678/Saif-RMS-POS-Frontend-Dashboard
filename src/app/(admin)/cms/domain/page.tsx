@@ -172,7 +172,7 @@ const DomainPage = () => {
     const StatusIcon = currentStatus.icon;
 
     return (
-        <ProtectedRoute module="cms-website:page-sections">
+        <ProtectedRoute module="cms-website:domain">
             <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-10 bg-gray-50/30 dark:bg-transparent min-h-screen">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 dark:border-gray-800 pb-10">

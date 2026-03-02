@@ -116,7 +116,7 @@ const navItems: NavItem[] = [
     name: "CMS & Website",
     subItems: [
       { name: "Page Sections", path: "/cms", pro: false, permission: "cms-website:page-sections" },
-      { name: "Connect Domain", path: "/cms/domain", pro: true },
+      { name: "Connect Domain", path: "/cms/domain", pro: true, permission: "cms-website:domain" },
       { name: "Banners", path: "/cms/banners", pro: false, permission: "cms-website:banners" },
       { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms-website:faqs" },
     ],
@@ -394,11 +394,10 @@ const AppSidebar: React.FC = () => {
       <div className="py-8 flex justify-center items-center w-full overflow-hidden">
         <Link href="/" className="flex justify-center items-center w-full px-2">
           <div
-            className={`relative flex justify-center items-center transition-all duration-300 overflow-hidden ${
-              isExpanded || isHovered || isMobileOpen
-                ? "w-full h-24 lg:h-28 px-4"
-                : "w-12 h-12"
-            }`}
+            className={`relative flex justify-center items-center transition-all duration-300 overflow-hidden ${isExpanded || isHovered || isMobileOpen
+              ? "w-full h-24 lg:h-28 px-4"
+              : "w-12 h-12"
+              }`}
           >
             <Image
               src={user?.restaurant?.logo || "/images/authentication-images/logo-black.png"}

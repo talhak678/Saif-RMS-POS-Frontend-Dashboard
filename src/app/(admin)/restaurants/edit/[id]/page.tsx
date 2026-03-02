@@ -178,7 +178,7 @@ export default function EditRestaurantPage() {
     if (loadingUser || (loading && isSuperAdmin)) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-                <Loader size="lg" />
+                <Loader size="md" />
             </div>
         );
     }
@@ -326,8 +326,8 @@ export default function EditRestaurantPage() {
                             onChange={handleChange}
                             placeholder="https://facebook.com/yourpage"
                             className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.facebookUrl
-                                    ? "border-red-500 dark:border-red-500 focus:ring-red-400"
-                                    : "dark:border-gray-600"
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
                                 }`}
                         />
                         {socialErrors.facebookUrl && (
@@ -343,8 +343,8 @@ export default function EditRestaurantPage() {
                             onChange={handleChange}
                             placeholder="https://instagram.com/yourpage"
                             className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.instagramUrl
-                                    ? "border-red-500 dark:border-red-500 focus:ring-red-400"
-                                    : "dark:border-gray-600"
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
                                 }`}
                         />
                         {socialErrors.instagramUrl && (
@@ -360,8 +360,8 @@ export default function EditRestaurantPage() {
                             onChange={handleChange}
                             placeholder="https://tiktok.com/@yourpage"
                             className={`w-full p-2 mt-1 border rounded dark:bg-gray-700 dark:text-gray-200 transition-colors ${socialErrors.tiktokUrl
-                                    ? "border-red-500 dark:border-red-500 focus:ring-red-400"
-                                    : "dark:border-gray-600"
+                                ? "border-red-500 dark:border-red-500 focus:ring-red-400"
+                                : "dark:border-gray-600"
                                 }`}
                         />
                         {socialErrors.tiktokUrl && (
