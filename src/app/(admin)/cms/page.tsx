@@ -120,10 +120,10 @@ const DEFAULT_CONFIG = {
                     showTitle: "true",
                     description: "We are committed to providing the best dining experience.",
                     cards: [
-                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients.", icon: "flaticon-fast-food" },
-                        { title: "Expert Chefs", description: "Our chefs have years of experience.", icon: "flaticon-chef" },
-                        { title: "Professional Service", description: "Customer satisfaction is our top priority.", icon: "flaticon-customer-service" },
-                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment.", icon: "flaticon-restaurant" }
+                        { title: "Fresh Ingredients", description: "We use only the finest and freshest ingredients.", icon: "flaticon-fast-food", iconUrl: "" },
+                        { title: "Expert Chefs", description: "Our chefs have years of experience.", icon: "flaticon-chef", iconUrl: "" },
+                        { title: "Professional Service", description: "Customer satisfaction is our top priority.", icon: "flaticon-customer-service", iconUrl: "" },
+                        { title: "Cozy Atmosphere", description: "Enjoy your meal in a warm environment.", icon: "flaticon-restaurant", iconUrl: "" }
                     ]
                 }
             },
@@ -135,7 +135,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", textAlign: "center", breadcrumb: "Get In Touch", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Contact Us", breadcrumb: "Get In Touch", description: "", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
@@ -144,15 +144,19 @@ const DEFAULT_CONFIG = {
                     phoneTitle: "Phone Number",
                     phoneValue: "+123 456 7890",
                     phoneIcon: "flaticon-telephone",
+                    phoneIconUrl: "",
                     emailTitle: "Email Address",
                     emailValue: "info@example.com",
                     emailIcon: "flaticon-email-1",
+                    emailIconUrl: "",
                     addressTitle: "Location",
                     addressValue: "123 Main Street, City",
                     addressIcon: "flaticon-placeholder",
+                    addressIconUrl: "",
                     hoursTitle: "Opening Hours",
                     hoursValue: "9:00 AM - 11:00 PM",
-                    hoursIcon: "flaticon-clock"
+                    hoursIcon: "flaticon-clock",
+                    hoursIconUrl: ""
                 }
             },
             form: {
@@ -302,26 +306,6 @@ const DEFAULT_CONFIG = {
                     websiteTitle: "Saif Kitchen",
                     websiteDescription: "Quality food delivered to your doorstep. Experience the best culinary delights with us."
                 }
-            }
-        }
-    },
-    account: {
-        enabled: true,
-        required: false,
-        sections: {
-            banner: {
-                required: false, enabled: true,
-                content: { title: "My Account", textAlign: "center", breadcrumb: "My Account", description: "", imageUrl: "", showTitle: "true" }
-            }
-        }
-    },
-    trackOrder: {
-        enabled: true,
-        required: false,
-        sections: {
-            banner: {
-                required: false, enabled: true,
-                content: { title: "Track Order", textAlign: "center", breadcrumb: "Track Order", description: "", imageUrl: "", showTitle: "true" }
             }
         }
     }
@@ -538,7 +522,7 @@ export default function CMSPage() {
     const addArrayItem = (page: string, section: string, arrayField: string) => {
         setConfig((prev: any) => {
             const newConfig = JSON.parse(JSON.stringify(prev));
-            let newItem: any = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food" };
+            let newItem: any = { title: "New Item", description: "Enter description here...", icon: "flaticon-fast-food", iconUrl: "" };
 
             if (arrayField === 'items' && section === 'banner') {
                 newItem = {
@@ -821,6 +805,7 @@ export default function CMSPage() {
                                                                                                                         field === 'hoursIcon' ? 'Hours Icon Class' :
                                                                                                                             field === 'showReview' ? 'Show Review on Banner' :
                                                                                                                                 field.replace(/([A-Z])/g, ' $1');
+                                                            if (activeTab === 'contact' && sectionKey === 'banner' && field === 'textAlign') return null;
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
@@ -1086,6 +1071,15 @@ export default function CMSPage() {
                                                                                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Icon Class</label>
                                                                                     <input value={item.icon} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'icon', e.target.value)} className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm" placeholder="flaticon-..." />
                                                                                 </div>
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Icon Upload (Alternative to Class)</label>
+                                                                                <ImageUpload
+                                                                                    label=""
+                                                                                    value={item.iconUrl || ""}
+                                                                                    onChange={(url) => handleArrayChange(activeTab, sectionKey, 'cards', idx, 'iconUrl', url)}
+                                                                                    recommendedSize="64x64"
+                                                                                />
                                                                             </div>
                                                                             <div className="space-y-1">
                                                                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</label>

@@ -182,114 +182,85 @@ export default function BlogsPage({ embedded = false }: Props) {
                 {isModalOpen && createPortal(
                     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
                         <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-700">
-                            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
-                                <h2 className="text-lg font-bold text-gray-800 dark:text-white">{currentBlog.id ? "Edit Article" : "Write Article"}</h2>
-                                <button onClick={() => setIsModalOpen(false)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <form onSubmit={handleSave} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto custom-scrollbar">
-                                <div className="space-y-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Title</label>
-                                        <input
-                                            required
-                                            value={currentBlog.title || ""}
-                                            onChange={e => setCurrentBlog({ ...currentBlog, title: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition-all placeholder:text-gray-400"
-                                            placeholder="Catchy title for your post..."
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <form onSubmit={handleSave} className="flex flex-col h-full max-h-[85vh]">
+                                <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                                    <h2 className="text-lg font-bold text-gray-800 dark:text-white">{currentBlog.id ? "Edit Article" : "Write Article"}</h2>
+                                    <button type="button" onClick={() => setIsModalOpen(false)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400">
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                                    <div className="space-y-4">
                                         <div className="space-y-1.5">
-                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Author Name</label>
+                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Title</label>
                                             <input
-                                                value={currentBlog.author || ""}
-                                                onChange={e => setCurrentBlog({ ...currentBlog, author: e.target.value })}
+                                                required
+                                                value={currentBlog.title || ""}
+                                                onChange={e => setCurrentBlog({ ...currentBlog, title: e.target.value })}
                                                 className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition-all placeholder:text-gray-400"
-                                                placeholder="Who is writing this?"
+                                                placeholder="Catchy title for your post..."
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Author Name</label>
+                                                <input
+                                                    value={currentBlog.author || ""}
+                                                    onChange={e => setCurrentBlog({ ...currentBlog, author: e.target.value })}
+                                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition-all placeholder:text-gray-400"
+                                                    placeholder="Who is writing this?"
+                                                />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <ImageUpload
+                                                    label="Cover Image"
+                                                    value={currentBlog.imageUrl || ""}
+                                                    onChange={(url) => setCurrentBlog({ ...currentBlog, imageUrl: url })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Short Snippet</label>
+                                            <textarea
+                                                value={currentBlog.snippet || ""}
+                                                onChange={e => setCurrentBlog({ ...currentBlog, snippet: e.target.value })}
+                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all resize-none shadow-sm"
+                                                rows={2}
+                                                placeholder="A brief summary for seekers..."
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <ImageUpload
-                                                label="Cover Image"
-                                                value={currentBlog.imageUrl || ""}
-                                                onChange={(url) => setCurrentBlog({ ...currentBlog, imageUrl: url })}
+                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Article Content</label>
+                                            <textarea
+                                                required
+                                                value={currentBlog.content || ""}
+                                                onChange={e => setCurrentBlog({ ...currentBlog, content: e.target.value })}
+                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all resize-y min-h-[180px] shadow-sm"
+                                                placeholder="Tell your story..."
                                             />
                                         </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Short Snippet</label>
-                                        <textarea
-                                            value={currentBlog.snippet || ""}
-                                            onChange={e => setCurrentBlog({ ...currentBlog, snippet: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all resize-none shadow-sm"
-                                            rows={2}
-                                            placeholder="A brief summary for seekers..."
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Article Content</label>
-                                        <textarea
-                                            required
-                                            value={currentBlog.content || ""}
-                                            onChange={e => setCurrentBlog({ ...currentBlog, content: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all resize-y min-h-[180px] shadow-sm"
-                                            placeholder="Tell your story..."
-                                        />
                                     </div>
                                 </div>
+                                <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsModalOpen(false); setCurrentBlog({}); }}
+                                        className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                                    >
+                                        Discard
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
+                                    >
+                                        {saving ? <Loader size="sm" className="space-y-0" /> : (currentBlog.id ? "Update Post" : "Publish Article")}
+                                    </button>
+                                </div>
                             </form>
-                            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col sm:flex-row justify-end gap-3">
-                                <button
-                                    onClick={() => { setIsModalOpen(false); setCurrentBlog({}); }}
-                                    className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                                >
-                                    Discard
-                                </button>
-                                {
-                                    !currentBlog.id && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setSaving(true);
-                                                api.post("/cms/blogs", currentBlog).then(res => {
-                                                    if (res.data.success) {
-                                                        setBlogs(prev => [res.data.data, ...prev]);
-                                                        toast.success("Blog created successfully");
-                                                        setCurrentBlog({});
-                                                    }
-                                                }).catch(error => {
-                                                    const data = error.response?.data;
-                                                    if (data?.error && typeof data.error === 'object') {
-                                                        const errorMessages = Object.entries(data.error)
-                                                            .map(([field, messages]: [string, any]) => `${field}: ${messages.join(', ')}`)
-                                                            .join('\n');
-                                                        toast.error(`Validation Failed:\n${errorMessages}`);
-                                                    } else {
-                                                        toast.error(data?.message || "Failed to save blog");
-                                                    }
-                                                }).finally(() => {
-                                                    setSaving(false);
-                                                });
-                                            }}
-                                            disabled={saving}
-                                            className="px-5 py-2 rounded-xl text-sm font-semibold text-brand-500 border border-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors disabled:opacity-50 flex justify-center items-center"
-                                        >
-                                            {saving ? <Loader size="sm" className="space-y-0" /> : "Save & Continue"}
-                                        </button>
-                                    )
-                                }
-                                <button
-                                    onClick={handleSave}
-                                    disabled={saving}
-                                    className="px-8 py-2 rounded-xl text-sm font-semibold bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
-                                >
-                                    {saving ? <Loader size="sm" className="space-y-0" /> : "Publish Article"}
-                                </button>
-                            </div>
                         </div>
-                    </div>, document.body
+                    </div>,
+                    document.body
                 )}
             </div>
         </ProtectedRoute>
