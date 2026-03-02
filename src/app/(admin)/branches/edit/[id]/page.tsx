@@ -177,7 +177,7 @@ function EditBranchForm() {
     if (loadingUser || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-                <Loader size="lg" />
+                <Loader size="md" />
             </div>
         );
     }

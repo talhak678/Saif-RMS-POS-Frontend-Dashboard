@@ -8,12 +8,14 @@ import { ApexOptions } from "apexcharts";
 import {
   ShoppingBag, Users, Globe, TrendingUp, Star, Package,
   CheckCircle, Clock, XCircle, ChefHat, Truck, RefreshCw,
-  Monitor, Smartphone, BarChart2, MessageSquare, ArrowUpRight,
+  Monitor, BarChart2, MessageSquare, ArrowUpRight,
   ArrowDownRight, Minus, UtensilsCrossed, Bike, Coffee,
   Activity, CalendarDays, DollarSign, LayoutGrid,
-  Facebook, Instagram, Search, MapPin
+  Facebook, Instagram, Search, MapPin, Building2, BadgeCheck,
+  AlertCircle, PauseCircle, CreditCard, Layers
 } from "lucide-react";
 import Loader from "@/components/common/Loader";
+import { useAuth } from "@/services/permission.service";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -38,6 +40,24 @@ interface DashboardData {
   hourlyOrders: { hour: string; count: number }[];
   categoryRevenue: { name: string; revenue: number; quantity: number }[];
   recentReviews: { id: string; rating: number; comment: string | null; customerName: string; createdAt: string }[];
+}
+
+interface SuperAdminData {
+  period: string;
+  totalRestaurants: number;
+  activeRestaurants: number;
+  pendingRestaurants: number;
+  suspendedRestaurants: number;
+  restaurantsByPlan: Record<string, number>;
+  totalSubscriptionRevenue: number;
+  subscriptionRevenue: { restaurantId: string; restaurantName: string; plan: string; billingCycle: string; price: number; features: string[] }[];
+  platformRevenue: number;
+  platformOrders: number;
+  growth: { revenue: number | null; orders: number | null };
+  monthlySalesTrend: { month: string; revenue: number; orders: number }[];
+  topRestaurantsByRevenue: { id: string; name: string; revenue: number; orders: number }[];
+  recentRestaurants: { id: string; name: string; slug: string; status: string; subscription: string; createdAt: string }[];
+  totalUsers: number;
 }
 
 // ─── Period Buttons ─────────────────────────────────────────────────────────
@@ -222,9 +242,187 @@ function BannerCarousel() {
 }
 
 
+// ─── SuperAdmin Dashboard View ────────────────────────────────────────────────
+function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }: {
+  data: SuperAdminData; period: Period; setPeriod: (p: Period) => void;
+  refreshing: boolean; onRefresh: () => void;
+}) {
+  const [chartTab, setChartTab] = useState<"revenue" | "orders">("revenue");
+
+  const trendChart: ApexOptions = {
+    chart: { type: "bar", toolbar: { show: false }, fontFamily: "Outfit, sans-serif", background: "transparent" },
+    colors: chartTab === "revenue" ? ["#6366f1"] : ["#f59e0b"],
+    plotOptions: { bar: { borderRadius: 6, columnWidth: "55%", borderRadiusApplication: "end" } },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: data.monthlySalesTrend.map(m => m.month),
+      axisBorder: { show: false }, axisTicks: { show: false },
+      labels: { style: { colors: "#9ca3af", fontFamily: "Outfit", fontSize: "11px" } },
+    },
+    yaxis: { labels: { style: { colors: "#9ca3af", fontFamily: "Outfit", fontSize: "11px" } } },
+    grid: { borderColor: "#f1f5f9", strokeDashArray: 4 },
+    tooltip: { theme: "light", y: { formatter: v => chartTab === "revenue" ? `Rs. ${Number(v).toLocaleString()}` : `${v} orders` } },
+  };
+
+  const planColors: Record<string, string> = { FREE: "bg-gray-400", BASIC: "bg-blue-500", PREMIUM: "bg-violet-500", ENTERPRISE: "bg-amber-500" };
+  const statusColors: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+    ACTIVE: { bg: "bg-emerald-50 dark:bg-emerald-900/20", text: "text-emerald-600 dark:text-emerald-400", icon: <BadgeCheck size={14} /> },
+    PENDING: { bg: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400", icon: <AlertCircle size={14} /> },
+    SUSPENDED: { bg: "bg-red-50 dark:bg-red-900/20", text: "text-red-600 dark:text-red-400", icon: <PauseCircle size={14} /> },
+  };
+
+  const totalPlanCount = Object.values(data.restaurantsByPlan).reduce((a, b) => a + b, 0) || 1;
+
+  return (
+    <div className="space-y-5 pb-10">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <Layers className="w-6 h-6 text-brand-600" /> Platform Overview
+          </h1>
+          <p className="text-sm text-gray-400 mt-0.5">Super Admin — platform-wide metrics</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-0.5">
+            {PERIODS.map(p => (
+              <button key={p.key} onClick={() => setPeriod(p.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${period === p.key ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                  }`}>{p.label}</button>
+            ))}
+          </div>
+          <button onClick={onRefresh} disabled={refreshing}
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <StatCard label="Total Restaurants" value={data.totalRestaurants} icon={<Building2 size={18} className="text-violet-600" />} accent="bg-violet-50 dark:bg-violet-900/30" />
+        <StatCard label="Active" value={data.activeRestaurants} sub="Restaurants" icon={<BadgeCheck size={18} className="text-emerald-600" />} accent="bg-emerald-50 dark:bg-emerald-900/30" />
+        <StatCard label="Platform Revenue" value={`Rs. ${Number(data.platformRevenue).toLocaleString()}`} icon={<DollarSign size={18} className="text-indigo-600" />} accent="bg-indigo-50 dark:bg-indigo-900/30" growth={data.growth.revenue} />
+        <StatCard label="Platform Orders" value={data.platformOrders.toLocaleString()} icon={<ShoppingBag size={18} className="text-amber-600" />} accent="bg-amber-50 dark:bg-amber-900/30" growth={data.growth.orders} />
+        <StatCard label="Total Users" value={data.totalUsers.toLocaleString()} icon={<Users size={18} className="text-blue-600" />} accent="bg-blue-50 dark:bg-blue-900/30" />
+      </div>
+
+      {/* Subscription Revenue + Plans */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<CreditCard size={16} />} title="Subscription Revenue" sub={`Rs. ${Number(data.totalSubscriptionRevenue).toLocaleString()} total`} />
+          {data.subscriptionRevenue.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No subscriptions</div>
+          ) : (
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              {data.subscriptionRevenue.map((s, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">{s.restaurantName}</p>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.plan === "ENTERPRISE" ? "bg-amber-100 text-amber-700" :
+                      s.plan === "PREMIUM" ? "bg-violet-100 text-violet-700" :
+                        s.plan === "BASIC" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                      }`}>{s.plan}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">Rs. {Number(s.price).toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">{s.billingCycle}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<LayoutGrid size={16} />} title="Restaurants by Plan" />
+          <div className="space-y-3 mt-2">
+            {Object.entries(data.restaurantsByPlan).map(([plan, count]) => (
+              <ProgressRow key={plan} label={plan} value={count} total={totalPlanCount}
+                color={planColors[plan] || "bg-brand-500"} suffix=" restaurants" />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="text-center p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Pending</p>
+              <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{data.pendingRestaurants}</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-red-50 dark:bg-red-900/20">
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Suspended</p>
+              <p className="text-2xl font-bold text-red-700 dark:text-red-300">{data.suspendedRestaurants}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Trend Chart */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <SectionHeader icon={<Activity size={16} />} title="Platform Monthly Trend" sub="Revenue &amp; Orders" />
+          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 gap-0.5">
+            {(["revenue", "orders"] as const).map(t => (
+              <button key={t} onClick={() => setChartTab(t)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all capitalize ${chartTab === t ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400"}`}>{t}</button>
+            ))}
+          </div>
+        </div>
+        <ReactApexChart
+          options={trendChart}
+          series={[{ name: chartTab === "revenue" ? "Revenue (Rs.)" : "Orders", data: data.monthlySalesTrend.map(m => chartTab === "revenue" ? m.revenue : m.orders) }]}
+          type="bar" height={210} />
+      </div>
+
+      {/* Top Restaurants + Recent Restaurants */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<TrendingUp size={16} />} title="Top Restaurants by Revenue" />
+          {data.topRestaurantsByRevenue.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No data</div>
+          ) : (
+            <div className="space-y-3">
+              {data.topRestaurantsByRevenue.map((r, i) => (
+                <ProgressRow key={r.id} label={`${i + 1}. ${r.name}`}
+                  value={r.revenue} total={data.topRestaurantsByRevenue[0]?.revenue || 1}
+                  color={["bg-brand-500", "bg-indigo-500", "bg-amber-500", "bg-emerald-500", "bg-pink-500"][i]}
+                  suffix={` — ${r.orders} orders`} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <SectionHeader icon={<Building2 size={16} />} title="Recently Joined Restaurants" />
+          {data.recentRestaurants.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No recent restaurants</div>
+          ) : (
+            <div className="space-y-2">
+              {data.recentRestaurants.map(r => {
+                const s = statusColors[r.status] || statusColors["PENDING"];
+                return (
+                  <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-white">{r.name}</p>
+                      <p className="text-xs text-gray-400">{r.subscription} · {new Date(r.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${s.bg} ${s.text}`}>{s.icon}{r.status}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const { user, loadingUser } = useAuth();
+  const isSuperAdmin = user?.role?.name === "SUPER_ADMIN";
+
   const [data, setData] = useState<DashboardData | null>(null);
+  const [superData, setSuperData] = useState<SuperAdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<Period>("30d");
@@ -234,13 +432,16 @@ export default function DashboardPage() {
     if (!silent) setLoading(true); else setRefreshing(true);
     try {
       const res = await api.get(`/dashboard?period=${p}`);
-      if (res.data?.success) setData(res.data.data);
+      if (res.data?.success) {
+        if (isSuperAdmin) setSuperData(res.data.data);
+        else setData(res.data.data);
+      }
     } catch (err) {
       console.error("Dashboard fetch failed", err);
     } finally {
       setLoading(false); setRefreshing(false);
     }
-  }, []);
+  }, [isSuperAdmin]);
 
   useEffect(() => { fetchData(period); }, [period, fetchData]);
 
@@ -309,13 +510,19 @@ export default function DashboardPage() {
     ? (data.recentReviews.reduce((s, r) => s + r.rating, 0) / data.recentReviews.length).toFixed(1)
     : null;
 
-  if (loading) {
+  if (loadingUser || loading) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
         <Loader size="md" />
       </div>
     );
   }
+
+  if (isSuperAdmin) {
+    if (!superData) return <div className="flex items-center justify-center min-h-[400px] text-gray-400 text-sm">No data available.</div>;
+    return <SuperAdminDashboard data={superData} period={period} setPeriod={setPeriod} refreshing={refreshing} onRefresh={() => fetchData(period, true)} />;
+  }
+
   if (!data) {
     return <div className="flex items-center justify-center min-h-[400px] text-gray-400 text-sm">No data available.</div>;
   }
@@ -323,8 +530,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5 pb-10">
 
-      {/* ── PROMO BANNER ────────────────────────────────────────────────── */}
-      <BannerCarousel />
+      {/* ── PROMO BANNER (hidden for Super Admin) ──────────────────────── */}
+      {!isSuperAdmin && <BannerCarousel />}
 
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
