@@ -744,17 +744,17 @@ export default function CMSPage() {
                                                                 mainLogo: {
                                                                     label: "Main Website Logo",
                                                                     desc: "Displayed in the top navigation bar of all pages.",
-                                                                    size: "180 × 60 px"
+                                                                    size: "50×50 to 400×400 px"
                                                                 },
                                                                 favicon: {
                                                                     label: "Browser Tab Icon",
-                                                                    desc: "The small icon (32x32) shown next to your site name in browser tabs.",
-                                                                    size: "32 × 32 px"
+                                                                    desc: "The small icon shown next to your site name in browser tabs.",
+                                                                    size: "Max 50×50 px"
                                                                 },
                                                                 footerLogo: {
                                                                     label: "Footer Logo",
                                                                     desc: "Optional logo displayed in the footer section.",
-                                                                    size: "180 × 60 px"
+                                                                    size: "50×50 to 400×400 px"
                                                                 },
                                                                 primaryFont: {
                                                                     label: "Main Body Font",
@@ -999,7 +999,7 @@ export default function CMSPage() {
                                                                             <div className="flex items-center justify-between">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">{displayLabel}</label>
                                                                                 <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">
-                                                                                    {isThemeLogo ? (fieldDescriptions[field]?.size || 'Recommended') : (field === 'logoUrl' ? '90×90 px' : field.toLowerCase().includes('favicon') ? '32×32 px' : field === 'rightImage' ? '800×800 px' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920×1080 px' : '1920×800 px') : '400×200 px')}
+                                                                                    {isThemeLogo ? (fieldDescriptions[field]?.size || 'Recommended') : (field === 'logoUrl' ? '50-400px' : field.toLowerCase().includes('favicon') ? 'Max 50px' : field === 'rightImage' ? '800×800 px' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920×1080 px' : '1920×800 px') : '400×200 px')}
                                                                                 </span>
                                                                             </div>
                                                                             <ImageUpload
@@ -1008,8 +1008,9 @@ export default function CMSPage() {
                                                                                 onChange={(url) => handleContentChange(activeTab, sectionKey, field, url)}
                                                                                 isBanner={sectionKey === 'banner'}
                                                                                 isVideo={field === 'videoUrl'}
-                                                                                isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon'))}
-                                                                                recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '90×90' : field.toLowerCase().includes('favicon') ? '32×32' : field === 'rightImage' ? '800x800' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
+                                                                                isLogo={!!(field === 'logoUrl' || field.toLowerCase().includes('logo'))}
+                                                                                isFavicon={field.toLowerCase().includes('favicon')}
+                                                                                recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '50-400px' : field.toLowerCase().includes('favicon') ? 'Max 50x50' : field === 'rightImage' ? '800x800' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
                                                                             />
                                                                             {fieldDescriptions[field]?.desc && (
                                                                                 <p className="text-[10px] text-gray-500 italic mt-1.5 px-1">
