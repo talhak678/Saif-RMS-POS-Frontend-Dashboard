@@ -46,9 +46,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                     } else if (img.width > 400 || img.height > 400) {
                         toast.error(`Logo too large (${img.width}×${img.height}px). Maximum: 400×400px.`);
                         resolve(false);
-                    } else if (Math.abs(img.width - img.height) / Math.max(img.width, img.height) > 0.6) {
-                        toast.error(`Logo aspect ratio is too distorted (${img.width}×${img.height}px). Please use a more balanced image.`);
-                        resolve(false);
                     } else {
                         resolve(true);
                     }
