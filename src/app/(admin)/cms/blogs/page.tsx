@@ -199,7 +199,7 @@ export default function BlogsPage({ embedded = false }: Props) {
                                 <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
-                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Title</label>
+                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Title <span className="text-red-500">*</span></label>
                                             <input
                                                 required
                                                 value={currentBlog.title || ""}
@@ -237,7 +237,7 @@ export default function BlogsPage({ embedded = false }: Props) {
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Article Content</label>
+                                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Article Content <span className="text-red-500">*</span></label>
                                             <textarea
                                                 required
                                                 value={currentBlog.content || ""}

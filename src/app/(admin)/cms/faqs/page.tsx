@@ -195,7 +195,7 @@ export default function FaqsPage({ embedded = false }: Props) {
                             <form onSubmit={handleSave} className="p-6 space-y-5">
                                 <div className="space-y-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Question</label>
+                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Question <span className="text-red-500">*</span></label>
                                         <input
                                             required
                                             value={currentFaq.question || ""}
@@ -205,7 +205,7 @@ export default function FaqsPage({ embedded = false }: Props) {
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Answer</label>
+                                        <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Answer <span className="text-red-500">*</span></label>
                                         <textarea
                                             required
                                             value={currentFaq.answer || ""}

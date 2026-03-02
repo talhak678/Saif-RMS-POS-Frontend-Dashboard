@@ -33,7 +33,7 @@ export default function RootLayout({
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <ThemeProvider>
           <SidebarProvider>{children}</SidebarProvider>
-          <Toaster richColors={true} position="bottom-right" />
+          <Toaster richColors={true} position="top-center" toastOptions={{ style: { zIndex: 999999 } }} />
         </ThemeProvider>
       </body>
     </html>
