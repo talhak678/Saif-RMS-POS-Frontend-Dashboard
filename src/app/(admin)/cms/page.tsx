@@ -94,7 +94,6 @@ const DEFAULT_CONFIG = {
                 content: {
                     title: "Full Menu Gallery",
                     textAlign: "center",
-                    description: "Discover our wide variety of dishes",
                     selectedCategoryIds: [], // ENABLE SELECTION PICKER
                     showTitle: "true"
                 }
@@ -713,7 +712,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
                                                     {/* Section Basic Fields */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description')).map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
