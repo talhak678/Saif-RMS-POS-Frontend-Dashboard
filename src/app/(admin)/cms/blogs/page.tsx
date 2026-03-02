@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
+import { useAuth } from "@/services/permission.service";
 
 type Blog = {
     id: string;
@@ -17,6 +18,7 @@ type Blog = {
     content: string;
     imageUrl: string;
     author: string;
+    restaurantId: string;
     publishedAt: string;
 };
 
@@ -25,6 +27,8 @@ type Props = {
 };
 
 export default function BlogsPage({ embedded = false }: Props) {
+    const { user } = useAuth();
+    const restaurantId = user?.restaurantId;
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +53,8 @@ export default function BlogsPage({ embedded = false }: Props) {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
         if (!confirm("Are you sure you want to delete this blog post?")) return;
         try {
             await api.delete(`/cms/blogs/${id}`);
@@ -62,16 +67,18 @@ export default function BlogsPage({ embedded = false }: Props) {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!restaurantId) return toast.error("Wait for restaurant ID...");
         setSaving(true);
         try {
+            const data = { ...currentBlog, restaurantId };
             if (currentBlog.id) {
-                const res = await api.put(`/cms/blogs/${currentBlog.id}`, currentBlog);
+                const res = await api.put(`/cms/blogs/${currentBlog.id}`, data);
                 if (res.data.success) {
                     setBlogs(prev => prev.map(b => b.id === currentBlog.id ? res.data.data : b));
                     toast.success("Blog updated successfully");
                 }
             } else {
-                const res = await api.post("/cms/blogs", currentBlog);
+                const res = await api.post("/cms/blogs", data);
                 if (res.data.success) {
                     setBlogs(prev => [res.data.data, ...prev]);
                     toast.success("Blog created successfully");
@@ -147,13 +154,13 @@ export default function BlogsPage({ embedded = false }: Props) {
                                 )}
                                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
-                                        onClick={() => { setCurrentBlog(blog); setIsModalOpen(true); }}
+                                        onClick={(e) => { e.stopPropagation(); setCurrentBlog(blog); setIsModalOpen(true); }}
                                         className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border border-gray-100 dark:border-gray-700"
                                     >
                                         <Edit2 className="w-3.5 h-3.5" />
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(blog.id)}
+                                        onClick={(e) => handleDelete(e, blog.id)}
                                         className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg text-red-500 hover:text-red-600 shadow-sm border border-gray-100 dark:border-gray-700"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />

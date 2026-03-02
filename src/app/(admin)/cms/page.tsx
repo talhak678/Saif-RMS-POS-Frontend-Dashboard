@@ -87,7 +87,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Menu", textAlign: "center", breadcrumb: "Delicious Selection", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Menu", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             menuGallery: {
                 required: true, enabled: true,
@@ -106,7 +106,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "About Us", textAlign: "center", breadcrumb: "Our Story", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "About Us", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             video: {
                 required: false, enabled: false,
@@ -135,7 +135,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Contact Us", breadcrumb: "Get In Touch", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Contact Us", description: "", imageUrl: "", showTitle: "true" }
             },
             cards: {
                 required: false, enabled: true,
@@ -191,30 +191,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Our Blogs", textAlign: "center", breadcrumb: "Latest News", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Our Blogs", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             blogList: {
                 required: true, enabled: true,
                 content: { title: "Latest Articles", textAlign: "center", showTitle: "true" }
             },
-            // footer: {
-            //     required: true, enabled: true,
-            //     content: {
-            //         address: "123 Street, City, Country",
-            //         description: "Quality food delivered to your doorstep.",
-            //         contactEmail: "info@example.com",
-            //         contactPhone: "+123456789",
-            //         facebook: "",
-            //         instagram: "",
-            //         tiktok: "",
-            //         openHours: "Mon-Sun: 9AM - 11PM",
-            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-            //     }
-            // },
-            // copyrightBar: {
-            //     required: false, enabled: false,
-            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            // },
         }
     },
     faq: {
@@ -223,30 +205,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Frequently Asked Questions", textAlign: "center", breadcrumb: "Help Center", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Frequently Asked Questions", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             faqList: {
                 required: true, enabled: true,
                 content: { title: "Common Questions", textAlign: "center", showTitle: "true" }
             },
-            // footer: {
-            //     required: true, enabled: true,
-            //     content: {
-            //         address: "123 Street, City, Country",
-            //         description: "Quality food delivered to your doorstep.",
-            //         contactEmail: "info@example.com",
-            //         contactPhone: "+123456789",
-            //         facebook: "",
-            //         instagram: "",
-            //         tiktok: "",
-            //         openHours: "Mon-Sun: 9AM - 11PM",
-            //         menuItems: "Home, Our Menu, Contact Us, About Us, FAQ"
-            //     }
-            // },
-            // copyrightBar: {
-            //     required: false, enabled: false,
-            //     content: { text: "Copyright 2026 Saif RMS. All Rights Reserved." }
-            // },
         }
     },
     cart: {
@@ -255,7 +219,7 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Shop Cart", textAlign: "center", breadcrumb: "Your Selection", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Shop Cart", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
             },
             cartContent: {
                 required: true, enabled: true,
