@@ -688,7 +688,7 @@ export default function CMSPage() {
 
                                             {isExpanded && (
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
-                                                    {/* Section Basic Fields */}
+                                                 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                         {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description')).map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
