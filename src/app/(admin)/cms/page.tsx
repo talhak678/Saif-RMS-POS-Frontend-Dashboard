@@ -248,17 +248,23 @@ const DEFAULT_CONFIG = {
                 required: false, enabled: true,
                 content: {
                     primaryColor: "#ff0000",
-                    secondaryColor: "#000000",
-                    accentColor: "#f3f4f6",
+                    secondaryColor: "#222222",
+                    headingColor: "#222222",
                     backgroundColor: "#ffffff",
-                    textColor: "#666666"
+                    textColor: "#666666",
+                    footerBgColor: "#0d0d0d",
+                    footerTextColor: "#ffffff"
                 }
             },
             fonts: {
                 required: false, enabled: true,
                 content: {
                     primaryFont: "Outfit",
-                    secondaryFont: "Outfit"
+                    secondaryFont: "Outfit",
+                    paragraphFont: "Inter",
+                    primaryFontWeight: "700",
+                    secondaryFontWeight: "600",
+                    paragraphFontWeight: "400"
                 }
             },
             logos: {
@@ -692,14 +698,14 @@ export default function CMSPage() {
                                                                     example: "Primary Button"
                                                                 },
                                                                 secondaryColor: {
-                                                                    label: "Footer & Dark Backgrounds",
-                                                                    desc: "Used for the footer background and other dark section highlights.",
-                                                                    example: "Footer / Dark Sections"
+                                                                    label: "Secondary / Accent Color",
+                                                                    desc: "Used for secondary brand highlights and decorative elements.",
+                                                                    example: "Accents / Border Highlights"
                                                                 },
-                                                                accentColor: {
-                                                                    label: "Accent (Soft) Background",
-                                                                    desc: "Used for subtle backgrounds, dividers, and secondary elements.",
-                                                                    example: "Background Accents"
+                                                                headingColor: {
+                                                                    label: "Headings Color",
+                                                                    desc: "Applied to all H1, H2, H3, H4 titles across the site.",
+                                                                    example: "Title Text"
                                                                 },
                                                                 backgroundColor: {
                                                                     label: "Global Site Background",
@@ -707,9 +713,19 @@ export default function CMSPage() {
                                                                     example: "Main Background"
                                                                 },
                                                                 textColor: {
-                                                                    label: "Main Content Text",
-                                                                    desc: "Primary color for all body text, paragraphs and descriptions.",
-                                                                    example: "Body Text"
+                                                                    label: "Body Text Color",
+                                                                    desc: "Primary color for paragraphs and general content.",
+                                                                    example: "Normal Text"
+                                                                },
+                                                                footerBgColor: {
+                                                                    label: "Footer Background",
+                                                                    desc: "Specific background color for the footer section.",
+                                                                    example: "Footer Background"
+                                                                },
+                                                                footerTextColor: {
+                                                                    label: "Footer Text Color",
+                                                                    desc: "Specific color for text inside the footer.",
+                                                                    example: "Footer Text"
                                                                 },
                                                                 mainLogo: {
                                                                     label: "Main Website Logo",
@@ -727,12 +743,28 @@ export default function CMSPage() {
                                                                     size: "50×50 to 400×400 px"
                                                                 },
                                                                 primaryFont: {
-                                                                    label: "Main Body Font",
-                                                                    desc: "Used for paragraphs, buttons, and most text content."
+                                                                    label: "Main Heading Font (Primary)",
+                                                                    desc: "Used for main page titles (H1, H2)."
                                                                 },
                                                                 secondaryFont: {
-                                                                    label: "Headings Font",
-                                                                    desc: "Used for titles (H1, H2, etc.) to give a distinct look."
+                                                                    label: "Small Heading Font (Secondary)",
+                                                                    desc: "Used for smaller section titles (H3, H4)."
+                                                                },
+                                                                paragraphFont: {
+                                                                    label: "Body & Paragraph Font",
+                                                                    desc: "Used for paragraphs, buttons, and general content."
+                                                                },
+                                                                primaryFontWeight: {
+                                                                    label: "Heading Weight",
+                                                                    desc: "Select thickness for main titles."
+                                                                },
+                                                                secondaryFontWeight: {
+                                                                    label: "Small Heading Weight",
+                                                                    desc: "Select thickness for secondary titles."
+                                                                },
+                                                                paragraphFontWeight: {
+                                                                    label: "Body Font Weight",
+                                                                    desc: "Select thickness for general text."
                                                                 },
                                                                 websiteTitle: {
                                                                     label: "Website SEO Title",
@@ -744,7 +776,8 @@ export default function CMSPage() {
                                                                 },
                                                             };
 
-                                                            const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather'];
+                                                            const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather', 'Raleway', 'Nunito', 'Ubuntu', 'Oswald', 'Source Sans Pro'];
+                                                            const weightOptions = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
 
 
                                                             const isImageField = (field.toLowerCase().includes('url') || field.toLowerCase().includes('image') || field.toLowerCase().includes('img') || field.toLowerCase().includes('logo') || field.toLowerCase().includes('favicon')) && !(['facebook', 'instagram', 'tiktok', 'twitter', 'linkedin', 'youtube', 'video'].some(social => field.toLowerCase().includes(social)));
@@ -813,37 +846,54 @@ export default function CMSPage() {
                                                                         </div>
                                                                     ) : isThemeFont ? (
                                                                         <div className="space-y-3">
-                                                                            <div className="relative">
-                                                                                <select
-                                                                                    value={fontOptions.includes(section.content[field]) ? section.content[field] : "Custom"}
-                                                                                    onChange={(e) => {
-                                                                                        const val = e.target.value;
-                                                                                        handleContentChange(activeTab, sectionKey, field, val);
-                                                                                    }}
-                                                                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-all shadow-sm appearance-none pr-10"
-                                                                                >
-                                                                                    {fontOptions.map(font => (
-                                                                                        <option key={font} value={font}>{font}</option>
-                                                                                    ))}
-                                                                                    <option value="Custom">Custom / Add New...</option>
-                                                                                </select>
-                                                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                                                            </div>
-                                                                            {(!fontOptions.includes(section.content[field]) || section.content[field] === "Custom") && (
-                                                                                <div className="p-3 bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
-                                                                                    <label className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase mb-2 block tracking-wider">Type Google Font Name</label>
-                                                                                    <div className="flex gap-2">
-                                                                                        <input
-                                                                                            type="text"
-                                                                                            autoFocus
-                                                                                            value={section.content[field] === "Custom" ? "" : section.content[field]}
-                                                                                            onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                                            placeholder="e.g. Open Sans, Lato, etc."
-                                                                                            className="w-full bg-white dark:bg-gray-800 border border-brand-200 dark:border-brand-500/30 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm"
-                                                                                        />
-                                                                                    </div>
-                                                                                    <p className="text-[9px] text-gray-400 mt-2">Enter any valid Google Font name to apply it.</p>
+                                                                            {field.toLowerCase().includes('weight') ? (
+                                                                                <div className="relative">
+                                                                                    <select
+                                                                                        value={section.content[field]}
+                                                                                        onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all shadow-sm appearance-none pr-10 font-bold"
+                                                                                    >
+                                                                                        {weightOptions.map(weight => (
+                                                                                            <option key={weight} value={weight}>Weight: {weight} {weight === '400' ? '(Regular)' : weight === '700' ? '(Bold)' : ''}</option>
+                                                                                        ))}
+                                                                                    </select>
+                                                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                                                                 </div>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <div className="relative">
+                                                                                        <select
+                                                                                            value={fontOptions.includes(section.content[field]) ? section.content[field] : "Custom"}
+                                                                                            onChange={(e) => {
+                                                                                                const val = e.target.value;
+                                                                                                handleContentChange(activeTab, sectionKey, field, val);
+                                                                                            }}
+                                                                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-all shadow-sm appearance-none pr-10"
+                                                                                        >
+                                                                                            {fontOptions.map(font => (
+                                                                                                <option key={font} value={font}>{font}</option>
+                                                                                            ))}
+                                                                                            <option value="Custom">Custom / Add New...</option>
+                                                                                        </select>
+                                                                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                                                    </div>
+                                                                                    {(!fontOptions.includes(section.content[field]) || section.content[field] === "Custom") && (
+                                                                                        <div className="p-3 bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                                                                                            <label className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase mb-2 block tracking-wider">Type Google Font Name</label>
+                                                                                            <div className="flex gap-2">
+                                                                                                <input
+                                                                                                    type="text"
+                                                                                                    autoFocus
+                                                                                                    value={section.content[field] === "Custom" ? "" : section.content[field]}
+                                                                                                    onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
+                                                                                                    placeholder="e.g. Open Sans, Lato, etc."
+                                                                                                    className="w-full bg-white dark:bg-gray-800 border border-brand-200 dark:border-brand-500/30 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm"
+                                                                                                />
+                                                                                            </div>
+                                                                                            <p className="text-[9px] text-gray-400 mt-2">Enter any valid Google Font name to apply it.</p>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </>
                                                                             )}
                                                                             {fieldDescriptions[field]?.desc && (
                                                                                 <p className="text-[10px] text-gray-500 italic mt-1 px-1 leading-relaxed">
