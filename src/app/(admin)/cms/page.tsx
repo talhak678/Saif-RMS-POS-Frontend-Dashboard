@@ -721,15 +721,15 @@ export default function CMSPage() {
                                                                     desc: "Color applied to all paragraphs and general text content across the website.",
                                                                     example: "Paragraph Text"
                                                                 },
-                                                                bannerTextColor: {
-                                                                    label: "Banner Text Color",
-                                                                    desc: "Color for home banner sub-title, paragraph text and button text.",
-                                                                    example: "Banner Text"
-                                                                },
                                                                 footerBgColor: {
                                                                     label: "Footer Background",
                                                                     desc: "Specific background color for the footer section.",
                                                                     example: "Footer Background"
+                                                                },
+                                                                bannerTextColor: {
+                                                                    label: "Home Banner Text Color",
+                                                                    desc: "Color for the subtitle, paragraph, and button text on the home page banner. Overrides the global paragraph color for the banner only.",
+                                                                    example: "Banner Text"
                                                                 },
                                                                 footerTextColor: {
                                                                     label: "Footer Text Color",
