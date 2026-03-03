@@ -251,6 +251,7 @@ const DEFAULT_CONFIG = {
                     headingColor: "#222222",
                     backgroundColor: "#ffffff",
                     textColor: "#666666",
+                    bannerTextColor: "#ffffff",
                     footerBgColor: "#0d0d0d",
                     footerTextColor: "#ffffff"
                 }
@@ -719,6 +720,11 @@ export default function CMSPage() {
                                                                     label: "Paragraph Color",
                                                                     desc: "Color applied to all paragraphs and general text content across the website.",
                                                                     example: "Paragraph Text"
+                                                                },
+                                                                bannerTextColor: {
+                                                                    label: "Banner Text Color",
+                                                                    desc: "Color for home banner sub-title, paragraph text and button text.",
+                                                                    example: "Banner Text"
                                                                 },
                                                                 footerBgColor: {
                                                                     label: "Footer Background",
