@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { toast } from "react-hot-toast";
-import { Image as ImageIcon, Plus, Trash2, ExternalLink, ToggleRight, ToggleLeft, LayoutList } from "lucide-react";
+import { toast } from "sonner";
+import {
+    Image as ImageIcon, Plus, Trash2, ExternalLink,
+    ToggleRight, ToggleLeft, X, CheckCircle2
+} from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
@@ -23,16 +26,12 @@ export default function BannersPage() {
     const [newBanner, setNewBanner] = useState({ title: "", imageUrl: "", linkUrl: "", isActive: true });
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchBanners();
-    }, []);
+    useEffect(() => { fetchBanners(); }, []);
 
     const fetchBanners = async () => {
         try {
             const res = await api.get("/cms/banners");
-            if (res.data?.success) {
-                setBanners(res.data.data);
-            }
+            if (res.data?.success) setBanners(res.data.data);
         } catch (error) {
             console.error("Failed to fetch banners", error);
         } finally {
@@ -74,7 +73,7 @@ export default function BannersPage() {
             const updated = { ...banner, isActive: !banner.isActive };
             await api.post(`/cms/banners`, { ...updated, bannerId: banner.id });
             setBanners(banners.map(b => b.id === banner.id ? updated : b));
-            toast.success(`Banner ${updated.isActive ? 'activated' : 'deactivated'}`);
+            toast.success(`Banner ${updated.isActive ? "activated" : "deactivated"}`);
         } catch (error) {
             toast.error("Failed to update status");
         }
@@ -82,164 +81,182 @@ export default function BannersPage() {
 
     if (loading) return <div className="flex items-center justify-center min-h-[400px]"><Loader size="md" /></div>;
 
+    const activeCount = banners.filter(b => b.isActive).length;
+
     return (
         <ProtectedRoute module="cms-website:banners">
+            <div className="pb-10">
 
-            <div className="max-w-[calc(98vw)] lg:max-w-[calc(78vw)] mx-auto p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl my-4">
-                <div className="flex justify-between items-center mb-8">
+                {/* ── Header ── */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 px-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                            <ImageIcon className="w-6 h-6 text-brand-500" />
+                        <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                            <ImageIcon className="w-6 h-6 text-[#5d69b9]" />
                             Promotional Banners
                         </h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage marketing banners and promo slides for your website.</p>
+                        <p className="text-gray-500 text-sm mt-1 font-medium">
+                            Manage marketing banners and promo slides for your website
+                        </p>
                     </div>
                     <button
                         onClick={() => setShowForm(!showForm)}
-                        className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm"
+                        style={{ backgroundColor: showForm ? "#e5e7eb" : "#5d69b9", color: showForm ? "#374151" : "#fff" }}
                     >
-                        <Plus className="w-4 h-4" />
-                        {showForm ? "Close Form" : "Add New Banner"}
+                        {showForm ? <><X className="w-4 h-4" /> Close</> : <><Plus className="w-4 h-4" /> Add Banner</>}
                     </button>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-2xl shadow-sm">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Banners</p>
-                        <p className="text-2xl font-black text-gray-800 dark:text-white mt-2 leading-none">{banners.length}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-2xl shadow-sm">
-                        <p className="text-[10px] font-black text-green-500 uppercase tracking-widest leading-none">Active Banners</p>
-                        <p className="text-2xl font-black text-gray-800 dark:text-white mt-2 leading-none">{banners.filter(b => b.isActive).length}</p>
-                    </div>
-                    <div className="bg-brand-500 p-5 rounded-2xl shadow-lg text-white">
-                        <p className="text-[10px] font-black opacity-80 uppercase tracking-widest leading-none text-white">Target Reach</p>
-                        <p className="text-2xl font-black mt-2 leading-none">100% Live</p>
-                    </div>
-                </div>
+                <div className="px-4 space-y-6">
 
-                {/* Add Form Modal/Section */}
-                {showForm && (
-                    <div className="bg-white dark:bg-gray-800 border border-brand-500/30 rounded-3xl p-6 mb-8 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 dark:text-white">
-                            <Plus className="w-5 h-5 text-brand-500" />
-                            New Banner Details
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Banner Title (Optional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Summer Sale 20% Off"
-                                    value={newBanner.title}
-                                    onChange={e => setNewBanner({ ...newBanner, title: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none text-gray-800 dark:text-white transition-all"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Link/Action URL (Optional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="https://example.com/promo"
-                                    value={newBanner.linkUrl}
-                                    onChange={e => setNewBanner({ ...newBanner, linkUrl: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none text-gray-800 dark:text-white transition-all"
-                                />
-                            </div>
-                            <div className="md:col-span-2 space-y-1.5">
-                                <ImageUpload
-                                    label="Banner Image (Recommended: 1920 x 1080)"
-                                    value={newBanner.imageUrl}
-                                    onChange={(url) => setNewBanner({ ...newBanner, imageUrl: url })}
-                                    isBanner
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-8 flex gap-3">
-                            <button
-                                onClick={handleAdd}
-                                disabled={submitting}
-                                className="bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 flex justify-center items-center text-sm"
-                            >
-                                {submitting ? <Loader size="sm" className="space-y-0" /> : "Create Banner"}
-                            </button>
-                            <button
-                                onClick={() => setShowForm(false)}
-                                className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-6 py-2.5 rounded-xl font-bold text-sm"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Banners Grid */}
-                {banners.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/20 rounded-[32px] border-2 border-dashed border-gray-200 dark:border-gray-800">
-                        <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 font-bold">No banners found. Start by adding one!</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                        {banners.map((banner) => (
-                            <div
-                                key={banner.id}
-                                className={`group bg-white dark:bg-gray-800 border-2 rounded-[32px] p-3 transition-all duration-300 flex flex-col ${banner.isActive ? "border-transparent hover:border-brand-600 hover:shadow-lg hover:shadow-brand-50" : "border-gray-100 dark:border-gray-700 opacity-80"}`}
-                            >
-                                {/* Image Container */}
-                                <div className="h-44 w-full bg-gray-100 dark:bg-gray-700 relative rounded-[24px] overflow-hidden mb-4">
-                                    <img
-                                        src={banner.imageUrl}
-                                        className={`w-full h-full object-cover transition-transform duration-700 ${banner.isActive ? 'group-hover:scale-110' : 'grayscale'}`}
-                                        alt={banner.title || 'Banner'}
-                                        onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/800x400?text=Invalid+Image+URL')}
-                                    />
-                                    <div className="absolute top-2 right-2">
-                                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${banner.isActive ? 'bg-brand-500/80 text-white' : 'bg-gray-500/80 text-white'}`}>
-                                            {banner.isActive ? 'Active' : 'Draft'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 flex flex-col px-1">
-                                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base line-clamp-1 leading-tight mb-2">
-                                        {banner.title || 'Untitled Banner'}
-                                    </h3>
-
-                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 h-8 mb-4 leading-normal flex items-center gap-1.5">
-                                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                                        <span className="truncate">{banner.linkUrl || 'No external link'}</span>
-                                    </p>
-
-                                    {/* Action Footer */}
-                                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                                        <div className="flex gap-1.5">
-                                            <button
-                                                onClick={() => toggleStatus(banner)}
-                                                className={`p-2 rounded-xl border transition-all ${banner.isActive ? 'bg-gray-50 dark:bg-gray-700 border-gray-100 dark:border-gray-600 text-gray-400 hover:text-brand-500' : 'bg-brand-50 dark:bg-brand-900/20 border-brand-100 dark:border-brand-800/30 text-brand-600 dark:text-brand-400 hover:bg-brand-100'}`}
-                                                title={banner.isActive ? "Deactivate" : "Activate"}
-                                            >
-                                                {banner.isActive ? <ToggleLeft size={18} /> : <ToggleRight size={18} />}
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(banner.id)}
-                                                className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                        <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                            <LayoutList size={16} className="text-gray-400" />
-                                        </div>
-                                    </div>
-                                </div>
+                    {/* ── Stats Row ── */}
+                    <div className="grid grid-cols-3 gap-4">
+                        {[
+                            { label: "Total Banners", value: banners.length, accent: "text-gray-700 dark:text-white" },
+                            { label: "Active", value: activeCount, accent: "text-emerald-600 dark:text-emerald-400" },
+                            { label: "Inactive", value: banners.length - activeCount, accent: "text-gray-400" },
+                        ].map(stat => (
+                            <div key={stat.label} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{stat.label}</p>
+                                <p className={`text-3xl font-black mt-1 ${stat.accent}`}>{stat.value}</p>
                             </div>
                         ))}
                     </div>
-                )}
+
+                    {/* ── Add Form ── */}
+                    {showForm && (
+                        <div className="bg-white dark:bg-gray-800 border-2 rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-3 duration-200"
+                            style={{ borderColor: "#5d69b9" + "40" }}>
+                            <h2 className="text-base font-bold mb-5 flex items-center gap-2 text-gray-800 dark:text-white">
+                                <Plus className="w-4 h-4" style={{ color: "#5d69b9" }} />
+                                New Banner Details
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Title (Optional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Summer Sale 20% Off"
+                                        value={newBanner.title}
+                                        onChange={e => setNewBanner({ ...newBanner, title: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-[#5d69b9] rounded-lg px-4 py-2.5 text-sm outline-none transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Link/Action URL (Optional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="https://example.com/promo"
+                                        value={newBanner.linkUrl}
+                                        onChange={e => setNewBanner({ ...newBanner, linkUrl: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-[#5d69b9] rounded-lg px-4 py-2.5 text-sm outline-none transition-all"
+                                    />
+                                </div>
+                                <div className="md:col-span-2 space-y-1.5">
+                                    <ImageUpload
+                                        label="Banner Image (Recommended: 1920 × 1080)"
+                                        value={newBanner.imageUrl}
+                                        onChange={(url) => setNewBanner({ ...newBanner, imageUrl: url })}
+                                        isBanner
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-6 flex gap-3">
+                                <button
+                                    onClick={handleAdd}
+                                    disabled={submitting}
+                                    className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
+                                    style={{ backgroundColor: "#5d69b9" }}
+                                >
+                                    {submitting ? <Loader size="sm" showText={false} className="space-y-0" /> : "Create Banner"}
+                                </button>
+                                <button
+                                    onClick={() => setShowForm(false)}
+                                    className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Banners Grid ── */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-5">All Banners</h2>
+
+                        {banners.length === 0 ? (
+                            <div className="text-center py-16 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                                <ImageIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                                <p className="text-gray-500 font-semibold text-sm">No banners yet. Click &quot;Add Banner&quot; to get started.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                                {banners.map((banner) => (
+                                    <div
+                                        key={banner.id}
+                                        className={`group rounded-xl border-2 overflow-hidden transition-all duration-200 ${banner.isActive
+                                                ? "border-transparent hover:border-[#5d69b9]/40 hover:shadow-md"
+                                                : "border-gray-100 dark:border-gray-700 opacity-70"
+                                            }`}
+                                    >
+                                        {/* Image */}
+                                        <div className="h-40 bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+                                            <img
+                                                src={banner.imageUrl}
+                                                className={`w-full h-full object-cover transition-transform duration-500 ${banner.isActive ? "group-hover:scale-105" : "grayscale"}`}
+                                                alt={banner.title || "Banner"}
+                                                onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/800x400?text=Invalid+Image")}
+                                            />
+                                            <div className="absolute top-2 right-2">
+                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow ${banner.isActive ? "bg-[#5d69b9]/80 text-white" : "bg-gray-600/80 text-white"
+                                                    }`}>
+                                                    {banner.isActive ? "Active" : "Draft"}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Info */}
+                                        <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                                {banner.title || "Untitled Banner"}
+                                            </h3>
+                                            {banner.linkUrl && (
+                                                <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1 truncate">
+                                                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                                    {banner.linkUrl}
+                                                </p>
+                                            )}
+
+                                            {/* Actions */}
+                                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                                <div className="flex gap-1.5">
+                                                    <button
+                                                        onClick={() => toggleStatus(banner)}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${banner.isActive
+                                                                ? "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-[#5d69b9] hover:text-[#5d69b9]"
+                                                                : "border-[#5d69b9]/30 text-[#5d69b9] bg-[#5d69b9]/5 hover:bg-[#5d69b9]/10"
+                                                            }`}
+                                                        title={banner.isActive ? "Deactivate" : "Activate"}
+                                                    >
+                                                        {banner.isActive ? <ToggleLeft size={15} /> : <ToggleRight size={15} />}
+                                                        {banner.isActive ? "Deactivate" : "Activate"}
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDelete(banner.id)}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </ProtectedRoute>
     );
