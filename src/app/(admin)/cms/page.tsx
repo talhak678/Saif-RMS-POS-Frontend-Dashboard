@@ -219,13 +219,12 @@ const DEFAULT_CONFIG = {
         sections: {
             banner: {
                 required: false, enabled: true,
-                content: { title: "Shop Cart", textAlign: "center", description: "", imageUrl: "", showTitle: "true" }
+                content: { title: "Shop Cart", description: "", imageUrl: "", showTitle: "true" }
             },
             cartContent: {
                 required: true, enabled: true,
                 content: {
                     title: "Your Selection",
-                    textAlign: "center",
                     emptyCartText: "Your cart is empty",
                     exploreMenuText: "Explore Menu",
                     billDetailsTitle: "Bill Details",
@@ -371,6 +370,10 @@ export default function CMSPage() {
                                     // REMOVE BREADCRUMB FROM EVERYWHERE
                                     if (mergedConfig[page].sections[sec].content.breadcrumb !== undefined) {
                                         delete mergedConfig[page].sections[sec].content.breadcrumb;
+                                    }
+                                    // REMOVE TEXTALIGN FROM CART SECTIONS
+                                    if (page === 'cart' && mergedConfig[page].sections[sec].content.textAlign !== undefined) {
+                                        delete mergedConfig[page].sections[sec].content.textAlign;
                                     }
                                 }
                             });
@@ -713,9 +716,9 @@ export default function CMSPage() {
                                                                     example: "Main Background"
                                                                 },
                                                                 textColor: {
-                                                                    label: "Body Text Color",
-                                                                    desc: "Primary color for paragraphs and general content.",
-                                                                    example: "Normal Text"
+                                                                    label: "Paragraph Color",
+                                                                    desc: "Color applied to all paragraphs and general text content across the website.",
+                                                                    example: "Paragraph Text"
                                                                 },
                                                                 footerBgColor: {
                                                                     label: "Footer Background",
@@ -803,6 +806,7 @@ export default function CMSPage() {
                                                                                                                             field === 'showReview' ? 'Show Review on Banner' :
                                                                                                                                 field.replace(/([A-Z])/g, ' $1');
                                                             if (activeTab === 'contact' && sectionKey === 'banner' && field === 'textAlign') return null;
+                                                            if (activeTab === 'cart' && field === 'textAlign') return null;
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
