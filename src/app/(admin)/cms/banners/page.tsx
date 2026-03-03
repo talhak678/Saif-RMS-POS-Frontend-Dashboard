@@ -5,7 +5,7 @@ import api from "@/services/api";
 import { toast } from "sonner";
 import {
     Image as ImageIcon, Plus, Trash2, ExternalLink,
-    ToggleRight, ToggleLeft, X, CheckCircle2
+    ToggleRight, ToggleLeft, X, Pencil, Save
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
@@ -22,9 +22,16 @@ interface Banner {
 export default function BannersPage() {
     const [banners, setBanners] = useState<Banner[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Add form state
     const [showForm, setShowForm] = useState(false);
     const [newBanner, setNewBanner] = useState({ title: "", imageUrl: "", linkUrl: "", isActive: true });
     const [submitting, setSubmitting] = useState(false);
+
+    // Edit state
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState<Partial<Banner>>({});
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => { fetchBanners(); }, []);
 
@@ -50,7 +57,7 @@ export default function BannersPage() {
                 setNewBanner({ title: "", imageUrl: "", linkUrl: "", isActive: true });
                 setShowForm(false);
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to add banner");
         } finally {
             setSubmitting(false);
@@ -63,7 +70,7 @@ export default function BannersPage() {
             await api.delete(`/cms/banners/${id}`);
             setBanners(banners.filter(b => b.id !== id));
             toast.success("Banner deleted");
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete banner");
         }
     };
@@ -74,8 +81,45 @@ export default function BannersPage() {
             await api.post(`/cms/banners`, { ...updated, bannerId: banner.id });
             setBanners(banners.map(b => b.id === banner.id ? updated : b));
             toast.success(`Banner ${updated.isActive ? "activated" : "deactivated"}`);
-        } catch (error) {
+        } catch {
             toast.error("Failed to update status");
+        }
+    };
+
+    // Open edit — pre-fill form with current banner data
+    const openEdit = (banner: Banner) => {
+        setEditingId(banner.id);
+        setEditForm({ title: banner.title || "", imageUrl: banner.imageUrl, linkUrl: banner.linkUrl || "" });
+        // Close add form if open
+        setShowForm(false);
+    };
+
+    const cancelEdit = () => { setEditingId(null); setEditForm({}); };
+
+    const handleUpdate = async (banner: Banner) => {
+        const { title, imageUrl, linkUrl } = editForm;
+        if (!imageUrl) return toast.error("Image URL is required");
+
+        setUpdating(true);
+        try {
+            const payload: Banner = {
+                ...banner,            // keep all existing fields (isActive etc.)
+                title,
+                imageUrl,
+                linkUrl,
+            };
+            const res = await api.put(`/cms/banners/${banner.id}`, payload);
+            if (res.data?.success) {
+                toast.success("Banner updated successfully");
+                setBanners(banners.map(b => b.id === banner.id ? payload : b));
+                cancelEdit();
+            } else {
+                toast.error(res.data?.message || "Failed to update banner");
+            }
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to update banner");
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -99,7 +143,7 @@ export default function BannersPage() {
                         </p>
                     </div>
                     <button
-                        onClick={() => setShowForm(!showForm)}
+                        onClick={() => { setShowForm(!showForm); cancelEdit(); }}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm"
                         style={{ backgroundColor: showForm ? "#e5e7eb" : "#5d69b9", color: showForm ? "#374151" : "#fff" }}
                     >
@@ -126,7 +170,7 @@ export default function BannersPage() {
                     {/* ── Add Form ── */}
                     {showForm && (
                         <div className="bg-white dark:bg-gray-800 border-2 rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-3 duration-200"
-                            style={{ borderColor: "#5d69b9" + "40" }}>
+                            style={{ borderColor: "#5d69b940" }}>
                             <h2 className="text-base font-bold mb-5 flex items-center gap-2 text-gray-800 dark:text-white">
                                 <Plus className="w-4 h-4" style={{ color: "#5d69b9" }} />
                                 New Banner Details
@@ -172,7 +216,7 @@ export default function BannersPage() {
                                 </button>
                                 <button
                                     onClick={() => setShowForm(false)}
-                                    className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 transition-all"
+                                    className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700"
                                 >
                                     Cancel
                                 </button>
@@ -194,7 +238,9 @@ export default function BannersPage() {
                                 {banners.map((banner) => (
                                     <div
                                         key={banner.id}
-                                        className={`group rounded-xl border-2 overflow-hidden transition-all duration-200 ${banner.isActive
+                                        className={`group rounded-xl border-2 overflow-hidden transition-all duration-200 ${editingId === banner.id
+                                            ? "border-[#5d69b9]/60 shadow-md"
+                                            : banner.isActive
                                                 ? "border-transparent hover:border-[#5d69b9]/40 hover:shadow-md"
                                                 : "border-gray-100 dark:border-gray-700 opacity-70"
                                             }`}
@@ -202,12 +248,12 @@ export default function BannersPage() {
                                         {/* Image */}
                                         <div className="h-40 bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
                                             <img
-                                                src={banner.imageUrl}
-                                                className={`w-full h-full object-cover transition-transform duration-500 ${banner.isActive ? "group-hover:scale-105" : "grayscale"}`}
+                                                src={editingId === banner.id ? (editForm.imageUrl || banner.imageUrl) : banner.imageUrl}
+                                                className={`w-full h-full object-cover transition-transform duration-500 ${banner.isActive && editingId !== banner.id ? "group-hover:scale-105" : ""} ${!banner.isActive ? "grayscale" : ""}`}
                                                 alt={banner.title || "Banner"}
                                                 onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/800x400?text=Invalid+Image")}
                                             />
-                                            <div className="absolute top-2 right-2">
+                                            <div className="absolute top-2 right-2 flex gap-1.5">
                                                 <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow ${banner.isActive ? "bg-[#5d69b9]/80 text-white" : "bg-gray-600/80 text-white"
                                                     }`}>
                                                     {banner.isActive ? "Active" : "Draft"}
@@ -215,42 +261,102 @@ export default function BannersPage() {
                                             </div>
                                         </div>
 
-                                        {/* Info */}
-                                        <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
-                                                {banner.title || "Untitled Banner"}
-                                            </h3>
-                                            {banner.linkUrl && (
-                                                <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1 truncate">
-                                                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                                                    {banner.linkUrl}
-                                                </p>
-                                            )}
-
-                                            {/* Actions */}
-                                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                                                <div className="flex gap-1.5">
+                                        {/* ── Editing mode ── */}
+                                        {editingId === banner.id ? (
+                                            <div className="p-4 bg-white dark:bg-gray-800 border-t border-[#5d69b9]/20 space-y-3">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#5d69b9] mb-1">Editing Banner</p>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">Title</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Banner title"
+                                                        value={editForm.title || ""}
+                                                        onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+                                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-[#5d69b9] rounded-lg px-3 py-2 text-sm outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">Link URL</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="https://..."
+                                                        value={editForm.linkUrl || ""}
+                                                        onChange={e => setEditForm({ ...editForm, linkUrl: e.target.value })}
+                                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-[#5d69b9] rounded-lg px-3 py-2 text-sm outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <ImageUpload
+                                                        label="Banner Image"
+                                                        value={editForm.imageUrl || ""}
+                                                        onChange={(url) => setEditForm({ ...editForm, imageUrl: url })}
+                                                        isBanner
+                                                    />
+                                                </div>
+                                                <div className="flex gap-2 pt-1">
                                                     <button
-                                                        onClick={() => toggleStatus(banner)}
-                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${banner.isActive
-                                                                ? "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-[#5d69b9] hover:text-[#5d69b9]"
-                                                                : "border-[#5d69b9]/30 text-[#5d69b9] bg-[#5d69b9]/5 hover:bg-[#5d69b9]/10"
-                                                            }`}
-                                                        title={banner.isActive ? "Deactivate" : "Activate"}
+                                                        onClick={() => handleUpdate(banner)}
+                                                        disabled={updating}
+                                                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all disabled:opacity-50"
+                                                        style={{ backgroundColor: "#5d69b9" }}
                                                     >
-                                                        {banner.isActive ? <ToggleLeft size={15} /> : <ToggleRight size={15} />}
-                                                        {banner.isActive ? "Deactivate" : "Activate"}
+                                                        {updating ? <Loader size="sm" showText={false} className="space-y-0" /> : <><Save size={13} /> Save Changes</>}
+                                                    </button>
+                                                    <button
+                                                        onClick={cancelEdit}
+                                                        className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-700 transition-all"
+                                                    >
+                                                        <X size={13} /> Cancel
                                                     </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDelete(banner.id)}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
                                             </div>
-                                        </div>
+                                        ) : (
+                                            /* ── Normal view ── */
+                                            <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+                                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                                    {banner.title || "Untitled Banner"}
+                                                </h3>
+                                                {banner.linkUrl && (
+                                                    <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1 truncate">
+                                                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                                        {banner.linkUrl}
+                                                    </p>
+                                                )}
+
+                                                {/* Actions */}
+                                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                                    <div className="flex gap-1.5">
+                                                        <button
+                                                            onClick={() => toggleStatus(banner)}
+                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${banner.isActive
+                                                                ? "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-[#5d69b9] hover:text-[#5d69b9]"
+                                                                : "border-[#5d69b9]/30 text-[#5d69b9] bg-[#5d69b9]/5 hover:bg-[#5d69b9]/10"
+                                                                }`}
+                                                            title={banner.isActive ? "Deactivate" : "Activate"}
+                                                        >
+                                                            {banner.isActive ? <ToggleLeft size={15} /> : <ToggleRight size={15} />}
+                                                            {banner.isActive ? "Deactivate" : "Activate"}
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex gap-1.5">
+                                                        <button
+                                                            onClick={() => openEdit(banner)}
+                                                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#5d69b9] hover:bg-[#5d69b9]/10 transition-all"
+                                                            title="Edit"
+                                                        >
+                                                            <Pencil size={15} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(banner.id)}
+                                                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
