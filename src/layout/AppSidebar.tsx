@@ -474,7 +474,9 @@ const AppSidebar: React.FC = () => {
             </div> */}
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+        <div className="flex justify-center items-center">
+          {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+        </div>
       </div>
     </aside>
   );

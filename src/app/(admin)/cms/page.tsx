@@ -41,7 +41,7 @@ const DEFAULT_CONFIG = {
             },
             todaysSpecial: {
                 required: false, enabled: false,
-                content: { title: "Today's Special", textAlign: "center", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
+                content: { title: "Today's Special", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
             },
             ourMenu: {
                 required: true, enabled: true,
@@ -353,6 +353,7 @@ export default function CMSPage() {
                                     if (sec === 'todaysSpecial') {
                                         // Clean up old category selection if it exists
                                         delete mergedConfig[page].sections[sec].content.selectedCategoryIds;
+                                        delete mergedConfig[page].sections[sec].content.textAlign;
                                         if (!mergedConfig[page].sections[sec].content.selectedItemIds)
                                             mergedConfig[page].sections[sec].content.selectedItemIds = [];
                                     }
@@ -378,6 +379,10 @@ export default function CMSPage() {
                                     // REMOVE FOOTER BACKGROUND COLOR (NOW IN BRANDING)
                                     if (page === 'home' && sec === 'footer') {
                                         delete mergedConfig[page].sections[sec].content.backgroundColor;
+                                    }
+                                    // REMOVE ACCENT COLOR FROM BRANDING COLORS (DEPRECATED)
+                                    if (page === 'theme' && sec === 'colors') {
+                                        delete mergedConfig[page].sections[sec].content.accentColor;
                                     }
                                 }
                             });
@@ -693,7 +698,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description') && !(sectionKey === 'footer' && k === 'backgroundColor')).map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description') && !(sectionKey === 'footer' && k === 'backgroundColor') && k !== 'accentColor').map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
@@ -816,6 +821,7 @@ export default function CMSPage() {
                                                                                                                                 field.replace(/([A-Z])/g, ' $1');
                                                             if (activeTab === 'contact' && sectionKey === 'banner' && field === 'textAlign') return null;
                                                             if (activeTab === 'cart' && field === 'textAlign') return null;
+                                                            if (sectionKey === 'todaysSpecial' && field === 'textAlign') return null;
 
                                                             return (
                                                                 <div key={field} className={`${field === 'description' || field === 'address' || field === 'menuItems' || isImageField ? 'md:col-span-2' : ''} space-y-1.5`}>
