@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     CONFIRMED: { label: "Confirmed", color: "text-brand-700 dark:text-brand-300", bg: "bg-brand-50 dark:bg-brand-900/30", border: "border-brand-200 dark:border-brand-700", dot: "bg-brand-500", cardBg: "bg-gradient-to-br from-brand-50/50 to-white dark:from-brand-900/10 dark:to-gray-800" },
     PREPARING: { label: "Preparing", color: "text-purple-700 dark:text-purple-300", bg: "bg-purple-100 dark:bg-purple-900/30", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500", cardBg: "bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/10 dark:to-gray-800" },
     KITCHEN_READY: { label: "Kitchen Ready", color: "text-indigo-700 dark:text-indigo-300", bg: "bg-indigo-100 dark:bg-indigo-900/30", border: "border-indigo-300 dark:border-indigo-700", dot: "bg-indigo-500", cardBg: "bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/10 dark:to-gray-800" },
-    OUT_FOR_DELIVERY: { label: "Out for Delivery", color: "text-orange-700 dark:text-orange-300", bg: "bg-orange-100 dark:bg-orange-900/30", border: "border-orange-300 dark:border-orange-700", dot: "bg-orange-500", cardBg: "bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/10 dark:to-gray-800" },
+    OUT_FOR_DELIVERY: { label: "On the Way", color: "text-orange-700 dark:text-orange-300", bg: "bg-orange-100 dark:bg-orange-900/30", border: "border-orange-300 dark:border-orange-700", dot: "bg-orange-500", cardBg: "bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/10 dark:to-gray-800" },
     DELIVERED: { label: "Delivered", color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900/30", border: "border-green-300 dark:border-green-700", dot: "bg-green-500", cardBg: "bg-gradient-to-br from-green-50 to-white dark:from-green-900/10 dark:to-gray-800" },
     CANCELLED: { label: "Cancelled", color: "text-red-700 dark:text-red-300", bg: "bg-red-100 dark:bg-red-900/30", border: "border-red-300 dark:border-red-700", dot: "bg-red-500", cardBg: "bg-gradient-to-br from-red-50 to-white dark:from-red-900/10 dark:to-gray-800" },
 };
@@ -180,7 +180,7 @@ function OrderDetailModal({
                             <ChevronRight className="w-3.5 h-3.5" />
                             {order.status === "PENDING" ? "Confirm" :
                                 order.status === "CONFIRMED" ? "Start Preparing" :
-                                    order.status === "PREPARING" ? "Mark Ready" : "Dispatch"}
+                                    order.status === "PREPARING" ? "Mark Ready" : "Mark on the Way"}
                         </button>
                     )}
                     <div className="ml-auto">
@@ -543,7 +543,7 @@ function OrderCard({ order, onChangeStatus, onView }: {
                             {order.status === "PENDING" ? "Confirm Order" :
                                 order.status === "CONFIRMED" ? "Start Preparing" :
                                     order.status === "PREPARING" ? "Mark Ready" :
-                                        order.status === "KITCHEN_READY" ? "Send for Delivery" : "Update"}
+                                        order.status === "KITCHEN_READY" ? "Mark on the Way" : "Update"}
                             <ChevronRight className="w-4 h-4" />
                         </button>
                     ) : (

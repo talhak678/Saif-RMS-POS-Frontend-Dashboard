@@ -559,7 +559,7 @@ export default function OrdersPage() {
                         </td>
                         <td className="p-4">
                           <div className="flex flex-col gap-1 items-start">
-                            <span className={getStatusBadge(o.status)}>{o.status}</span>
+                            <span className={getStatusBadge(o.status)}>{o.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : o.status}</span>
                             <button onClick={() => openViewModal(o)} className="text-[9px] text-brand-500 font-bold hover:underline">View History</button>
                           </div>
                         </td>
@@ -624,7 +624,7 @@ export default function OrdersPage() {
                     }}
                     className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500"
                   >
-                    {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {ORDER_STATUSES.map(s => <option key={s} value={s}>{s === "OUT_FOR_DELIVERY" ? "ON THE WAY" : s}</option>)}
                   </select>
                 </div>
                 {newStatus === "OUT_FOR_DELIVERY" && (

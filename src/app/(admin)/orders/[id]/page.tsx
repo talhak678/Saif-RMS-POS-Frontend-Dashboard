@@ -200,7 +200,7 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                                         onClick={() => updateStatus(s)}
                                         className="w-full text-left px-4 py-1.5 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 uppercase"
                                     >
-                                        {s}
+                                        {s === "OUT_FOR_DELIVERY" ? "ON THE WAY" : s}
                                     </button>
                                 ))}
                             </div>
@@ -297,7 +297,7 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                                 )}
                                 <div className="relative">
                                     <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-emerald-500 bg-white dark:bg-gray-950 z-10" />
-                                    <p className="text-[11px] font-bold text-emerald-600 uppercase">Current Status: {order.status}</p>
+                                    <p className="text-[11px] font-bold text-emerald-600 uppercase">Current Status: {order.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : order.status}</p>
                                 </div>
                             </div>
                         </div>
@@ -325,7 +325,7 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                                         <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Status</p>
                                             <div className="pt-1">
-                                                <span className={getStatusBadge(order.status)}>{order.status}</span>
+                                                <span className={getStatusBadge(order.status)}>{order.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : order.status}</span>
                                             </div>
                                         </div>
                                         <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
