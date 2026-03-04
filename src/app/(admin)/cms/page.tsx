@@ -54,7 +54,6 @@ const DEFAULT_CONFIG = {
             footer: {
                 required: true, enabled: true,
                 content: {
-                    backgroundColor: "#0d0d0d",
                     logoTitle: "Saif RMS",
                     description: "Quality food delivered to your doorstep. Experience the best culinary delights with us.",
                     newsletterTitle: "Subscribe To Our Newsletter",
@@ -376,6 +375,10 @@ export default function CMSPage() {
                                     if (page === 'cart' && mergedConfig[page].sections[sec].content.textAlign !== undefined) {
                                         delete mergedConfig[page].sections[sec].content.textAlign;
                                     }
+                                    // REMOVE FOOTER BACKGROUND COLOR (NOW IN BRANDING)
+                                    if (page === 'home' && sec === 'footer') {
+                                        delete mergedConfig[page].sections[sec].content.backgroundColor;
+                                    }
                                 }
                             });
                         }
@@ -688,9 +691,9 @@ export default function CMSPage() {
 
                                             {isExpanded && (
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
-                                                 
+
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description')).map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description') && !(sectionKey === 'footer' && k === 'backgroundColor')).map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
