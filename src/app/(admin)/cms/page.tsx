@@ -1132,7 +1132,7 @@ export default function CMSPage() {
                                                             </div>
                                                             <div className="space-y-6">
                                                                 {(section.content.items || []).map((item: any, idx: number) => (
-                                                                    <div key={idx} className="bg-white dark:bg-white/5 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 relative group/banner shadow-sm">
+                                                                    <div key={idx} className="bg-gray-50/50 dark:bg-white/[0.02] p-6 rounded-2xl border border-gray-200 dark:border-gray-700 relative group/banner">
                                                                         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50 dark:border-gray-800">
                                                                             <div className="flex items-center gap-4">
                                                                                 <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-sm">#{idx + 2}</div>
@@ -1141,7 +1141,7 @@ export default function CMSPage() {
                                                                             <button onClick={() => removeArrayItem(activeTab, sectionKey, 'items', idx)} className="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm border border-red-100 dark:border-red-900/20 bg-white dark:bg-gray-800"><Trash2 className="w-4 h-4" /></button>
                                                                         </div>
 
-                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                                             {/* Subheading */}
                                                                             <div className="space-y-1.5">
                                                                                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Subheading</label>
@@ -1175,7 +1175,7 @@ export default function CMSPage() {
                                                                                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Dish Image</label>
                                                                                     <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">800×800 px</span>
                                                                                 </div>
-                                                                                <ImageUpload label="" value={item.rightImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'rightImage', url)} recommendedSize="800x800" />
+                                                                                <ImageUpload label="" value={item.rightImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'rightImage', url)} isBanner={true} recommendedSize="800x800" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
