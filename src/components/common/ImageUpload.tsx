@@ -141,7 +141,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "", 
                         )}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                             <button type="button" onClick={() => fileInputRef.current?.click()}
-                                className="p-2 bg-white/20 backdrop-blur-md text-white rounded-lg hover:bg-white/30 transition-colors border border-white/30" title="Change">
+                                className="p-2 bg-white/20  text-white rounded-lg hover:bg-white/30 transition-colors border border-white/30" title="Change">
                                 <Upload size={20} />
                             </button>
                             <button type="button" onClick={removeImage}

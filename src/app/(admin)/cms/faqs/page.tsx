@@ -184,7 +184,7 @@ export default function FaqsPage({ embedded = false }: Props) {
 
                 {/* Modal */}
                 {isModalOpen && createPortal(
-                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-gray-500/10 ">
                         <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-700">
                             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
                                 <h2 className="text-lg font-bold text-gray-800 dark:text-white">{currentFaq.id ? "Edit Question" : "New Question"}</h2>
@@ -273,3 +273,4 @@ export default function FaqsPage({ embedded = false }: Props) {
         </ProtectedRoute>
     );
 }
+

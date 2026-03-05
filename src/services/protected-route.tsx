@@ -43,7 +43,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, module, compo
 
     if (loadingUser || checking) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 ">
                 <Loader size="md" />
             </div>
         );
@@ -139,3 +139,4 @@ export const GetModules: React.FC<getModules> = ({ fetched }) => {
 }
 
 export { ProtectedModules, ProtectedRoute }
+

@@ -150,7 +150,7 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
                 onClose={() => setModal(false)}
                 className="max-w-xl p-0 overflow-hidden bg-transparent shadow-none border-none"
             >
-                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden flex flex-col h-full">
+                <div className="bg-white/90 dark:bg-gray-800/90  rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700/50">
                         <div>

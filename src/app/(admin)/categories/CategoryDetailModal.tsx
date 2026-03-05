@@ -46,7 +46,7 @@ export default function CategoryDetailModal({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                className="fixed inset-0 z-40 bg-gray-500/10 "
                 onClick={onClose}
             />
 
@@ -175,8 +175,8 @@ export default function CategoryDetailModal({
                                                 {/* Availability Badge */}
                                                 <span
                                                     className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${item.isAvailable
-                                                            ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                                                            : "bg-red-50 text-red-500 dark:bg-red-900/30 dark:text-red-400"
+                                                        ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                                                        : "bg-red-50 text-red-500 dark:bg-red-900/30 dark:text-red-400"
                                                         }`}
                                                 >
                                                     {item.isAvailable ? "Available" : "Unavailable"}
@@ -230,3 +230,4 @@ function InfoRow({
         </div>
     );
 }
+

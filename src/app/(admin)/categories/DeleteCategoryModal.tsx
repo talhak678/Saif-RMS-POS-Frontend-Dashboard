@@ -4,12 +4,12 @@ import { AlertTriangle } from "lucide-react";
 
 export default function DeleteCategoryModal({ onCancel, onConfirm, loading }: any) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
         <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangle size={24} />
         </div>
-        
+
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           Delete Category?
         </h3>

@@ -53,7 +53,7 @@ export default function SettingsPage() {
 
     return (
         <ProtectedRoute module="settings:all">
-            <div className="min-h-screen p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
 
                 {/* --- NEW HEADER UI (Transparent/Glassy Style) --- */}
                 <div className="flex justify-between items-center mb-6">
@@ -63,7 +63,7 @@ export default function SettingsPage() {
 
                     <button
                         onClick={handleAddClick}
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        className="bg-button  outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                     >
                         <Plus size={16} />
                         Add Setting

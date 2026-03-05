@@ -269,7 +269,7 @@ export default function OrdersPage() {
         {/* Header Bar - Purple Theme with Combined Filters */}
         <div className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-500 p-4 shadow-lg flex flex-wrap justify-between items-center text-white gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md border border-white/20">
+            <div className="bg-white/20 p-2 rounded-lg  border border-white/20">
               <ShoppingBag size={20} />
             </div>
             <div>
@@ -607,7 +607,7 @@ export default function OrdersPage() {
 
         {/* Status Update Modal */}
         {statusModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-[100] p-4">
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="bg-brand-600 p-4 flex justify-between items-center text-white">
                 <h3 className="font-bold">Update Order Status</h3>

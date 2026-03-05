@@ -102,7 +102,7 @@ function Branch() {
     };
 
     return (
-        <div className="min-h-screen p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+        <div className="min-h-screen p-4 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
             {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
@@ -280,7 +280,7 @@ function Branch() {
 
             {/* DELETE MODAL */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
                         <div className="flex justify-between mb-4">
                             <h2 className="font-semibold">Delete Branch</h2>

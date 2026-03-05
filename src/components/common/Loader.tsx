@@ -42,9 +42,10 @@ const Loader: React.FC<LoaderProps> = ({
 };
 
 export const FullPageLoader = ({ text }: { text?: string }) => (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/70 dark:bg-gray-900/70 ">
         <Loader size="lg" showText={!!text} text={text} />
     </div>
 );
 
 export default Loader;
+

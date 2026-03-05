@@ -7,28 +7,28 @@
   --font-outfit: Outfit, sans-serif;
 
   --breakpoint-*: initial;
-  --breakpoint-2xsm: 375px;
-  --breakpoint-xsm: 425px;
-  --breakpoint-3xl: 2000px;
-  --breakpoint-sm: 640px;
+  --breakpoint-2xsm:375px;
+  --breakpoint-xsm:425px;
+  --breakpoint-3xl:2000px;
+  --breakpoint-sm:640px;
   --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
+  --breakpoint-lg:1024px;
+  --breakpoint-xl:1280px;
+  --breakpoint-2xl:1536px;
 
-  --text-title-2xl: 72px;
+  --text-title-2xl:72px;
   --text-title-2xl--line-height: 90px;
-  --text-title-xl: 60px;
+  --text-title-xl:60px;
   --text-title-xl--line-height: 72px;
-  --text-title-lg: 48px;
+  --text-title-lg:48px;
   --text-title-lg--line-height: 60px;
   --text-title-md: 36px;
   --text-title-md--line-height: 44px;
-  --text-title-sm: 30px;
+  --text-title-sm:30px;
   --text-title-sm--line-height: 38px;
-  --text-theme-xl: 20px;
+  --text-theme-xl:20px;
   --text-theme-xl--line-height: 30px;
-  --text-theme-sm: 14px;
+  --text-theme-sm:14px;
   --text-theme-sm--line-height: 20px;
   --text-theme-xs: 12px;
   --text-theme-xs--line-height: 18px;
@@ -78,7 +78,7 @@
   --color-gray-800: #1d2939;
   --color-gray-900: #101828;
   --color-gray-950: #0c111d;
-  --color-gray-dark: #1a2231;
+  --color-gray-dark:#1a2231;
 
   --color-orange-25: #fffaf5;
   --color-orange-50: #fff6ed;
@@ -171,6 +171,109 @@
   --z-index-9999: 9999;
   --z-index-99999: 99999;
   --z-index-999999: 999999;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes zoom-in-95 {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slide-in-from-top-1 {
+    from {
+      transform: translateY(-0.25rem);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-top-2 {
+    from {
+      transform: translateY(-0.5rem);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-top-3 {
+    from {
+      transform: translateY(-0.75rem);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-right-4 {
+    from {
+      transform: translateX(1rem);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(1rem);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  --animation-fade-in: fade-in 0.3s ease-out;
+  --animation-zoom-in: zoom-in 0.3s ease-out;
+  --animation-zoom-in-95: zoom-in-95 0.3s ease-out;
+  --animation-slide-in-from-top-1: slide-in-from-top-1 0.3s ease-out;
+  --animation-slide-in-from-top-2: slide-in-from-top-2 0.3s ease-out;
+  --animation-slide-in-from-top-3: slide-in-from-top-3 0.3s ease-out;
+  --animation-slide-in-from-right-4: slide-in-from-right-4 0.3s ease-out;
+  --animation-slide-in-from-bottom: slide-in-from-bottom 0.3s ease-out;
 }
 
 .dark {
@@ -307,6 +410,48 @@
 
 @utility menu-dropdown-badge-inactive {
   @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
+}
+
+@utility modal-backdrop {
+  @apply fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-[4px] p-4;
+  animation: fade-in 0.3s ease-out;
+}
+
+@utility animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+}
+
+@utility fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@utility zoom-in {
+  animation: zoom-in 0.3s ease-out;
+}
+
+@utility zoom-in-95 {
+  animation: zoom-in-95 0.3s ease-out;
+}
+
+@utility slide-in-from-top-1 {
+  animation: slide-in-from-top-1 0.3s ease-out;
+}
+
+@utility slide-in-from-top-2 {
+  animation: slide-in-from-top-2 0.3s ease-out;
+}
+
+@utility slide-in-from-top-3 {
+  animation: slide-in-from-top-3 0.3s ease-out;
+}
+
+@utility slide-in-from-right-4 {
+  animation: slide-in-from-right-4 0.3s ease-out;
+}
+
+@utility slide-in-from-bottom {
+  animation: slide-in-from-bottom 0.3s ease-out;
 }
 
 @utility no-scrollbar {
@@ -448,7 +593,7 @@
 }
 
 .flatpickr-day {
-  @apply !flex !items-center !text-theme-sm !font-medium !text-gray-800 dark:!text-white/90 dark:hover:!border-gray-300 dark:hover:!bg-gray-900;
+  @apply !flex !items-center !text-theme-sm !font-medium !text-gray-800 dark:!text-white/90 dark:!border-gray-300 dark:!bg-gray-900;
 }
 
 .flatpickr-day.nextMonthDay,

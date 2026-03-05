@@ -58,7 +58,7 @@ export default function EditSettingModal({
   const isEditing = !!setting; // Boolean check
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700">
         <h2 className="text-xl font-semibold mb-5 dark:text-gray-200">
           {isEditing ? "Edit Setting" : "Add New Setting"}

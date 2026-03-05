@@ -37,7 +37,7 @@ export default function EditCategoryModal({ category, onClose, onSuccess }: Prop
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}

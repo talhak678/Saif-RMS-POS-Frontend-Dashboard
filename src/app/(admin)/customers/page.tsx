@@ -167,7 +167,7 @@ export default function CustomersPage() {
   // ──────────────────────────────────────────────────────────────────────────
   return (
     <ProtectedRoute module="customers-orders:customers">
-      <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200 space-y-6">
+      <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200 space-y-6">
 
         {/* ── Header ────────────────────────────────────────────────────────── */}
         <div className="flex justify-between items-center">

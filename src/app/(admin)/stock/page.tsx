@@ -156,7 +156,7 @@ export default function StocksPage() {
 
   return (
     <ProtectedRoute module="inventory-recipes:stock">
-      <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+      <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
 
         {/* HEADER & CONTROLS */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -272,7 +272,7 @@ export default function StocksPage() {
 
         {/* --- ADD / UPDATE MODAL --- */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
 
               <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">

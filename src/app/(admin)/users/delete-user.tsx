@@ -47,7 +47,7 @@ const DeleteUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) 
                 onClose={() => setModal(false)}
                 className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none"
             >
-                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
+                <div className="bg-white/90 dark:bg-gray-800/90  rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
                     <div className="p-6 text-center">
                         <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50 dark:border-red-900/20">
                             <Trash2 className="w-8 h-8 text-red-500" />

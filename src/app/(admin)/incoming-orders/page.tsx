@@ -149,7 +149,7 @@ function OrderDetailModal({
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[999999] flex items-center justify-center bg-gray-500/10 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
             <div
@@ -912,7 +912,7 @@ export default function IncomingOrdersPage() {
 
     return (
         <ProtectedRoute module="customers-orders:incoming-orders">
-            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
 
                 {/* Page Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
@@ -1082,7 +1082,7 @@ export default function IncomingOrdersPage() {
 
                 {/* STATUS MODAL */}
                 {statusModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-100 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <div>

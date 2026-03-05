@@ -89,7 +89,7 @@ export default function UsersPage() {
 
     return (
         <ProtectedRoute module="authentication:users">
-            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                         Users

@@ -183,7 +183,7 @@ export default function RidersPage() {
 
     return (
         <ProtectedRoute module="delivery-support:riders">
-            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h1 className="text-2xl font-bold">Riders Management</h1>
@@ -260,7 +260,7 @@ export default function RidersPage() {
 
                 {/* ADD RIDER MODAL */}
                 {showAddModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border dark:border-gray-700">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <h2 className="font-bold text-lg">Add New Rider</h2>
@@ -280,7 +280,7 @@ export default function RidersPage() {
 
                 {/* EDIT RIDER MODAL */}
                 {showEditModal && selectedRider && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border dark:border-gray-700">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <h2 className="font-bold text-lg">Edit Rider</h2>

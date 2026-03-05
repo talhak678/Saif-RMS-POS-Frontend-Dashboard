@@ -881,7 +881,7 @@ export default function ProfilePage() {
                       <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24" />
                     </div>
                     <div className="relative flex items-center gap-6">
-                      <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-xl">
+                      <div className="w-20 h-20 rounded-2xl bg-white/20  flex items-center justify-center border border-white/30 shadow-xl">
                         {user?.restaurant?.logo ? (
                           <img src={user.restaurant.logo} alt="logo" className="w-full h-full object-cover rounded-2xl" />
                         ) : (

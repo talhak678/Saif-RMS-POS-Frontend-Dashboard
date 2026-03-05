@@ -64,7 +64,7 @@ export default function CategoriesPage() {
 
     return (
         <ProtectedRoute module="menu-management:categories">
-            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between mb-6">
@@ -80,7 +80,7 @@ export default function CategoriesPage() {
 
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="bg-button backdrop-blur-xs outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 hover:opacity-90"
+                        className="bg-button  outline-1 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 hover:opacity-90"
                     >
                         <Plus className="h-4 w-4" />
                         Add Category

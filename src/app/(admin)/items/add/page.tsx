@@ -137,7 +137,7 @@ function AddItemForm() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-blend backdrop-blur-1xl dark:bg-gray-900">
+    <div className="min-h-screen p-4 md:p-8 bg-blend  dark:bg-gray-900">
       <div className="max-w-screen mx-auto">
 
         {/* Header with Back Button */}

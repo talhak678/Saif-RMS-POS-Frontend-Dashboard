@@ -173,7 +173,7 @@ export default function TableServicesPage() {
 
     return (
         <ProtectedRoute module="pos:table-services">
-            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+            <div className="min-h-screen p-4 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -355,7 +355,7 @@ export default function TableServicesPage() {
 
                 {/* ── CREATE / EDIT FORM MODAL ── */}
                 {showForm && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <div>
@@ -415,7 +415,7 @@ export default function TableServicesPage() {
 
                 {/* ── VIEW DETAIL MODAL ── */}
                 {viewItem && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Table {viewItem.number} Details</h2>
@@ -478,7 +478,7 @@ export default function TableServicesPage() {
 
                 {/* ── STATUS MODAL ── */}
                 {statusModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                                 <div>
@@ -524,7 +524,7 @@ export default function TableServicesPage() {
 
                 {/* ── DELETE MODAL ── */}
                 {deleteModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                             <div className="p-5 text-center">
                                 <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">

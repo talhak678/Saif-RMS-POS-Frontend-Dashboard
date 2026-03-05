@@ -110,7 +110,7 @@ function AddRecipeForm() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl flex items-center justify-center">
+    <div className="min-h-screen p-4 md:p-8 bg-white/60 dark:bg-gray-900/60  flex items-center justify-center">
       <div className="w-full max-w-2xl">
 
         {/* Header */}
@@ -227,7 +227,7 @@ function AddRecipeForm() {
 
       {/* QUICK ADD INGREDIENT MODAL */}
       {isIngModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-500/10 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-5 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center">
               <div>

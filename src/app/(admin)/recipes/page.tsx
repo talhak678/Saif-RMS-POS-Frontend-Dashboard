@@ -104,7 +104,7 @@ export default function RecipesPage() {
 
   return (
     <ProtectedRoute module="inventory-recipes:recipes">
-      <div className="min-h-screen p-4 md:p-8 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
+      <div className="min-h-screen p-4 md:p-8 bg-white/60 dark:bg-gray-900/60 ">
 
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
@@ -212,7 +212,7 @@ export default function RecipesPage() {
 
         {/* DELETE CONFIRMATION MODAL */}
         {deleteId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
               <div className="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle size={28} />

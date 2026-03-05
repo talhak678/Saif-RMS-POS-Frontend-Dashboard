@@ -152,7 +152,7 @@ export default function MenuItemsPage() {
 
     return (
         <ProtectedRoute module="menu-management:items">
-            <div className="max-w-[calc(98vw)] lg:max-w-[calc(78vw)] mx-auto p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl my-4">
+            <div className="max-w-[calc(98vw)] lg:max-w-[calc(78vw)] mx-auto p-4 bg-white/60 dark:bg-gray-900/60  rounded-2xl my-4">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
                         Menu Items
@@ -239,7 +239,7 @@ export default function MenuItemsPage() {
                                                             )}
 
                                                             {!item.isAvailable && (
-                                                                <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                                                                <div className="absolute inset-0 bg-white/40 dark:bg-gray-500/10 -[1px] flex items-center justify-center">
                                                                     <span className="bg-red-500 text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 rounded-xl shadow-lg">
                                                                         Unavailable
                                                                     </span>
@@ -247,7 +247,7 @@ export default function MenuItemsPage() {
                                                             )}
 
                                                             <div className="absolute top-2 left-2 flex gap-1">
-                                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center p-0.5 border border-white/50 backdrop-blur-md ${isVeg ? "bg-brand-600/80" : "bg-red-600/80"}`}>
+                                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center p-0.5 border border-white/50  ${isVeg ? "bg-brand-600/80" : "bg-red-600/80"}`}>
                                                                     <div className="w-full h-full rounded-full bg-white" />
                                                                 </div>
                                                             </div>

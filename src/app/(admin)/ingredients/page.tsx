@@ -121,7 +121,7 @@ export default function IngredientsPage() {
 
     return (
         <ProtectedRoute module="inventory-recipes:ingredients">
-            <div className="min-h-screen bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl pb-20 font-outfit">
+            <div className="min-h-screen bg-white/60 dark:bg-gray-900/60  pb-20 font-outfit">
 
                 {/* --- SIMPLIFIED HEADER --- */}
                 <div className="px-4 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
@@ -238,7 +238,7 @@ export default function IngredientsPage() {
 
                 {/* --- SIMPLE MODALS --- */}
                 {isFormModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-500/10">
                         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
                             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
                                 <h2 className="text-base font-bold text-gray-800 dark:text-white">
@@ -295,7 +295,7 @@ export default function IngredientsPage() {
                 )}
 
                 {deleteId && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-500/10 p-4">
                         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-8 text-center animate-in fade-in zoom-in duration-200">
                             <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <AlertTriangle size={28} />

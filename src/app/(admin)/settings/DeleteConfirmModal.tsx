@@ -4,7 +4,7 @@ export default function DeleteConfirmModal({
   loading,
 }: any) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-sm">
         <h2 className="text-lg font-semibold dark:text-gray-200">
           Delete Setting?

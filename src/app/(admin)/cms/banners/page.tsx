@@ -254,7 +254,7 @@ export default function BannersPage() {
                                                 onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/800x400?text=Invalid+Image")}
                                             />
                                             <div className="absolute top-2 right-2 flex gap-1.5">
-                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow ${banner.isActive ? "bg-[#5d69b9]/80 text-white" : "bg-gray-600/80 text-white"
+                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider  shadow ${banner.isActive ? "bg-[#5d69b9]/80 text-white" : "bg-gray-600/80 text-white"
                                                     }`}>
                                                     {banner.isActive ? "Active" : "Draft"}
                                                 </span>

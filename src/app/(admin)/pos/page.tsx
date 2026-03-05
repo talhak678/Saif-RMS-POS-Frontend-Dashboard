@@ -117,7 +117,7 @@ function ItemSelectionModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 {/* Image */}
                 <div className="relative h-56 p-4">
@@ -432,7 +432,7 @@ function CustomerDetailsModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -707,7 +707,7 @@ function StripeModal({
     onSuccess: () => void
 }) {
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-500/10 p-4 ">
             <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Complete Payment</h2>
@@ -1320,3 +1320,4 @@ export default function POSPage() {
         </ProtectedRoute>
     );
 }
+

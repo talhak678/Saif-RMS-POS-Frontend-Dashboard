@@ -155,13 +155,13 @@ export default function BlogsPage({ embedded = false }: Props) {
                                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setCurrentBlog(blog); setIsModalOpen(true); }}
-                                        className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border border-gray-100 dark:border-gray-700"
+                                        className="p-2 bg-white/90 dark:bg-gray-800/90  rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border border-gray-100 dark:border-gray-700"
                                     >
                                         <Edit2 className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                         onClick={(e) => handleDelete(e, blog.id)}
-                                        className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-lg text-red-500 hover:text-red-600 shadow-sm border border-gray-100 dark:border-gray-700"
+                                        className="p-2 bg-white/90 dark:bg-gray-800/90  rounded-lg text-red-500 hover:text-red-600 shadow-sm border border-gray-100 dark:border-gray-700"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -187,7 +187,7 @@ export default function BlogsPage({ embedded = false }: Props) {
 
                 {/* Modal */}
                 {isModalOpen && createPortal(
-                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-gray-500/10 ">
                         <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-700">
                             <form onSubmit={handleSave} className="flex flex-col h-full max-h-[85vh]">
                                 <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
@@ -273,3 +273,4 @@ export default function BlogsPage({ embedded = false }: Props) {
         </ProtectedRoute>
     );
 }
+

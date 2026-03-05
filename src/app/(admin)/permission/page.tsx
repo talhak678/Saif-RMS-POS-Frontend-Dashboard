@@ -35,7 +35,7 @@ export default function Permissions() {
     }, []);
 
     const PermCard: React.FC<{ permission: iPermission }> = ({ permission }) => (
-        <div className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md transition-all duration-300 hover:bg-white/20 hover:shadow-xl dark:border-gray-800/30 dark:bg-gray-900/40 dark:hover:bg-gray-900/60">
+        <div className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-5  transition-all duration-300 hover:bg-white/20 hover:shadow-xl dark:border-gray-800/30 dark:bg-gray-900/40 dark:hover:bg-gray-900/60">
             <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/10 text-brand-500 transition-transform duration-300 group-hover:scale-110">
                     <ShieldCheck size={24} />

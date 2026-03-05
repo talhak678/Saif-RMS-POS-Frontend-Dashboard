@@ -67,7 +67,7 @@ function Roles() {
 
     return (
 
-        <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl dark:text-gray-200">
+        <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
             {/* HEADER */}
             <div className="md:flex items-center justify-between mb-6 gap-4">
                 <div>
@@ -195,7 +195,7 @@ function Roles() {
 
             {/* DELETE MODAL */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-gray-500/10  flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100 dark:border-gray-700">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Delete Role</h2>

@@ -123,7 +123,7 @@ const SubscriptionRequestModal = ({ isOpen, onClose, initialContact }: Subscript
         <Modal
             isOpen={isOpen}
             onClose={handleClose}
-            className="max-w-2xl p-0 overflow-hidden rounded-3xl z-[9999] backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-white/10"
+            className="max-w-2xl p-0 overflow-hidden rounded-3xl z-[9999]  bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-white/10"
         >
             <div className="relative">
                 {/* Modal Header */}

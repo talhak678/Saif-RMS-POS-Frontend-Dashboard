@@ -278,7 +278,7 @@ export default function LoyaltyPage() {
                 {/* ADD TRANSACTION MODAL */}
                 {
                     showAddModal && (
-                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
                                 <div className="flex justify-between mb-4">
                                     <h2 className="font-semibold text-lg">Add Loyalty Transaction</h2>
