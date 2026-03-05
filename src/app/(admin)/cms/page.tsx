@@ -28,7 +28,9 @@ const DEFAULT_CONFIG = {
                     logoUrl: "",
                     menuItems: "Home, Our Menu, About Us, Contact Us, Blogs",
                     showCart: "true",
-                    showLogin: "true"
+                    showLogin: "true",
+                    openingTime: "09:00",
+                    closingTime: "01:00"
                 }
             },
             banner: {
@@ -37,11 +39,11 @@ const DEFAULT_CONFIG = {
             },
             browseMenu: {
                 required: false, enabled: true,
-                content: { title: "Browse Our Menu", textAlign: "center", selectedCategoryIds: [] }
+                content: { title: "Browse Our Menu", selectedCategoryIds: [] }
             },
             todaysSpecial: {
                 required: false, enabled: false,
-                content: { title: "Today's Special", description: "Special items for today only", selectedItemIds: [], backgroundColor: "#222222", backgroundImageUrl: "" }
+                content: { title: "Today's Special", textAlign: "center", selectedItemIds: [], backgroundImageUrl: "" }
             },
             ourMenu: {
                 required: true, enabled: true,
@@ -252,7 +254,8 @@ const DEFAULT_CONFIG = {
                     textColor: "#666666",
                     bannerTextColor: "#ffffff",
                     footerBgColor: "#0d0d0d",
-                    footerTextColor: "#ffffff"
+                    footerTextColor: "#ffffff",
+                    todaysSpecialBgColor: "#222222"
                 }
             },
             fonts: {
@@ -351,13 +354,14 @@ export default function CMSPage() {
                                     };
                                     // FORCE: Ensure selection arrays exist
                                     if (sec === 'todaysSpecial') {
-                                        // Clean up old category selection if it exists
+                                        delete mergedConfig[page].sections[sec].content.description;
+                                        delete mergedConfig[page].sections[sec].content.backgroundColor;
                                         delete mergedConfig[page].sections[sec].content.selectedCategoryIds;
-                                        delete mergedConfig[page].sections[sec].content.textAlign;
                                         if (!mergedConfig[page].sections[sec].content.selectedItemIds)
                                             mergedConfig[page].sections[sec].content.selectedItemIds = [];
                                     }
                                     if (sec === 'ourMenu' || sec === 'browseMenu' || sec === 'menuGallery') {
+                                        if (sec === 'browseMenu') delete mergedConfig[page].sections[sec].content.textAlign;
                                         if (!mergedConfig[page].sections[sec].content.selectedCategoryIds)
                                             mergedConfig[page].sections[sec].content.selectedCategoryIds = [];
                                     }
@@ -791,6 +795,14 @@ export default function CMSPage() {
                                                                     label: "Website Meta Description",
                                                                     desc: "A brief summary of your restaurant for search engines and social sharing."
                                                                 },
+                                                                openingTime: {
+                                                                    label: "Restaurant Opening Time",
+                                                                    desc: "Format: 09:00 (24-hour format). Used to show 'Closed' status automatically."
+                                                                },
+                                                                closingTime: {
+                                                                    label: "Restaurant Closing Time",
+                                                                    desc: "Format: 01:00 (24-hour format). Can be after midnight."
+                                                                },
                                                             };
 
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather', 'Raleway', 'Nunito', 'Ubuntu', 'Oswald', 'Source Sans Pro'];
@@ -1060,7 +1072,7 @@ export default function CMSPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <input
-                                                                            type={field.toLowerCase().includes('phone') ? 'tel' : 'text'}
+                                                                            type={field.toLowerCase().includes('phone') ? 'tel' : field.toLowerCase().includes('time') ? 'time' : 'text'}
                                                                             value={section.content[field]}
                                                                             onChange={(e) => {
                                                                                 let val = e.target.value;
