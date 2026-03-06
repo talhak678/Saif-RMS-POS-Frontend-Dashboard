@@ -919,7 +919,7 @@ export default function CMSPage() {
                                                                                 </>
                                                                             )}
                                                                             {fieldDescriptions[field]?.desc && (
-                                                                                <p className="text-[10px] text-gray-500 italic mt-1 px-1 leading-relaxed">
+                                                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 italic mt-1 px-1 leading-relaxed">
                                                                                     {fieldDescriptions[field].desc}
                                                                                 </p>
                                                                             )}
@@ -947,7 +947,7 @@ export default function CMSPage() {
                                                                                             type="text"
                                                                                             value={section.content[field]}
                                                                                             onChange={(e) => handleContentChange(activeTab, sectionKey, field, e.target.value)}
-                                                                                            className="bg-transparent border-none outline-none text-[11px] font-mono uppercase text-gray-500 w-full"
+                                                                                            className="bg-transparent border-none outline-none text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 w-full"
                                                                                             placeholder="#000000"
                                                                                         />
                                                                                     </div>
@@ -1057,7 +1057,7 @@ export default function CMSPage() {
                                                                                 recommendedSize={isThemeLogo ? (fieldDescriptions[field]?.size || 'Auto') : (field === 'logoUrl' ? '50-400px' : field.toLowerCase().includes('favicon') ? 'Max 50x50' : field === 'rightImage' ? '800x800' : sectionKey === 'banner' ? (activeTab === 'home' ? '1920x1080' : '1920x800') : field === 'bgImage' || field === 'imageUrl' ? '1920x800' : (field === 'videoUrl' ? 'MP4/WebM' : '400×200'))}
                                                                             />
                                                                             {fieldDescriptions[field]?.desc && (
-                                                                                <p className="text-[10px] text-gray-500 italic mt-1.5 px-1">
+                                                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 italic mt-1.5 px-1">
                                                                                     {fieldDescriptions[field].desc}
                                                                                 </p>
                                                                             )}
@@ -1306,7 +1306,7 @@ export default function CMSPage() {
                                                                             )}
 
                                                                             {(data as any[]).length === 0 && (
-                                                                                <div className="py-8 text-center text-gray-400 text-xs border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                                                                                <div className="py-8 text-center text-gray-400 dark:text-gray-500 text-xs border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
                                                                                     No {label} found.
                                                                                 </div>
                                                                             )}

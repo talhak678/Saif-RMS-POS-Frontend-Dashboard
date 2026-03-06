@@ -70,7 +70,7 @@ const PERIODS: { key: Period; label: string }[] = [
 
 // ─── Growth Badge ───────────────────────────────────────────────────────────
 function GrowthBadge({ value }: { value: number | null }) {
-  if (value === null) return <span className="text-xs text-gray-400">—</span>;
+  if (value === null) return <span className="text-xs text-gray-400 dark:text-gray-500">—</span>;
   if (value > 0) return (
     <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">
       <ArrowUpRight size={11} />{value}%
@@ -82,7 +82,7 @@ function GrowthBadge({ value }: { value: number | null }) {
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
       <Minus size={11} />0%
     </span>
   );
@@ -101,7 +101,7 @@ function StatCard({ label, value, sub, icon, accent, growth }: {
       </div>
       <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{value}</p>
       <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-gray-400">{sub}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{sub}</p>
         {growth !== undefined && <GrowthBadge value={growth ?? null} />}
       </div>
     </div>
@@ -126,7 +126,7 @@ function SectionHeader({ icon, title, sub }: { icon: React.ReactNode; title: str
       <span className="text-brand-500">{icon}</span>
       <div>
         <h2 className="text-base font-semibold text-gray-800 dark:text-white leading-tight">{title}</h2>
-        {sub && <p className="text-xs text-gray-400">{sub}</p>}
+        {sub && <p className="text-xs text-gray-400 dark:text-gray-500">{sub}</p>}
       </div>
     </div>
   );
@@ -174,7 +174,7 @@ function KeywordRow({ keyword, count, percentage }: { keyword: string; count: nu
       </div>
       <div className="text-right">
         <p className="text-sm font-bold text-gray-900 dark:text-white">{count}</p>
-        <p className="text-[10px] text-gray-400">{percentage}% of searches</p>
+        <p className="text-[10px] text-gray-400 dark:text-gray-500">{percentage}% of searches</p>
       </div>
     </div>
   );
@@ -189,7 +189,7 @@ function SocialLinkRow({ name, clicks, count, icon, color }: { name: string; cli
         </div>
         <div>
           <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100">{name}</h4>
-          <p className="text-xs text-gray-400 font-medium">Outbound clicks</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Outbound clicks</p>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -281,7 +281,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
             <Layers className="w-6 h-6 text-brand-600" /> Platform Overview
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">Super Admin — platform-wide metrics</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Super Admin — platform-wide metrics</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-0.5">
@@ -312,7 +312,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
           <SectionHeader icon={<CreditCard size={16} />} title="Subscription Revenue" sub={`Rs. ${Number(data.totalSubscriptionRevenue).toLocaleString()} total`} />
           {data.subscriptionRevenue.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No subscriptions</div>
+            <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500 text-sm">No subscriptions</div>
           ) : (
             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
               {data.subscriptionRevenue.map((s, i) => (
@@ -326,7 +326,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-gray-900 dark:text-white">Rs. {Number(s.price).toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">{s.billingCycle}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{s.billingCycle}</p>
                   </div>
                 </div>
               ))}
@@ -377,7 +377,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
           <SectionHeader icon={<TrendingUp size={16} />} title="Top Restaurants by Revenue" />
           {data.topRestaurantsByRevenue.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No data</div>
+            <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500 text-sm">No data</div>
           ) : (
             <div className="space-y-3">
               {data.topRestaurantsByRevenue.map((r, i) => (
@@ -393,7 +393,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
           <SectionHeader icon={<Building2 size={16} />} title="Recently Joined Restaurants" />
           {data.recentRestaurants.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">No recent restaurants</div>
+            <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500 text-sm">No recent restaurants</div>
           ) : (
             <div className="space-y-2">
               {data.recentRestaurants.map(r => {
@@ -402,7 +402,7 @@ function SuperAdminDashboard({ data, period, setPeriod, refreshing, onRefresh }:
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700">
                     <div>
                       <p className="text-sm font-semibold text-gray-800 dark:text-white">{r.name}</p>
-                      <p className="text-xs text-gray-400">{r.subscription} · {new Date(r.createdAt).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{r.subscription} · {new Date(r.createdAt).toLocaleDateString()}</p>
                     </div>
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${s.bg} ${s.text}`}>{s.icon}{r.status}</span>
                   </div>
@@ -539,7 +539,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
             <BarChart2 className="w-6 h-6 text-brand-600" /> Overview Dashboard
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">Track your restaurant performance in real-time</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Track your restaurant performance in real-time</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -606,7 +606,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2half bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm lg:col-span-3">
           <SectionHeader icon={<Monitor size={16} />} title="By Platform" />
           {posCount + webCount + mobileCount === 0 ? (
-            <div className="flex items-center justify-center h-40 text-gray-400 text-sm">No data</div>
+            <div className="flex items-center justify-center h-40 text-gray-400 dark:text-gray-500 text-sm">No data</div>
           ) : (
             <>
               <ReactApexChart options={sourceChart} series={[posCount, webCount, mobileCount]} type="donut" height={160} />
@@ -628,7 +628,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm lg:col-span-2">
           <SectionHeader icon={<UtensilsCrossed size={16} />} title="By Type" />
           {dineCount + delivCount + pickCount === 0 ? (
-            <div className="flex items-center justify-center h-40 text-gray-400 text-sm">No data</div>
+            <div className="flex items-center justify-center h-40 text-gray-400 dark:text-gray-500 text-sm">No data</div>
           ) : (
             <>
               <ReactApexChart options={typeChart} series={[dineCount, delivCount, pickCount]} type="donut" height={160} />
@@ -680,7 +680,7 @@ export default function DashboardPage() {
               );
             })}
             {Object.keys(data.statusBreakdown).length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">No orders yet</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">No orders yet</p>
             )}
           </div>
         </div>
@@ -746,12 +746,12 @@ export default function DashboardPage() {
             <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
               ${Number(data.avgOrderValue).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </p>
-            <p className="text-xs text-gray-400 mt-1">Per completed order</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Per completed order</p>
           </div>
           {avgRating && (
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <Stars rating={Math.round(Number(avgRating))} />
-              <span className="text-xs text-gray-400">{avgRating} avg rating</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{avgRating} avg rating</span>
             </div>
           )}
         </div>
