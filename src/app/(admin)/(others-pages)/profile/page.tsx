@@ -180,7 +180,9 @@ export default function ProfilePage() {
     subEndDate: null,
     price: 0,
     billingCycle: "MONTHLY",
-    features: [] as string[]
+    features: [] as string[],
+    openingTime: "09:00",
+    closingTime: "01:00"
   });
 
   const [userForm, setUserForm] = useState({
@@ -193,6 +195,8 @@ export default function ProfilePage() {
     newPassword: "",
     confirmPassword: ""
   });
+
+  const [cmsData, setCmsData] = useState<any>(null);
 
   const [payments, setPayments] = useState<any[]>([]);
   const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
@@ -303,10 +307,21 @@ export default function ProfilePage() {
   const fetchData = async () => {
     try {
       setFetching(true);
-      const [restRes, payRes] = await Promise.all([
+      const [restRes, payRes, cmsRes] = await Promise.all([
         api.get(`/restaurants/${user?.restaurantId}`),
-        api.get(`/payments?limit=50`)
+        api.get(`/payments?limit=50`),
+        api.get("/cms/config")
       ]);
+
+      let cmsOpeningTime = "09:00";
+      let cmsClosingTime = "01:00";
+
+      if (cmsRes.data?.success) {
+        const data = cmsRes.data.data;
+        setCmsData(data);
+        cmsOpeningTime = data.openingTime || data.configJson?.home?.sections?.header?.content?.openingTime || "09:00";
+        cmsClosingTime = data.closingTime || data.configJson?.home?.sections?.header?.content?.closingTime || "01:00";
+      }
 
       if (restRes.data?.success) {
         const data = restRes.data.data;
@@ -349,6 +364,8 @@ export default function ProfilePage() {
           activePriceId: planPrice?.id || null,
           activePriceIsActive: planPrice?.isActive ?? true,
           subscriptionPrices: data.subscriptionPrices || [],
+          openingTime: data.openingTime || cmsOpeningTime,
+          closingTime: data.closingTime || cmsClosingTime,
         });
       }
 
@@ -374,11 +391,36 @@ export default function ProfilePage() {
   const handleUpdateRestaurant = async () => {
     try {
       setLoading(true);
-      const { subStartDate, subEndDate, price, billingCycle, subscription, ...restPayload } = restaurantForm;
+      const { subStartDate, subEndDate, price, billingCycle, subscription, activePriceId, activePriceIsActive, subscriptionPrices, ...restPayload } = restaurantForm;
+
+      // Update restaurant info
       const res = await api.put(`/restaurants/${user?.restaurantId}`, restPayload);
+
+      // ALSO update CMS config specifically for timing 
+      // This ensures the website sees the new times immediately
+      if (cmsData) {
+        const updatedConfig = { ...cmsData.configJson };
+        if (!updatedConfig.home) updatedConfig.home = { sections: { header: { content: {} } } };
+        if (!updatedConfig.home.sections) updatedConfig.home.sections = { header: { content: {} } };
+        if (!updatedConfig.home.sections.header) updatedConfig.home.sections.header = { content: {} };
+        if (!updatedConfig.home.sections.header.content) updatedConfig.home.sections.header.content = {};
+
+        updatedConfig.home.sections.header.content.openingTime = restaurantForm.openingTime;
+        updatedConfig.home.sections.header.content.closingTime = restaurantForm.closingTime;
+
+        await api.post("/cms/config", {
+          configJson: updatedConfig,
+          backgroundColor: cmsData.backgroundColor,
+          primaryColor: cmsData.primaryColor,
+          openingTime: restaurantForm.openingTime,
+          closingTime: restaurantForm.closingTime
+        });
+      }
+
       if (res.data?.success) {
         toast.success("Restaurant information updated!");
         refreshUser();
+        fetchData(); // Reload to be sure
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update restaurant");
@@ -619,6 +661,40 @@ export default function ProfilePage() {
                       />
                       <p className="mt-2 text-xs text-gray-500 font-medium">Recommended size: 500x500 pixels (1:1 ratio).</p>
                       <p className="text-xs text-gray-400 italic">This logo will be displayed on your invoices and website. Images not in 1:1 ratio may appear cropped.</p>
+                    </div>
+                  </div>
+
+                  {/* Operational Hours Section */}
+                  <div className="flex flex-col md:flex-row md:items-center py-4 border-b border-gray-50 dark:border-gray-700/50">
+                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-2 md:mb-0">Operating Hours</Label>
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold uppercase text-gray-400">Opening Time</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={restaurantForm.openingTime}
+                            onChange={(e) => setRestaurantForm({ ...restaurantForm, openingTime: e.target.value })}
+                            className="bg-gray-50/50 border-gray-200 dark:border-gray-700 pl-10"
+                          />
+                          <Clock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold uppercase text-gray-400">Closing Time</Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            value={restaurantForm.closingTime}
+                            onChange={(e) => setRestaurantForm({ ...restaurantForm, closingTime: e.target.value })}
+                            className="bg-gray-50/50 border-gray-200 dark:border-gray-700 pl-10"
+                          />
+                          <Clock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+                      </div>
+                      <p className="md:col-span-2 text-[10px] text-gray-400 font-medium italic mt-1">
+                        ⓘ Format: 24-hour. These hours are used for 'Closed' status on the website.
+                      </p>
                     </div>
                   </div>
 

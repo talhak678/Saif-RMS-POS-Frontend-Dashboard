@@ -15,6 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 
 // Types
 interface RecipeItem {
@@ -211,35 +212,33 @@ export default function RecipesPage() {
         </div>
 
         {/* DELETE CONFIRMATION MODAL */}
-        {deleteId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
-              <div className="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Remove Ingredient?</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Are you sure you want to remove this ingredient from the recipe?
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteId(null)}
-                  disabled={deleteLoading}
-                  className="flex-1 px-4 py-2.5 border rounded-xl text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleteLoading}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-md shadow-red-200 dark:shadow-none flex justify-center items-center"
-                >
-                  {deleteLoading ? <Loader size="sm" className="space-y-0" /> : "Remove"}
-                </button>
-              </div>
+        <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} showCloseButton={false} className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full p-6 text-center animate-in fade-in zoom-in duration-200">
+            <div className="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Remove Ingredient?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Are you sure you want to remove this ingredient from the recipe?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2.5 border rounded-xl text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium shadow-md shadow-red-200 dark:shadow-none flex justify-center items-center"
+              >
+                {deleteLoading ? <Loader size="sm" className="space-y-0" /> : "Remove"}
+              </button>
             </div>
           </div>
-        )}
+        </Modal>
 
       </div>
     </ProtectedRoute>

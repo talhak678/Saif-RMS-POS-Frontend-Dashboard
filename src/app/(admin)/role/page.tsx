@@ -11,6 +11,7 @@ import Loader from "@/components/common/Loader";
 import { RoleServiceInstance } from "@/services/role.service";
 import { ProtectedRoute } from "@/services/protected-route";
 import { iRole } from "@/types/auth.types";
+import { Modal } from "@/components/ui/modal";
 
 function Roles() {
     const router = useRouter();
@@ -194,38 +195,36 @@ function Roles() {
             </div>
 
             {/* DELETE MODAL */}
-            {deleteModal && (
-                <div className="fixed inset-0 bg-gray-500/10  flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100 dark:border-gray-700">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Delete Role</h2>
-                            <button onClick={() => setDeleteModal(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={20} />
-                            </button>
-                        </div>
+            <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} showCloseButton={false} className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full border border-gray-100 dark:border-gray-700">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Delete Role</h2>
+                        <button onClick={() => setDeleteModal(false)} className="text-gray-500 hover:text-gray-700">
+                            <X size={20} />
+                        </button>
+                    </div>
 
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 font-medium">
-                            Are you sure you want to delete the role <b>{selectedRole?.name}</b>? This action cannot be undone.
-                        </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 font-medium">
+                        Are you sure you want to delete the role <b>{selectedRole?.name}</b>? This action cannot be undone.
+                    </p>
 
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setDeleteModal(false)}
-                                className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                disabled={deleting}
-                                className="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex justify-center items-center"
-                            >
-                                {deleting ? <Loader size="sm" className="space-y-0" /> : "Confirm Delete"}
-                            </button>
-                        </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setDeleteModal(false)}
+                            className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex justify-center items-center"
+                        >
+                            {deleting ? <Loader size="sm" className="space-y-0" /> : "Confirm Delete"}
+                        </button>
                     </div>
                 </div>
-            )}
+            </Modal>
         </div>
     );
 }

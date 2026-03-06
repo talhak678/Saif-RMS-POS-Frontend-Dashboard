@@ -1,11 +1,13 @@
+import { Modal } from "@/components/ui/modal";
+
 export default function DeleteConfirmModal({
   onConfirm,
   onCancel,
   loading,
 }: any) {
   return (
-    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-sm">
+    <Modal isOpen={true} onClose={onCancel} showCloseButton={false} className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full">
         <h2 className="text-lg font-semibold dark:text-gray-200">
           Delete Setting?
         </h2>
@@ -30,6 +32,6 @@ export default function DeleteConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

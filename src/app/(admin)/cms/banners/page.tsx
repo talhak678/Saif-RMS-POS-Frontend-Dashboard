@@ -147,7 +147,7 @@ export default function BannersPage() {
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm"
                         style={{ backgroundColor: showForm ? "#e5e7eb" : "#5d69b9", color: showForm ? "#374151" : "#fff" }}
                     >
-                        {showForm ? <><X className="w-4 h-4" /> Close</> : <><Plus className="w-4 h-4" /> Add Banner</>}
+                        {showForm ? <><X className="w-4 h-4 text-[#5d69b9]" /> Close</> : <><Plus className="w-4 h-4" /> Add Banner</>}
                     </button>
                 </div>
 

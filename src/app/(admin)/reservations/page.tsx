@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 import DatePicker from "@/components/common/DatePicker";
 
 const RESERVATION_STATUSES = ["BOOKED", "ARRIVED", "COMPLETED", "CANCELLED"];
@@ -381,226 +382,218 @@ export default function ReservationsPage() {
                 )}
 
                 {/* ── CREATE / EDIT MODAL ── */}
-                {showCreate && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <div>
-                                    <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                                        {editItem ? "Edit Reservation" : "New Reservation"}
-                                    </h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fill in the details below</p>
-                                </div>
-                                <button onClick={() => { setShowCreate(false); setEditItem(null); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <X size={18} />
-                                </button>
+                <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); setEditItem(null); }} showCloseButton={false} className="max-w-md">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <div>
+                                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                                    {editItem ? "Edit Reservation" : "New Reservation"}
+                                </h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fill in the details below</p>
                             </div>
+                            <button onClick={() => { setShowCreate(false); setEditItem(null); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                <X size={18} />
+                            </button>
+                        </div>
 
-                            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-                                {formError && (
-                                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-700 dark:text-red-300 font-medium">
-                                        ⚠️ {formError}
-                                    </div>
-                                )}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="col-span-2">
-                                        <label className={labelCls}>Customer Name *</label>
-                                        <input type="text" value={form.customerName}
-                                            onChange={(e) => setForm({ ...form, customerName: e.target.value })}
-                                            placeholder="Ahmed Khan" className={inputCls} />
-                                    </div>
-                                    <div>
-                                        <label className={labelCls}>Phone *</label>
-                                        <input type="tel" value={form.phone}
-                                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                            placeholder="+1 300 1234567" className={inputCls} />
-                                    </div>
-                                    <div>
-                                        <label className={labelCls}>Guests *</label>
-                                        <input type="number" min={1} value={form.guestCount}
-                                            onChange={(e) => setForm({ ...form, guestCount: e.target.value })}
-                                            placeholder="4" className={inputCls} />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <label className={labelCls}>Reservation Date & Time *</label>
-                                        <DatePicker
-                                            value={form.startTime}
-                                            onChange={(val) => setForm({ ...form, startTime: val })}
-                                            showTime={true}
-                                            className={inputCls}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={labelCls}>Branch *</label>
-                                        <select value={form.branchId}
-                                            onChange={(e) => setForm({ ...form, branchId: e.target.value })}
-                                            className={inputCls}>
-                                            <option value="">Select branch</option>
-                                            {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className={labelCls}>Table (Optional)</label>
-                                        <select value={form.tableId}
-                                            onChange={(e) => setForm({ ...form, tableId: e.target.value })}
-                                            disabled={!form.branchId || formTables.length === 0}
-                                            className={inputCls + " disabled:opacity-50"}>
-                                            <option value="">No table</option>
-                                            {formTables
-                                                .filter((t: any) => t.status === "AVAILABLE" || t.id === form.tableId)
-                                                .map(t => (
-                                                    <option key={t.id} value={t.id}>
-                                                        Table {t.number} (cap: {t.capacity})
-                                                        {t.status !== "AVAILABLE" ? ` — ${t.status}` : ""}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                        {form.branchId && formTables.length === 0 && (
-                                            <p className="text-[11px] text-gray-400 mt-1">No tables found for this branch</p>
-                                        )}
-                                    </div>
-                                    {editItem && (
-                                        <div>
-                                            <label className={labelCls}>Status</label>
-                                            <select value={form.status}
-                                                onChange={(e) => setForm({ ...form, status: e.target.value })}
-                                                className={inputCls}>
-                                                {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
-                                            </select>
-                                        </div>
+                        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                            {formError && (
+                                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-700 dark:text-red-300 font-medium">
+                                    ⚠️ {formError}
+                                </div>
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <label className={labelCls}>Customer Name *</label>
+                                    <input type="text" value={form.customerName}
+                                        onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+                                        placeholder="Ahmed Khan" className={inputCls} />
+                                </div>
+                                <div>
+                                    <label className={labelCls}>Phone *</label>
+                                    <input type="tel" value={form.phone}
+                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                        placeholder="+1 300 1234567" className={inputCls} />
+                                </div>
+                                <div>
+                                    <label className={labelCls}>Guests *</label>
+                                    <input type="number" min={1} value={form.guestCount}
+                                        onChange={(e) => setForm({ ...form, guestCount: e.target.value })}
+                                        placeholder="4" className={inputCls} />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className={labelCls}>Reservation Date & Time *</label>
+                                    <DatePicker
+                                        value={form.startTime}
+                                        onChange={(val) => setForm({ ...form, startTime: val })}
+                                        showTime={true}
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelCls}>Branch *</label>
+                                    <select value={form.branchId}
+                                        onChange={(e) => setForm({ ...form, branchId: e.target.value })}
+                                        className={inputCls}>
+                                        <option value="">Select branch</option>
+                                        {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={labelCls}>Table (Optional)</label>
+                                    <select value={form.tableId}
+                                        onChange={(e) => setForm({ ...form, tableId: e.target.value })}
+                                        disabled={!form.branchId || formTables.length === 0}
+                                        className={inputCls + " disabled:opacity-50"}>
+                                        <option value="">No table</option>
+                                        {formTables
+                                            .filter((t: any) => t.status === "AVAILABLE" || t.id === form.tableId)
+                                            .map(t => (
+                                                <option key={t.id} value={t.id}>
+                                                    Table {t.number} (cap: {t.capacity})
+                                                    {t.status !== "AVAILABLE" ? ` — ${t.status}` : ""}
+                                                </option>
+                                            ))}
+                                    </select>
+                                    {form.branchId && formTables.length === 0 && (
+                                        <p className="text-[11px] text-gray-400 mt-1">No tables found for this branch</p>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="p-5 pt-0 flex gap-3">
-                                <button onClick={() => { setShowCreate(false); setEditItem(null); }}
-                                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
-                                    Cancel
-                                </button>
-                                <button onClick={handleSave} disabled={saving}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
-                                >
-                                    {saving ? <Loader size="sm" className="space-y-0" /> : editItem ? "Save Changes" : "Create Reservation"}
-                                </button>
+                                {editItem && (
+                                    <div>
+                                        <label className={labelCls}>Status</label>
+                                        <select value={form.status}
+                                            onChange={(e) => setForm({ ...form, status: e.target.value })}
+                                            className={inputCls}>
+                                            {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
                         </div>
+
+                        <div className="p-5 pt-0 flex gap-3">
+                            <button onClick={() => { setShowCreate(false); setEditItem(null); }}
+                                className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button onClick={handleSave} disabled={saving}
+                                className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                            >
+                                {saving ? <Loader size="sm" className="space-y-0" /> : editItem ? "Save Changes" : "Create Reservation"}
+                            </button>
+                        </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* ── VIEW MODAL ── */}
-                {viewItem && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Reservation Details</h2>
-                                <button onClick={() => setViewItem(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
-                            </div>
-                            <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
-                                <div className="flex justify-center mb-2"><StatusPill status={viewItem.status} /></div>
-                                {[
-                                    { icon: <Users className="w-4 h-4" />, label: "Customer", value: viewItem.customerName },
-                                    { icon: <Phone className="w-4 h-4" />, label: "Phone", value: viewItem.phone },
-                                    { icon: <Users className="w-4 h-4" />, label: "Guests", value: `${viewItem.guestCount} people` },
-                                    { icon: <Calendar className="w-4 h-4" />, label: "Branch", value: viewItem.branch?.name || "—" },
-                                    { icon: <LayoutGrid className="w-4 h-4" />, label: "Table", value: viewItem.table ? `Table ${viewItem.table.number} (cap: ${viewItem.table.capacity})` : "No table assigned" },
-                                    { icon: <Clock className="w-4 h-4" />, label: "Reservation Time", value: formatDateTime(viewItem.startTime) },
-                                    { icon: <Clock className="w-4 h-4" />, label: "Created At", value: formatDateTime(viewItem.createdAt) },
-                                ].map(({ icon, label, value }) => (
-                                    <div key={label} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                        <span className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0">{icon}</span>
-                                        <div>
-                                            <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold">{label}</p>
-                                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-0.5">{value}</p>
-                                        </div>
+                <Modal isOpen={!!viewItem} onClose={() => setViewItem(null)} showCloseButton={false} className="max-w-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Reservation Details</h2>
+                            <button onClick={() => setViewItem(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
+                        </div>
+                        <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
+                            <div className="flex justify-center mb-2"><StatusPill status={viewItem?.status} /></div>
+                            {[
+                                { icon: <Users className="w-4 h-4" />, label: "Customer", value: viewItem?.customerName },
+                                { icon: <Phone className="w-4 h-4" />, label: "Phone", value: viewItem?.phone },
+                                { icon: <Users className="w-4 h-4" />, label: "Guests", value: `${viewItem?.guestCount} people` },
+                                { icon: <Calendar className="w-4 h-4" />, label: "Branch", value: viewItem?.branch?.name || "—" },
+                                { icon: <LayoutGrid className="w-4 h-4" />, label: "Table", value: viewItem?.table ? `Table ${viewItem.table.number} (cap: ${viewItem.table.capacity})` : "No table assigned" },
+                                { icon: <Clock className="w-4 h-4" />, label: "Reservation Time", value: viewItem ? formatDateTime(viewItem.startTime) : "" },
+                                { icon: <Clock className="w-4 h-4" />, label: "Created At", value: viewItem ? formatDateTime(viewItem.createdAt) : "" },
+                            ].map(({ icon, label, value }) => (
+                                <div key={label} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                                    <span className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0">{icon}</span>
+                                    <div>
+                                        <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold">{label}</p>
+                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-0.5">{value}</p>
                                     </div>
-                                ))}
-                                <div className="flex gap-2 pt-1">
-                                    <button onClick={() => { const v = viewItem; setViewItem(null); openEdit(v); }}
-                                        className="flex-1 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        Edit
-                                    </button>
-                                    <button onClick={() => { setViewItem(null); setSelectedItem(viewItem); setNewStatus(viewItem.status); setStatusModal(true); }}
-                                        className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
-                                        Change Status
-                                    </button>
                                 </div>
+                            ))}
+                            <div className="flex gap-2 pt-1">
+                                <button onClick={() => { const v = viewItem; setViewItem(null); openEdit(v); }}
+                                    className="flex-1 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    Edit
+                                </button>
+                                <button onClick={() => { setSelectedItem(viewItem); setNewStatus(viewItem?.status); setStatusModal(true); setViewItem(null); }}
+                                    className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-lg text-sm font-bold transition-colors">
+                                    Change Status
+                                </button>
                             </div>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* ── STATUS MODAL ── */}
-                {statusModal && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <div>
-                                    <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Update Status</h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedItem?.customerName}</p>
-                                </div>
-                                <button onClick={() => setStatusModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
+                <Modal isOpen={statusModal} onClose={() => setStatusModal(false)} showCloseButton={false} className="max-w-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <div>
+                                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Update Status</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedItem?.customerName}</p>
                             </div>
-                            <div className="p-5 space-y-2">
-                                {/* Info note */}
-                                <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-3">
-                                    Setting status to <strong>Cancelled</strong> or <strong>Completed</strong> will automatically free the linked table.
-                                </p>
-                                {RESERVATION_STATUSES.map(st => {
-                                    const cfg = STATUS_CONFIG[st];
-                                    const isSelected = newStatus === st;
-                                    return (
-                                        <button key={st} onClick={() => setNewStatus(st)}
-                                            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected ? `${cfg.border} ${cfg.bg}` : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"
-                                                }`}>
-                                            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                                            <span className={`font-semibold text-sm ${isSelected ? cfg.color : "text-gray-700 dark:text-gray-300"}`}>{cfg.label}</span>
-                                            {isSelected && <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 font-bold">✓ Selected</span>}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <div className="p-5 pt-0 flex gap-3">
-                                <button onClick={() => setStatusModal(false)}
-                                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
-                                    Cancel
-                                </button>
-                                <button onClick={handleStatusUpdate} disabled={updatingStatus}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm flex justify-center items-center"
-                                >
-                                    {updatingStatus ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
-                                </button>
-                            </div>
+                            <button onClick={() => setStatusModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
+                        </div>
+                        <div className="p-5 space-y-2">
+                            {/* Info note */}
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-3">
+                                Setting status to <strong>Cancelled</strong> or <strong>Completed</strong> will automatically free the linked table.
+                            </p>
+                            {RESERVATION_STATUSES.map(st => {
+                                const cfg = STATUS_CONFIG[st];
+                                const isSelected = newStatus === st;
+                                return (
+                                    <button key={st} onClick={() => setNewStatus(st)}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${isSelected ? `${cfg.border} ${cfg.bg}` : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600"
+                                            }`}>
+                                        <span className={`w-3 h-3 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                                        <span className={`font-semibold text-sm ${isSelected ? cfg.color : "text-gray-700 dark:text-gray-300"}`}>{cfg.label}</span>
+                                        {isSelected && <span className="ml-auto text-xs text-blue-600 dark:text-blue-400 font-bold">✓ Selected</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <div className="p-5 pt-0 flex gap-3">
+                            <button onClick={() => setStatusModal(false)}
+                                className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button onClick={handleStatusUpdate} disabled={updatingStatus}
+                                className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm flex justify-center items-center"
+                            >
+                                {updatingStatus ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* ── DELETE MODAL ── */}
-                {deleteModal && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                            <div className="p-5 text-center">
-                                <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Trash2 className="w-7 h-7 text-red-500" />
-                                </div>
-                                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">Delete Reservation?</h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    <span className="font-semibold text-gray-700 dark:text-gray-300">{deleteTarget?.customerName}</span> ka reservation delete hoga aur linked table free ho jayega.
-                                </p>
+                <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} showCloseButton={false} className="max-w-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
+                        <div className="p-5 text-center">
+                            <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="w-7 h-7 text-red-500" />
                             </div>
-                            <div className="p-5 pt-0 flex gap-3">
-                                <button onClick={() => setDeleteModal(false)}
-                                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
-                                    Cancel
-                                </button>
-                                <button onClick={handleDelete} disabled={deleting}
-                                    className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
-                                >
-                                    {deleting ? <Loader size="sm" className="space-y-0" /> : "Yes, Delete"}
-                                </button>
-                            </div>
+                            <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">Delete Reservation?</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">{deleteTarget?.customerName}</span> ka reservation delete hoga aur linked table free ho jayega.
+                            </p>
+                        </div>
+                        <div className="p-5 pt-0 flex gap-3">
+                            <button onClick={() => setDeleteModal(false)}
+                                className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium">
+                                Cancel
+                            </button>
+                            <button onClick={handleDelete} disabled={deleting}
+                                className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center"
+                            >
+                                {deleting ? <Loader size="sm" className="space-y-0" /> : "Yes, Delete"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
             </div>
         </ProtectedRoute>
     );

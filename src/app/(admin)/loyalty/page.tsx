@@ -8,6 +8,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 
 const TRANSACTION_TYPES = ["EARNED", "REDEEMED"];
 
@@ -276,80 +277,76 @@ export default function LoyaltyPage() {
                 </div>
 
                 {/* ADD TRANSACTION MODAL */}
-                {
-                    showAddModal && (
-                        <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                                <div className="flex justify-between mb-4">
-                                    <h2 className="font-semibold text-lg">Add Loyalty Transaction</h2>
-                                    <button onClick={() => setShowAddModal(false)}>
-                                        <X size={18} />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Customer ID *</label>
-                                        <input
-                                            type="text"
-                                            value={addFormData.customerId}
-                                            onChange={(e) =>
-                                                setAddFormData({ ...addFormData, customerId: e.target.value })
-                                            }
-                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                            placeholder="clxxx..."
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Points *</label>
-                                        <input
-                                            type="number"
-                                            value={addFormData.points}
-                                            onChange={(e) =>
-                                                setAddFormData({ ...addFormData, points: e.target.value })
-                                            }
-                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                            placeholder="50"
-                                            min="1"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Transaction Type *</label>
-                                        <select
-                                            value={addFormData.type}
-                                            onChange={(e) =>
-                                                setAddFormData({ ...addFormData, type: e.target.value as "EARNED" | "REDEEMED" })
-                                            }
-                                            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        >
-                                            {TRANSACTION_TYPES.map((type) => (
-                                                <option key={type} value={type}>
-                                                    {type}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-lg border border-brand-100 dark:border-brand-800 text-sm">
-                                        <p className="text-brand-700 dark:text-brand-300">
-                                            <b>Note:</b> EARNED adds points, REDEEMED subtracts points from customer balance.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        onClick={handleAddTransaction}
-                                        disabled={adding}
-                                        className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
-                                    >
-                                        {adding ? <Loader size="sm" className="space-y-0" /> : "Add Transaction"}
-                                    </button>
-                                </div>
-                            </div>
+                <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} showCloseButton={false} className="max-w-md">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full">
+                        <div className="flex justify-between mb-4">
+                            <h2 className="font-semibold text-lg">Add Loyalty Transaction</h2>
+                            <button onClick={() => setShowAddModal(false)}>
+                                <X size={18} />
+                            </button>
                         </div>
-                    )
-                }
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Customer ID *</label>
+                                <input
+                                    type="text"
+                                    value={addFormData.customerId}
+                                    onChange={(e) =>
+                                        setAddFormData({ ...addFormData, customerId: e.target.value })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder="clxxx..."
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Points *</label>
+                                <input
+                                    type="number"
+                                    value={addFormData.points}
+                                    onChange={(e) =>
+                                        setAddFormData({ ...addFormData, points: e.target.value })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder="50"
+                                    min="1"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Transaction Type *</label>
+                                <select
+                                    value={addFormData.type}
+                                    onChange={(e) =>
+                                        setAddFormData({ ...addFormData, type: e.target.value as "EARNED" | "REDEEMED" })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                >
+                                    {TRANSACTION_TYPES.map((type) => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-lg border border-brand-100 dark:border-brand-800 text-sm">
+                                <p className="text-brand-700 dark:text-brand-300">
+                                    <b>Note:</b> EARNED adds points, REDEEMED subtracts points from customer balance.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={handleAddTransaction}
+                                disabled={adding}
+                                className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
+                            >
+                                {adding ? <Loader size="sm" className="space-y-0" /> : "Add Transaction"}
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
 
                 {/* VIEW DETAIL MODAL */}
                 <ViewDetailModal

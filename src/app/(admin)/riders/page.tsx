@@ -7,6 +7,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 
 const RIDER_STATUSES = ["AVAILABLE", "BUSY", "OFFLINE"];
 
@@ -259,44 +260,40 @@ export default function RidersPage() {
                 </div>
 
                 {/* ADD RIDER MODAL */}
-                {showAddModal && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border dark:border-gray-700">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <h2 className="font-bold text-lg">Add New Rider</h2>
-                                <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
-                            </div>
-                            <div className="p-5 space-y-4">
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={addFormData.name} onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="Enter rider name" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="number" value={addFormData.phone} onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="+1 234 567-8901" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={addFormData.status} onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
-                                <button onClick={handleAddRider} disabled={adding} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide flex justify-center items-center">
-                                    {adding ? <Loader size="sm" className="space-y-0" /> : "Add Rider"}
-                                </button>
-                            </div>
+                <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} showCloseButton={false} className="max-w-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden border dark:border-gray-700">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <h2 className="font-bold text-lg">Add New Rider</h2>
+                            <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={addFormData.name} onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="Enter rider name" /></div>
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="number" value={addFormData.phone} onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="+1 234 567-8901" /></div>
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={addFormData.status} onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+                            <button onClick={handleAddRider} disabled={adding} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide flex justify-center items-center">
+                                {adding ? <Loader size="sm" className="space-y-0" /> : "Add Rider"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* EDIT RIDER MODAL */}
-                {showEditModal && selectedRider && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border dark:border-gray-700">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <h2 className="font-bold text-lg">Edit Rider</h2>
-                                <button onClick={() => setShowEditModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
-                            </div>
-                            <div className="p-5 space-y-4">
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="number" value={editFormData.phone} onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
-                                <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={editFormData.status} onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
-                                <button onClick={handleEditRider} disabled={updating} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide flex justify-center items-center">
-                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Rider"}
-                                </button>
-                            </div>
+                <Modal isOpen={showEditModal && !!selectedRider} onClose={() => setShowEditModal(false)} showCloseButton={false} className="max-w-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden border dark:border-gray-700">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <h2 className="font-bold text-lg">Edit Rider</h2>
+                            <button onClick={() => setShowEditModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><X size={18} /></button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Name</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone</label><input type="number" value={editFormData.phone} onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all" /></div>
+                            <div><label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label><select value={editFormData.status} onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })} className="w-full px-3 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">{RIDER_STATUSES.map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+                            <button onClick={handleEditRider} disabled={updating} className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white py-3.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-brand-100 dark:shadow-none mt-2 uppercase tracking-wide flex justify-center items-center">
+                                {updating ? <Loader size="sm" className="space-y-0" /> : "Update Rider"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* VIEW DETAIL MODAL */}
                 <ViewDetailModal

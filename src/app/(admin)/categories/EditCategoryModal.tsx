@@ -4,6 +4,7 @@ import { useState } from "react";
 import api from "@/services/api";
 import { X } from "lucide-react";
 import ImageUpload from "@/components/common/ImageUpload";
+import { Modal } from "@/components/ui/modal";
 
 interface Props {
     category: { id: string; name: string; description?: string; image?: string };
@@ -37,9 +38,8 @@ export default function EditCategoryModal({ category, onClose, onSuccess }: Prop
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-
+        <Modal isOpen={true} onClose={onClose} showCloseButton={false} className="max-w-md">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full border dark:border-gray-700 overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
@@ -114,6 +114,6 @@ export default function EditCategoryModal({ category, onClose, onSuccess }: Prop
                     </div>
                 </form>
             </div>
-        </div>
+        </Modal>
     );
 }

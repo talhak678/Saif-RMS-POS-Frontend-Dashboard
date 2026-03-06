@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { X, Printer } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -174,8 +175,8 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
   }, {});
 
   return (
-    <div className="fixed inset-0 z-[999] bg-gray-500/10 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+    <Modal isOpen={isOpen} onClose={onClose} showCloseButton={false} className="max-w-4xl">
+      <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
 
         {/* Modal Header */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
@@ -304,15 +305,11 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
                   <span className="font-black text-black">Rs. {Number(order.total) + Number(order.deliveryCharge || 0)}</span>
                 </div>
               </div>
-
-
             </div>
           </div>
-
         </div>
-
       </div>
-    </div>
+    </Modal>
   );
 }
 

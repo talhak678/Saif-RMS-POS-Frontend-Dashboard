@@ -8,6 +8,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { useAuth } from "@/services/permission.service";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 
 function Branch() {
     const { user } = useAuth();
@@ -279,31 +280,29 @@ function Branch() {
             </div>
 
             {/* DELETE MODAL */}
-            {deleteModal && (
-                <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-80">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="font-semibold">Delete Branch</h2>
-                            <button onClick={() => setDeleteModal(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <p className="text-sm mb-4">
-                            Are you sure you want to delete{" "}
-                            <b>{selectedBranch?.name}</b>?
-                        </p>
-
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="w-full bg-red-600 text-white py-2 rounded"
-                        >
-                            {deleting ? "Deleting..." : "Confirm Delete"}
+            <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} showCloseButton={false} className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full">
+                    <div className="flex justify-between mb-4">
+                        <h2 className="font-semibold">Delete Branch</h2>
+                        <button onClick={() => setDeleteModal(false)}>
+                            <X size={18} />
                         </button>
                     </div>
+
+                    <p className="text-sm mb-4">
+                        Are you sure you want to delete{" "}
+                        <b>{selectedBranch?.name}</b>?
+                    </p>
+
+                    <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="w-full bg-red-600 text-white py-2 rounded"
+                    >
+                        {deleting ? "Deleting..." : "Confirm Delete"}
+                    </button>
                 </div>
-            )}
+            </Modal>
 
             {/* VIEW DETAIL MODAL */}
             <ViewDetailModal

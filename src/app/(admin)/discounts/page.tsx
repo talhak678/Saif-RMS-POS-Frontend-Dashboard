@@ -7,6 +7,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 import DatePicker from "@/components/common/DatePicker";
 
 const getStatusBadge = (isActive: boolean, expiresAt: string) => {
@@ -310,220 +311,216 @@ export default function DiscountsPage() {
                 </div>
 
                 {/* ADD DISCOUNT MODAL */}
-                {showAddModal && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                            <div className="flex justify-between mb-4">
-                                <h2 className="font-semibold text-lg">Add New Discount</h2>
-                                <button onClick={() => setShowAddModal(false)}>
-                                    <X size={18} />
-                                </button>
+                <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} showCloseButton={false} className="max-w-md">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full">
+                        <div className="flex justify-between mb-4">
+                            <h2 className="font-semibold text-lg">Add New Discount</h2>
+                            <button onClick={() => setShowAddModal(false)}>
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Code</label>
+                                <input
+                                    type="text"
+                                    value={addFormData.code}
+                                    onChange={(e) =>
+                                        setAddFormData({ ...addFormData, code: e.target.value.toUpperCase() })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder="NEWUSER50"
+                                />
                             </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Code</label>
-                                    <input
-                                        type="text"
-                                        value={addFormData.code}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, code: e.target.value.toUpperCase() })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="NEWUSER50"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Discount Type</label>
-                                    <div className="flex gap-4">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                value="percentage"
-                                                checked={addFormData.discountType === "percentage"}
-                                                onChange={(e) =>
-                                                    setAddFormData({ ...addFormData, discountType: "percentage" })
-                                                }
-                                                className="mr-2"
-                                            />
-                                            Percentage
-                                        </label>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                value="amount"
-                                                checked={addFormData.discountType === "amount"}
-                                                onChange={(e) =>
-                                                    setAddFormData({ ...addFormData, discountType: "amount" })
-                                                }
-                                                className="mr-2"
-                                            />
-                                            Fixed Amount
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        {addFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={addFormData.value}
-                                        onChange={(e) =>
-                                            setAddFormData({ ...addFormData, value: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder={addFormData.discountType === "percentage" ? "50" : "200"}
-                                        min="0"
-                                        max={addFormData.discountType === "percentage" ? "100" : undefined}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                    <DatePicker
-                                        value={addFormData.expiresAt}
-                                        onChange={(val) => setAddFormData({ ...addFormData, expiresAt: val })}
-                                        showTime={true}
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    />
-                                </div>
-
-                                <div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Discount Type</label>
+                                <div className="flex gap-4">
                                     <label className="flex items-center">
                                         <input
-                                            type="checkbox"
-                                            checked={addFormData.isActive}
+                                            type="radio"
+                                            value="percentage"
+                                            checked={addFormData.discountType === "percentage"}
                                             onChange={(e) =>
-                                                setAddFormData({ ...addFormData, isActive: e.target.checked })
+                                                setAddFormData({ ...addFormData, discountType: "percentage" })
                                             }
                                             className="mr-2"
                                         />
-                                        Active
+                                        Percentage
+                                    </label>
+                                    <label className="flex items-center">
+                                        <input
+                                            type="radio"
+                                            value="amount"
+                                            checked={addFormData.discountType === "amount"}
+                                            onChange={(e) =>
+                                                setAddFormData({ ...addFormData, discountType: "amount" })
+                                            }
+                                            className="mr-2"
+                                        />
+                                        Fixed Amount
                                     </label>
                                 </div>
-
-                                <button
-                                    onClick={handleAddDiscount}
-                                    disabled={adding}
-                                    className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-green-100 dark:shadow-none flex justify-center items-center"
-                                >
-                                    {adding ? <Loader size="sm" className="space-y-0" /> : "Add Discount"}
-                                </button>
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    {addFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
+                                </label>
+                                <input
+                                    type="number"
+                                    value={addFormData.value}
+                                    onChange={(e) =>
+                                        setAddFormData({ ...addFormData, value: e.target.value })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder={addFormData.discountType === "percentage" ? "50" : "200"}
+                                    min="0"
+                                    max={addFormData.discountType === "percentage" ? "100" : undefined}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Expiration Date</label>
+                                <DatePicker
+                                    value={addFormData.expiresAt}
+                                    onChange={(val) => setAddFormData({ ...addFormData, expiresAt: val })}
+                                    showTime={true}
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={addFormData.isActive}
+                                        onChange={(e) =>
+                                            setAddFormData({ ...addFormData, isActive: e.target.checked })
+                                        }
+                                        className="mr-2"
+                                    />
+                                    Active
+                                </label>
+                            </div>
+
+                            <button
+                                onClick={handleAddDiscount}
+                                disabled={adding}
+                                className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-green-100 dark:shadow-none flex justify-center items-center"
+                            >
+                                {adding ? <Loader size="sm" className="space-y-0" /> : "Add Discount"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* EDIT DISCOUNT MODAL */}
-                {showEditModal && selectedDiscount && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96">
-                            <div className="flex justify-between mb-4">
-                                <h2 className="font-semibold text-lg">Edit Discount</h2>
-                                <button onClick={() => setShowEditModal(false)}>
-                                    <X size={18} />
-                                </button>
+                <Modal isOpen={showEditModal && !!selectedDiscount} onClose={() => setShowEditModal(false)} showCloseButton={false} className="max-w-md">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full">
+                        <div className="flex justify-between mb-4">
+                            <h2 className="font-semibold text-lg">Edit Discount</h2>
+                            <button onClick={() => setShowEditModal(false)}>
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Code</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.code}
+                                    onChange={(e) =>
+                                        setEditFormData({ ...editFormData, code: e.target.value.toUpperCase() })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder="NEWUSER50"
+                                />
                             </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Code</label>
-                                    <input
-                                        type="text"
-                                        value={editFormData.code}
-                                        onChange={(e) =>
-                                            setEditFormData({ ...editFormData, code: e.target.value.toUpperCase() })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder="NEWUSER50"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Discount Type</label>
-                                    <div className="flex gap-4">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                value="percentage"
-                                                checked={editFormData.discountType === "percentage"}
-                                                onChange={(e) =>
-                                                    setEditFormData({ ...editFormData, discountType: "percentage" })
-                                                }
-                                                className="mr-2"
-                                            />
-                                            Percentage
-                                        </label>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                value="amount"
-                                                checked={editFormData.discountType === "amount"}
-                                                onChange={(e) =>
-                                                    setEditFormData({ ...editFormData, discountType: "amount" })
-                                                }
-                                                className="mr-2"
-                                            />
-                                            Fixed Amount
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        {editFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={editFormData.value}
-                                        onChange={(e) =>
-                                            setEditFormData({ ...editFormData, value: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                        placeholder={editFormData.discountType === "percentage" ? "50" : "200"}
-                                        min="0"
-                                        max={editFormData.discountType === "percentage" ? "100" : undefined}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Expiration Date</label>
-                                    <DatePicker
-                                        value={editFormData.expiresAt}
-                                        onChange={(val) => setEditFormData({ ...editFormData, expiresAt: val })}
-                                        showTime={true}
-                                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                                    />
-                                </div>
-
-                                <div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Discount Type</label>
+                                <div className="flex gap-4">
                                     <label className="flex items-center">
                                         <input
-                                            type="checkbox"
-                                            checked={editFormData.isActive}
+                                            type="radio"
+                                            value="percentage"
+                                            checked={editFormData.discountType === "percentage"}
                                             onChange={(e) =>
-                                                setEditFormData({ ...editFormData, isActive: e.target.checked })
+                                                setEditFormData({ ...editFormData, discountType: "percentage" })
                                             }
                                             className="mr-2"
                                         />
-                                        Active
+                                        Percentage
+                                    </label>
+                                    <label className="flex items-center">
+                                        <input
+                                            type="radio"
+                                            value="amount"
+                                            checked={editFormData.discountType === "amount"}
+                                            onChange={(e) =>
+                                                setEditFormData({ ...editFormData, discountType: "amount" })
+                                            }
+                                            className="mr-2"
+                                        />
+                                        Fixed Amount
                                     </label>
                                 </div>
-
-                                <button
-                                    onClick={handleEditDiscount}
-                                    disabled={updating}
-                                    className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none mt-2 flex justify-center items-center"
-                                >
-                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Discount"}
-                                </button>
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    {editFormData.discountType === "percentage" ? "Percentage" : "Amount ($)"}
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editFormData.value}
+                                    onChange={(e) =>
+                                        setEditFormData({ ...editFormData, value: e.target.value })
+                                    }
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                    placeholder={editFormData.discountType === "percentage" ? "50" : "200"}
+                                    min="0"
+                                    max={editFormData.discountType === "percentage" ? "100" : undefined}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Expiration Date</label>
+                                <DatePicker
+                                    value={editFormData.expiresAt}
+                                    onChange={(val) => setEditFormData({ ...editFormData, expiresAt: val })}
+                                    showTime={true}
+                                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={editFormData.isActive}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, isActive: e.target.checked })
+                                        }
+                                        className="mr-2"
+                                    />
+                                    Active
+                                </label>
+                            </div>
+
+                            <button
+                                onClick={handleEditDiscount}
+                                disabled={updating}
+                                className="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none mt-2 flex justify-center items-center"
+                            >
+                                {updating ? <Loader size="sm" className="space-y-0" /> : "Update Discount"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
 
                 {/* VIEW DETAIL MODAL */}
                 <ViewDetailModal

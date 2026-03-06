@@ -1,11 +1,12 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 
 export default function DeleteCategoryModal({ onCancel, onConfirm, loading }: any) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
+    <Modal isOpen={true} onClose={onCancel} showCloseButton={false} className="max-w-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full p-6 text-center overflow-hidden">
         <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangle size={24} />
         </div>
@@ -34,6 +35,6 @@ export default function DeleteCategoryModal({ onCancel, onConfirm, loading }: an
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

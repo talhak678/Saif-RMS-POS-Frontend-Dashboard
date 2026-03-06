@@ -22,6 +22,7 @@ import api from "@/services/api";
 import toast from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 import { loadStripe } from "@stripe/stripe-js";
 import {
     Elements,
@@ -117,8 +118,8 @@ function ItemSelectionModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <Modal isOpen={!!item} onClose={onClose} showCloseButton={false} className="max-w-md p-0 overflow-hidden bg-transparent shadow-none border-none">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
                 {/* Image */}
                 <div className="relative h-56 p-4">
                     <img
@@ -138,7 +139,7 @@ function ItemSelectionModal({
                     </button>
                 </div>
 
-                <div className="p-5 space-y-4 max-h-[calc(85vh-250px)] overflow-y-auto custom-scrollbar overscroll-contain">
+                <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar overscroll-contain">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.name}</h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{item.description}</p>
@@ -245,7 +246,7 @@ function ItemSelectionModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -432,8 +433,8 @@ function CustomerDetailsModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <Modal isOpen={true} onClose={onClose} showCloseButton={false} className="max-w-lg p-0 overflow-hidden bg-transparent shadow-none border-none">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         Order Summary & Customer Details
@@ -443,7 +444,7 @@ function CustomerDetailsModal({
                     </button>
                 </div>
 
-                <div className="p-5 space-y-4 max-h-[calc(85vh-160px)] overflow-y-auto custom-scrollbar overscroll-contain">
+                <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto custom-scrollbar overscroll-contain">
                     {/* Order Summary */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -617,7 +618,7 @@ function CustomerDetailsModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -707,8 +708,8 @@ function StripeModal({
     onSuccess: () => void
 }) {
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-500/10 p-4 ">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <Modal isOpen={!!clientSecret} onClose={onClose} showCloseButton={false} className="max-w-md p-0 overflow-hidden bg-transparent shadow-none border-none">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Complete Payment</h2>
                     <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -733,7 +734,7 @@ function StripeModal({
                     </Elements>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -760,31 +761,12 @@ export default function POSPage() {
     const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
     const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
-    // Prevent background scroll when modal is open
+    // Redundant scroll locking now handled by Modal component
     useEffect(() => {
-        const isModalOpen = !!(selectedItem || showCustomerModal || stripeClientSecret);
-        if (isModalOpen) {
-            document.body.style.overflow = "hidden";
-            // Also try to find and lock the dashboard scrollable container
-            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
-            if (dashboardContainer instanceof HTMLElement) {
-                dashboardContainer.style.overflow = "hidden";
-            }
-        } else {
-            document.body.style.overflow = "unset";
-            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
-            if (dashboardContainer instanceof HTMLElement) {
-                dashboardContainer.style.overflow = "auto";
-            }
-        }
         return () => {
-            document.body.style.overflow = "unset";
-            const dashboardContainer = document.querySelector('.overflow-y-auto.no-scrollbar');
-            if (dashboardContainer instanceof HTMLElement) {
-                dashboardContainer.style.overflow = "auto";
-            }
+            document.body.style.overflow = "auto";
         };
-    }, [selectedItem, showCustomerModal, stripeClientSecret]);
+    }, []);
 
     // Fetch categories & branches on mount
     useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/services/api";
+import { Modal } from "@/components/ui/modal";
 
 export default function EditSettingModal({
   setting,
@@ -58,8 +59,8 @@ export default function EditSettingModal({
   const isEditing = !!setting; // Boolean check
 
   return (
-    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md border dark:border-gray-700">
+    <Modal isOpen={true} onClose={onClose} showCloseButton={false} className="max-w-md p-0 overflow-hidden bg-transparent shadow-none border-none">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full border dark:border-gray-700">
         <h2 className="text-xl font-semibold mb-5 dark:text-gray-200">
           {isEditing ? "Edit Setting" : "Add New Setting"}
         </h2>
@@ -119,6 +120,6 @@ export default function EditSettingModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

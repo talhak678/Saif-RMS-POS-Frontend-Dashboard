@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import DatePicker from "@/components/common/DatePicker";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/modal";
 
 const ORDER_STATUSES = [
     "PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY",
@@ -137,27 +138,16 @@ function OrderDetailModal({
     };
     const typeBannerColor = typeColors[order.type] || "bg-brand-600";
 
-    // Lock body scroll when modal is open
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        document.documentElement.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-            document.documentElement.style.overflow = "";
-        };
-    }, []);
 
-    return createPortal(
-        <div
-            className="fixed inset-0 z-[999999] flex items-center justify-center bg-gray-500/10 p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-        >
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} showCloseButton={false} className="max-w-5xl p-0 overflow-hidden bg-transparent shadow-none border-none">
             <div
-                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden"
                 style={{ maxHeight: "90vh" }}
                 onClick={(e) => e.stopPropagation()}
             >
-
+                {/* ... (rest of the content remains the same inside Modal) */}
                 {/* ── TOP ACTION BAR ── */}
                 <div className="flex items-center gap-2 px-5 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <button
@@ -435,8 +425,7 @@ function OrderDetailModal({
                     </div>
                 </div>
             </div>
-        </div>,
-        document.body
+        </Modal>
     );
 }
 
@@ -1081,84 +1070,82 @@ export default function IncomingOrdersPage() {
                 />
 
                 {/* STATUS MODAL */}
-                {statusModal && (
-                    <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-100 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                                <div>
-                                    <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Change Status</h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Order #{selectedOrder?.orderNo}</p>
-                                </div>
-                                <button onClick={() => setStatusModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <X size={18} />
-                                </button>
+                <Modal isOpen={statusModal} onClose={() => setStatusModal(false)} showCloseButton={false} className="max-w-sm p-0 overflow-hidden bg-transparent shadow-none border-none">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full shadow-2xl overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                            <div>
+                                <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Change Status</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Order #{selectedOrder?.orderNo}</p>
                             </div>
+                            <button onClick={() => setStatusModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                <X size={18} />
+                            </button>
+                        </div>
 
-                            <div className="p-5 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Status</label>
-                                    <select
-                                        value={newStatus}
-                                        onChange={(e) => {
-                                            setNewStatus(e.target.value);
-                                            if (e.target.value === "OUT_FOR_DELIVERY") fetchAvailableRiders();
-                                        }}
-                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    >
-                                        {ORDER_STATUSES.map((st) => (
-                                            <option key={st} value={st}>{STATUS_CONFIG[st]?.label || st}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {newStatus === "DELIVERED" && (
-                                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                        <p className="text-xs text-green-700 dark:text-green-300 font-medium">
-                                            ✅ Payment will automatically be marked as <strong>PAID</strong>
-                                        </p>
-                                    </div>
-                                )}
-
-                                {newStatus === "OUT_FOR_DELIVERY" && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Assign Rider *</label>
-                                        {loadingRiders ? (
-                                            <div className="py-2"><Loader size="sm" className="space-y-0" /></div>
-                                        ) : (
-                                            <select
-                                                value={selectedRiderId}
-                                                onChange={(e) => setSelectedRiderId(e.target.value)}
-                                                className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                                required
-                                            >
-                                                <option value="">Select a rider</option>
-                                                {availableRiders.map((rider) => (
-                                                    <option key={rider.id} value={rider.id}>{rider.name} — {rider.phone}</option>
-                                                ))}
-                                            </select>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-5 pt-0 flex gap-3">
-                                <button
-                                    onClick={() => setStatusModal(false)}
-                                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium"
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Status</label>
+                                <select
+                                    value={newStatus}
+                                    onChange={(e) => {
+                                        setNewStatus(e.target.value);
+                                        if (e.target.value === "OUT_FOR_DELIVERY") fetchAvailableRiders();
+                                    }}
+                                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                                 >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleStatusUpdate}
-                                    disabled={updating}
-                                    className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
-                                >
-                                    {updating ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
-                                </button>
+                                    {ORDER_STATUSES.map((st) => (
+                                        <option key={st} value={st}>{STATUS_CONFIG[st]?.label || st}</option>
+                                    ))}
+                                </select>
                             </div>
+
+                            {newStatus === "DELIVERED" && (
+                                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <p className="text-xs text-green-700 dark:text-green-300 font-medium">
+                                        ✅ Payment will automatically be marked as <strong>PAID</strong>
+                                    </p>
+                                </div>
+                            )}
+
+                            {newStatus === "OUT_FOR_DELIVERY" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Assign Rider *</label>
+                                    {loadingRiders ? (
+                                        <div className="py-2"><Loader size="sm" className="space-y-0" /></div>
+                                    ) : (
+                                        <select
+                                            value={selectedRiderId}
+                                            onChange={(e) => setSelectedRiderId(e.target.value)}
+                                            className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                            required
+                                        >
+                                            <option value="">Select a rider</option>
+                                            {availableRiders.map((rider) => (
+                                                <option key={rider.id} value={rider.id}>{rider.name} — {rider.phone}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-5 pt-0 flex gap-3">
+                            <button
+                                onClick={() => setStatusModal(false)}
+                                className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleStatusUpdate}
+                                disabled={updating}
+                                className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-100 dark:shadow-none flex justify-center items-center"
+                            >
+                                {updating ? <Loader size="sm" className="space-y-0" /> : "Update Status"}
+                            </button>
                         </div>
                     </div>
-                )}
+                </Modal>
             </div>
         </ProtectedRoute>
     );

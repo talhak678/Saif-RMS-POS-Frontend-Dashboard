@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/modal";
 
 export default function IngredientsPage() {
     const router = useRouter();
@@ -236,79 +237,85 @@ export default function IngredientsPage() {
                     </div>
                 </div>
 
-                {/* --- SIMPLE MODALS --- */}
-                {isFormModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-500/10">
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-                            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                                <h2 className="text-base font-bold text-gray-800 dark:text-white">
-                                    {editingItem ? "Edit Ingredient" : "New Ingredient"}
-                                </h2>
-                                <button onClick={() => setIsFormModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                    <X size={20} />
+                {/* --- MODALS --- */}
+                <Modal
+                    isOpen={isFormModalOpen}
+                    onClose={() => setIsFormModalOpen(false)}
+                    showCloseButton={false}
+                    className="max-w-md"
+                >
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                            <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                                {editingItem ? "Edit Ingredient" : "New Ingredient"}
+                            </h2>
+                            <button onClick={() => setIsFormModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 ml-1">Name</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="Tomatoes, Flour, etc."
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 ml-1">Base Unit</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="kg, box, litre"
+                                    value={formData.unit}
+                                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsFormModalOpen(false)}
+                                    className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={formLoading}
+                                    className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
+                                >
+                                    {formLoading ? "Saving..." : "Save Item"}
                                 </button>
                             </div>
+                        </form>
+                    </div>
+                </Modal>
 
-                            <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-500 ml-1">Name</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        placeholder="Tomatoes, Flour, etc."
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-500 ml-1">Base Unit</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        placeholder="kg, box, litre"
-                                        value={formData.unit}
-                                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
-                                    />
-                                </div>
-
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsFormModalOpen(false)}
-                                        className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={formLoading}
-                                        className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
-                                    >
-                                        {formLoading ? "Saving..." : "Save Item"}
-                                    </button>
-                                </div>
-                            </form>
+                <Modal
+                    isOpen={!!deleteId}
+                    onClose={() => setDeleteId(null)}
+                    showCloseButton={false}
+                    className="max-w-sm"
+                >
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full p-8 text-center">
+                        <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <AlertTriangle size={28} />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Delete Item?</h3>
+                        <p className="text-xs text-gray-500 mb-6">Are you sure? This action will remove the ingredient from your list and recipes.</p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600">Cancel</button>
+                            <button onClick={handleDelete} className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-rose-500/20">Delete</button>
                         </div>
                     </div>
-                )}
-
-                {deleteId && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-500/10 p-4">
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-8 text-center animate-in fade-in zoom-in duration-200">
-                            <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <AlertTriangle size={28} />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Delete Item?</h3>
-                            <p className="text-xs text-gray-500 mb-6">Are you sure? This action will remove the ingredient from your list and recipes.</p>
-                            <div className="flex gap-3">
-                                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600">Cancel</button>
-                                <button onClick={handleDelete} className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-rose-500/20">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                </Modal>
             </div>
         </ProtectedRoute>
     );

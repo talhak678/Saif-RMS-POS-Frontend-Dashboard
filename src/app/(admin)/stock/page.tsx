@@ -14,6 +14,7 @@ import {
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 
 export default function StocksPage() {
   // --- MAIN STATES ---
@@ -271,86 +272,84 @@ export default function StocksPage() {
         </div>
 
         {/* --- ADD / UPDATE MODAL --- */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/10 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm border dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} showCloseButton={false} className="max-w-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full border dark:border-gray-700 overflow-hidden">
 
-              <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {modalMode === 'ADD' ? "Add Stock" : "Update Stock"}
-                </h2>
-                <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                  <X size={20} />
-                </button>
+            <div className="flex justify-between items-center p-5 border-b dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+                {modalMode === 'ADD' ? "Add Stock" : "Update Stock"}
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+
+              {/* Ingredient Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Ingredient
+                </label>
+
+                {modalMode === 'UPDATE' ? (
+                  // Update Mode: Read-only Text
+                  <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium">
+                    {selectedIngredientName}
+                  </div>
+                ) : (
+                  // Add Mode: Dropdown
+                  <select
+                    required
+                    value={ingredientId}
+                    onChange={handleIngredientSelect}
+                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
+                  >
+                    <option value="" disabled>Select Ingredient</option>
+                    {ingredientsList.map((ing) => (
+                      <option key={ing.id} value={ing.id}>
+                        {ing.name} ({ing.unit})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              {/* Quantity Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Quantity {selectedIngredientUnit ? `(${selectedIngredientUnit})` : ""}
+                </label>
+                <input
+                  required
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 50"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 text-lg font-bold"
+                />
+              </div>
 
-                {/* Ingredient Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Ingredient
-                  </label>
-
-                  {modalMode === 'UPDATE' ? (
-                    // Update Mode: Read-only Text
-                    <div className="w-full p-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium">
-                      {selectedIngredientName}
-                    </div>
-                  ) : (
-                    // Add Mode: Dropdown
-                    <select
-                      required
-                      value={ingredientId}
-                      onChange={handleIngredientSelect}
-                      className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
-                    >
-                      <option value="" disabled>Select Ingredient</option>
-                      {ingredientsList.map((ing) => (
-                        <option key={ing.id} value={ing.id}>
-                          {ing.name} ({ing.unit})
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                {/* Quantity Input */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Quantity {selectedIngredientUnit ? `(${selectedIngredientUnit})` : ""}
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    step="0.01"
-                    placeholder="e.g. 50"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 text-lg font-bold"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={updateLoading}
-                    className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none min-w-[120px]"
-                  >
-                    {updateLoading ? <Loader size="sm" className="space-y-0" /> : <><Save size={16} /> Save Stock</>}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateLoading}
+                  className="px-5 py-2.5 text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-700 flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-brand-100 dark:shadow-none min-w-[120px]"
+                >
+                  {updateLoading ? <Loader size="sm" className="space-y-0" /> : <><Save size={16} /> Save Stock</>}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
+        </Modal>
 
         {/* VIEW DETAIL MODAL */}
         <ViewDetailModal

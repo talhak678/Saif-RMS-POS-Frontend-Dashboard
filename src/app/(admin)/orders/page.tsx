@@ -26,6 +26,7 @@ import { ViewDetailModal } from "@/components/ViewDetailModal";
 import ReceiptModal from "@/components/orders/ReceiptModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { Modal } from "@/components/ui/modal";
 import DatePicker from "@/components/common/DatePicker";
 
 const ORDER_STATUSES = [
@@ -606,51 +607,49 @@ export default function OrdersPage() {
         />
 
         {/* Status Update Modal */}
-        {statusModal && (
-          <div className="fixed inset-0 bg-gray-500/10 flex items-center justify-center z-[100] p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="bg-brand-600 p-4 flex justify-between items-center text-white">
-                <h3 className="font-bold">Update Order Status</h3>
-                <button onClick={() => setStatusModal(false)}><X size={20} /></button>
+        <Modal isOpen={statusModal} onClose={() => setStatusModal(false)} showCloseButton={false} className="max-w-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full overflow-hidden">
+            <div className="bg-brand-600 p-4 flex justify-between items-center text-white">
+              <h3 className="font-bold">Update Order Status</h3>
+              <button onClick={() => setStatusModal(false)}><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Select New Status</label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => {
+                    setNewStatus(e.target.value);
+                    if (e.target.value === "OUT_FOR_DELIVERY") fetchAvailableRiders();
+                  }}
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  {ORDER_STATUSES.map(s => <option key={s} value={s}>{s === "OUT_FOR_DELIVERY" ? "ON THE WAY" : s}</option>)}
+                </select>
               </div>
-              <div className="p-6 space-y-4">
+              {newStatus === "OUT_FOR_DELIVERY" && (
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Select New Status</label>
+                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Assign Rider</label>
                   <select
-                    value={newStatus}
-                    onChange={(e) => {
-                      setNewStatus(e.target.value);
-                      if (e.target.value === "OUT_FOR_DELIVERY") fetchAvailableRiders();
-                    }}
+                    value={selectedRiderId}
+                    onChange={(e) => setSelectedRiderId(e.target.value)}
                     className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500"
                   >
-                    {ORDER_STATUSES.map(s => <option key={s} value={s}>{s === "OUT_FOR_DELIVERY" ? "ON THE WAY" : s}</option>)}
+                    <option value="">Select a rider</option>
+                    {availableRiders.map(r => <option key={r.id} value={r.id}>{r.name} ({r.phone})</option>)}
                   </select>
                 </div>
-                {newStatus === "OUT_FOR_DELIVERY" && (
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Assign Rider</label>
-                    <select
-                      value={selectedRiderId}
-                      onChange={(e) => setSelectedRiderId(e.target.value)}
-                      className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500"
-                    >
-                      <option value="">Select a rider</option>
-                      {availableRiders.map(r => <option key={r.id} value={r.id}>{r.name} ({r.phone})</option>)}
-                    </select>
-                  </div>
-                )}
-                <button
-                  onClick={handleStatusUpdate}
-                  disabled={updating}
-                  className="w-full bg-brand-600 text-white font-bold py-3.5 rounded-2xl hover:bg-brand-700 disabled:opacity-50 shadow-lg shadow-brand-600/20 transition-all active:scale-95 text-sm"
-                >
-                  {updating ? "Updating..." : "Confirm Update"}
-                </button>
-              </div>
+              )}
+              <button
+                onClick={handleStatusUpdate}
+                disabled={updating}
+                className="w-full bg-brand-600 text-white font-bold py-3.5 rounded-2xl hover:bg-brand-700 disabled:opacity-50 shadow-lg shadow-brand-600/20 transition-all active:scale-95 text-sm"
+              >
+                {updating ? "Updating..." : "Confirm Update"}
+              </button>
             </div>
           </div>
-        )}
+        </Modal>
 
       </div>
     </ProtectedRoute>

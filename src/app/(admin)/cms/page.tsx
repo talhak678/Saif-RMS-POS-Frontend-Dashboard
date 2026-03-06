@@ -568,7 +568,7 @@ export default function CMSPage() {
                             <Layout className="w-6 h-6 text-brand-500" />
                             Website Designer
                         </h1>
-                        <p className="text-gray-500 text-sm mt-1 font-medium">Manage your restaurant's digital presence</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">Manage your restaurant's digital presence</p>
                     </div>
                     <button
                         onClick={handleSave}
@@ -584,7 +584,7 @@ export default function CMSPage() {
                     {/* Navigation Sidebar */}
                     <div className="lg:col-span-3 space-y-4">
                         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-3 shadow-sm">
-                            <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-4 px-3">Pages</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4 px-3">Pages</h2>
                             <div className="space-y-1">
                                 {pages.map((p) => (
                                     <button
@@ -624,7 +624,7 @@ export default function CMSPage() {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold text-gray-800 dark:text-white capitalize">{activeTab === 'theme' ? 'Branding & Style' : `${activeTab} Page Content`}</h2>
-                                    <p className="text-gray-500 text-xs font-medium">{activeTab === 'theme' ? 'Manage global colors, fonts and logos' : 'Customize sections and information'}</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">{activeTab === 'theme' ? 'Manage global colors, fonts and logos' : 'Customize sections and information'}</p>
                                 </div>
                             </div>
 
@@ -637,7 +637,7 @@ export default function CMSPage() {
                                         </div>
                                         <div>
                                             <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Page Status</h3>
-                                            <p className="text-[11px] text-gray-500 font-medium">
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                                                 {config[activeTab].enabled ? "Enabled on public website" : "Hidden from public website"}
                                             </p>
                                         </div>
@@ -795,14 +795,6 @@ export default function CMSPage() {
                                                                     label: "Website Meta Description",
                                                                     desc: "A brief summary of your restaurant for search engines and social sharing."
                                                                 },
-                                                                openingTime: {
-                                                                    label: "Restaurant Opening Time",
-                                                                    desc: "Format: 09:00 (24-hour format). Used to show 'Closed' status automatically."
-                                                                },
-                                                                closingTime: {
-                                                                    label: "Restaurant Closing Time",
-                                                                    desc: "Format: 01:00 (24-hour format). Can be after midnight."
-                                                                },
                                                             };
 
                                                             const fontOptions = ['Outfit', 'Inter', 'Poppins', 'Roboto', 'Montserrat', 'Playfair Display', 'Open Sans', 'Lato', 'Lora', 'Merriweather', 'Raleway', 'Nunito', 'Ubuntu', 'Oswald', 'Source Sans Pro'];
@@ -921,7 +913,7 @@ export default function CMSPage() {
                                                                                                     className="w-full bg-white dark:bg-gray-800 border border-brand-200 dark:border-brand-500/30 focus:border-brand-500 rounded-lg px-3 py-2 text-sm outline-none shadow-sm"
                                                                                                 />
                                                                                             </div>
-                                                                                            <p className="text-[9px] text-gray-400 mt-2">Enter any valid Google Font name to apply it.</p>
+                                                                                            <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-2">Enter any valid Google Font name to apply it.</p>
                                                                                         </div>
                                                                                     )}
                                                                                 </>
