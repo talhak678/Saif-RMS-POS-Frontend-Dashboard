@@ -836,26 +836,45 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Notification Email Field */}
-                  <div className="flex flex-col md:flex-row md:items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
-                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Notification email</Label>
-                    <div className="flex-1 flex gap-2 items-center">
-                      <Input
-                        value={restaurantForm.notificationEmail}
-                        onChange={(e) => setRestaurantForm({ ...restaurantForm, notificationEmail: e.target.value })}
-                        className="bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 flex-1"
-                        disabled
-                      />
-                      <Button variant="default" size="sm" className="bg-brand-500 hover:bg-brand-600 text-white font-bold h-10 px-4 shrink-0">
-                        <Mail className="w-4 h-4 mr-2" /> Update Email
-                      </Button>
+                  {/* Notification Email Field - Modern Card Style */}
+                  <div className="py-6 border-b border-gray-50 dark:border-gray-700/50">
+                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                      <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 pt-2">Alerts & Notifications</Label>
+
+                      <div className="flex-1 bg-brand-50/50 dark:bg-brand-900/10 p-5 rounded-2xl border border-brand-100 dark:border-brand-900/30">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                            <Bell className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">Notification Email</p>
+                            <p className="text-[10px] text-gray-500 font-medium">Where you receive order alerts and system updates</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="relative flex-1">
+                            <Input
+                              value={restaurantForm.notificationEmail}
+                              onChange={(e) => setRestaurantForm({ ...restaurantForm, notificationEmail: e.target.value })}
+                              className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-11 pl-10"
+                              placeholder="orders@yourrestaurant.com"
+                            />
+                            <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                          </div>
+                          <Button className="bg-brand-600 hover:bg-brand-700 text-white font-bold h-11 px-6 rounded-xl transition-all shadow-md active:scale-95 text-xs uppercase tracking-wide">
+                            Configure Alerts
+                          </Button>
+                        </div>
+
+                        <div className="mt-3 flex items-start gap-2">
+                          <Info size={14} className="text-brand-500 mt-0.5 shrink-0" />
+                          <p className="text-[10px] text-gray-500 leading-relaxed">
+                            This email is separate from your public contact email. We'll use this primarily for critical restaurant activities and automated notification logs.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex md:items-center md:pb-4 border-b border-gray-50 dark:border-gray-700/50">
-                    <div className="md:w-1/4"></div>
-                    <p className="text-[10px] text-gray-400 font-bold">
-                      ⓘ Click the button above to update your notification email with OTP verification
-                    </p>
                   </div>
 
                   {/* Country Field */}
@@ -1662,16 +1681,16 @@ export default function ProfilePage() {
 
             {/* 7. NOTIFICATION TEMPLATES (SUPER ADMIN ONLY) */}
             {activeTab === "NOTIFICATION_TEMPLATES" && isSuperAdmin && (
-              <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between mb-2">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Notification Templates</h2>
-                    <p className="text-sm text-gray-400 font-medium italic">Edit the text of system-wide notifications using placeholders like #{"{orderNo}"}.</p>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Notification Templates</h2>
+                    <p className="text-sm text-gray-400 font-medium italic">Edit the text of system-wide notifications using placeholders like {"#{orderNo}"}.</p>
                   </div>
                   <Button
                     onClick={handleSaveTemplates}
                     disabled={savingTemplates || loading}
-                    className="bg-brand-600 hover:bg-brand-700 text-white font-black px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/30 text-xs uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95"
+                    className="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 text-xs tracking-wide flex items-center gap-2 transition-all active:scale-95"
                   >
                     {savingTemplates ? <Loader size="sm" /> : <Save size={16} />}
                     Save Changes
@@ -1691,10 +1710,10 @@ export default function ProfilePage() {
                       <div key={template.id} className="bg-white dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700 p-6 space-y-4 hover:border-brand-500/30 transition-all shadow-sm">
                         <div className="flex items-start justify-between">
                           <div className="space-y-0.5">
-                            <h3 className="text-base font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">{info.title}</h3>
+                            <h3 className="text-base font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">{info.title}</h3>
                             <p className="text-[11px] text-gray-400 font-medium">{info.desc}</p>
                           </div>
-                          <span className="bg-gray-100 dark:bg-gray-900 px-2.5 py-1 rounded text-[9px] font-black text-gray-400 uppercase tracking-widest">{template.event}</span>
+                          <span className="bg-gray-100 dark:bg-gray-900 px-2.5 py-1 rounded text-[9px] font-bold text-gray-400 uppercase tracking-widest">{template.event}</span>
                         </div>
 
                         <div className="space-y-2">
@@ -1706,12 +1725,12 @@ export default function ProfilePage() {
                           />
                           {info.vars.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 items-center">
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-1">Variables:</span>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Variables:</span>
                               {info.vars.map((v: string) => (
                                 <button
                                   key={v}
                                   onClick={() => setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, message: t.message + ' ' + v } : t))}
-                                  className="px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-[10px] font-black hover:bg-brand-100 transition-colors"
+                                  className="px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-[10px] font-bold hover:bg-brand-100 transition-colors"
                                 >
                                   {v}
                                 </button>
