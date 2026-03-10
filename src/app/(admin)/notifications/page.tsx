@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import Badge from "@/components/ui/badge/Badge";
 import { Button } from "@/components/ui/button/Button";
 import Loader from "@/components/common/Loader";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface Notification {
     id: string;
@@ -34,6 +34,7 @@ function NotificationsInner() {
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
     const searchParams = useSearchParams();
+    const router = useRouter();
     const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     const fetchNotifications = async () => {
@@ -114,6 +115,15 @@ function NotificationsInner() {
         }
     };
 
+    const handleNotificationClick = (notification: Notification) => {
+        if (!notification.isRead) {
+            markAsRead(notification.id);
+        }
+        if (notification.message.toLowerCase().includes("upgrade request") || notification.message.toLowerCase().includes("subscription")) {
+            router.push("/profile?tab=SUBSCRIPTION_REQUESTS");
+        }
+    };
+
     const filteredNotifications = filter === "ALL"
         ? notifications
         : notifications.filter(n => !n.isRead);
@@ -190,8 +200,9 @@ function NotificationsInner() {
                                     key={notification.id}
                                     id={`notif-${notification.id}`}
                                     ref={(el) => { rowRefs.current[notification.id] = el; }}
+                                    onClick={() => handleNotificationClick(notification)}
                                     className={[
-                                        "p-6 flex items-start gap-4 transition-all duration-500",
+                                        "p-6 flex items-start gap-4 transition-all duration-500 cursor-pointer",
                                         // Highlighted ring (fades out after 3s via state reset)
                                         isHighlighted
                                             ? "bg-brand-50 dark:bg-brand-900/20 ring-2 ring-inset ring-brand-400 dark:ring-brand-500 rounded-2xl scale-[1.01]"
@@ -221,7 +232,7 @@ function NotificationsInner() {
                                             <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 {!notification.isRead && (
                                                     <button
-                                                        onClick={() => markAsRead(notification.id)}
+                                                        onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
                                                         className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors"
                                                         title="Mark as read"
                                                     >
@@ -229,7 +240,7 @@ function NotificationsInner() {
                                                     </button>
                                                 )}
                                                 <button
-                                                    onClick={() => deleteNotification(notification.id)}
+                                                    onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
                                                     className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                                                     title="Delete"
                                                 >
@@ -257,15 +268,6 @@ function NotificationsInner() {
                         })}
                     </div>
                 )}
-            </div>
-
-            <div className="mt-8 p-6 bg-blue-50/30 dark:bg-blue-900/10 rounded-3xl border border-blue-100/50 dark:border-blue-900/20 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                    <AlertCircle size={20} />
-                </div>
-                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
-                    Contact us via email at <span className="font-bold">saifgrill@gmail.com</span> or call <span className="font-bold">+1-994-343-434</span> for new subscriptions and feature updates.
-                </p>
             </div>
         </div>
     );

@@ -33,6 +33,16 @@ export default function BannersPage() {
     const [editForm, setEditForm] = useState<Partial<Banner>>({});
     const [updating, setUpdating] = useState(false);
 
+    const showError = (error: any, fallback: string) => {
+        const data = error?.response?.data || error?.data || error;
+        if (data?.message === "Validation failed" && data?.error && typeof data.error === 'object') {
+            const details = Object.values(data.error).flat().join(", ");
+            toast.error(`Error: ${details}`);
+        } else {
+            toast.error(data?.message || fallback);
+        }
+    };
+
     useEffect(() => { fetchBanners(); }, []);
 
     const fetchBanners = async () => {
@@ -48,17 +58,26 @@ export default function BannersPage() {
 
     const handleAdd = async () => {
         if (!newBanner.imageUrl) return toast.error("Image URL is required");
+
+        let finalLinkUrl = newBanner.linkUrl?.trim() || "";
+        if (finalLinkUrl && !finalLinkUrl.startsWith("http://") && !finalLinkUrl.startsWith("https://")) {
+            finalLinkUrl = "https://" + finalLinkUrl;
+        }
+
         setSubmitting(true);
         try {
-            const res = await api.post("/cms/banners", newBanner);
+            const payload = { ...newBanner, linkUrl: finalLinkUrl };
+            const res = await api.post("/cms/banners", payload);
             if (res.data?.success) {
                 toast.success("Banner added successfully");
                 setBanners([res.data.data, ...banners]);
                 setNewBanner({ title: "", imageUrl: "", linkUrl: "", isActive: true });
                 setShowForm(false);
+            } else {
+                showError(res, "Failed to add banner");
             }
-        } catch {
-            toast.error("Failed to add banner");
+        } catch (error: any) {
+            showError(error, "Failed to add banner");
         } finally {
             setSubmitting(false);
         }
@@ -67,22 +86,30 @@ export default function BannersPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this banner?")) return;
         try {
-            await api.delete(`/cms/banners/${id}`);
-            setBanners(banners.filter(b => b.id !== id));
-            toast.success("Banner deleted");
-        } catch {
-            toast.error("Failed to delete banner");
+            const res = await api.delete(`/cms/banners/${id}`);
+            if (res.data?.success !== false) {
+                setBanners(banners.filter(b => b.id !== id));
+                toast.success("Banner deleted");
+            } else {
+                showError(res, "Failed to delete banner");
+            }
+        } catch (error: any) {
+            showError(error, "Failed to delete banner");
         }
     };
 
     const toggleStatus = async (banner: Banner) => {
         try {
             const updated = { ...banner, isActive: !banner.isActive };
-            await api.post(`/cms/banners`, { ...updated, bannerId: banner.id });
-            setBanners(banners.map(b => b.id === banner.id ? updated : b));
-            toast.success(`Banner ${updated.isActive ? "activated" : "deactivated"}`);
-        } catch {
-            toast.error("Failed to update status");
+            const res = await api.put(`/cms/banners/${banner.id}`, updated);
+            if (res.data?.success !== false) {
+                setBanners(banners.map(b => b.id === banner.id ? updated : b));
+                toast.success(`Banner ${updated.isActive ? "activated" : "deactivated"}`);
+            } else {
+                showError(res, "Failed to update status");
+            }
+        } catch (error: any) {
+            showError(error, "Failed to update status");
         }
     };
 
@@ -100,13 +127,18 @@ export default function BannersPage() {
         const { title, imageUrl, linkUrl } = editForm;
         if (!imageUrl) return toast.error("Image URL is required");
 
+        let finalLinkUrl = linkUrl?.trim() || "";
+        if (finalLinkUrl && !finalLinkUrl.startsWith("http://") && !finalLinkUrl.startsWith("https://")) {
+            finalLinkUrl = "https://" + finalLinkUrl;
+        }
+
         setUpdating(true);
         try {
             const payload: Banner = {
                 ...banner,            // keep all existing fields (isActive etc.)
                 title,
                 imageUrl,
-                linkUrl,
+                linkUrl: finalLinkUrl,
             };
             const res = await api.put(`/cms/banners/${banner.id}`, payload);
             if (res.data?.success) {
@@ -114,10 +146,10 @@ export default function BannersPage() {
                 setBanners(banners.map(b => b.id === banner.id ? payload : b));
                 cancelEdit();
             } else {
-                toast.error(res.data?.message || "Failed to update banner");
+                showError(res, "Failed to update banner");
             }
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Failed to update banner");
+            showError(err, "Failed to update banner");
         } finally {
             setUpdating(false);
         }

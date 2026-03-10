@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import api from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -22,25 +23,52 @@ interface Notification {
 export default function NotificationDropdown({ isOpen, toggle, close }: NotificationDropdownProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const latestNotifIdRef = useRef<string | null>(null);
+  const initialLoadRef = useRef(true);
+
+  const playAlertSound = () => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio("/Shop_bell.wav");
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
-      setLoading(true);
       const res = await api.get("/notifications");
       if (res.data?.success) {
-        setNotifications(res.data.data || []);
+        const fetched = res.data.data || [];
+        setNotifications(fetched);
+
+        // Check for new notifications
+        if (fetched.length > 0) {
+          const latestId = fetched[0].id; // Assuming newest first
+          const isUnread = !fetched[0].isRead;
+
+          if (!initialLoadRef.current && latestNotifIdRef.current !== latestId && isUnread) {
+            // A new incoming notification detected!
+            playAlertSound();
+            toast.info(`🔔 ${fetched[0].message}`);
+          }
+          latestNotifIdRef.current = latestId;
+        }
+        initialLoadRef.current = false;
       }
     } catch (error) {
       console.error("Failed to fetch notifications", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchNotifications();
-    // Setup a small interval to poll for new notifications every minute
-    const interval = setInterval(fetchNotifications, 60000);
+    // Setup interval to poll for new notifications every 15 seconds
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -125,7 +153,11 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
             notifications.map((notification) => (
               <li key={notification.id}>
                 <Link
-                  href={`/notifications?highlight=${notification.id}`}
+                  href={
+                    (notification.message.toLowerCase().includes("upgrade request") || notification.message.toLowerCase().includes("subscription"))
+                      ? "/profile?tab=SUBSCRIPTION_REQUESTS"
+                      : `/notifications?highlight=${notification.id}`
+                  }
                   onClick={() => {
                     markAsRead(notification.id);
                     close();

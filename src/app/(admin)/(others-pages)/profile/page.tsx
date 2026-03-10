@@ -141,6 +141,10 @@ export default function ProfilePage() {
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
 
   useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      setActiveTab(tabParam as TabType);
+    }
     const payment = searchParams.get("payment");
     if (payment === "success") {
       toast.success("Payment successful! Your subscription has been updated.");
@@ -974,14 +978,18 @@ export default function ProfilePage() {
 
                   {/* Service Type Field */}
                   <div className="flex flex-col md:flex-row md:items-center py-2">
-                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Pick Up or Delivery?</Label>
+                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Service Type</Label>
                     <div className="flex-1">
                       <CustomSelect
                         value={restaurantForm.serviceType}
                         options={[
                           { value: "DELIVERY", label: "🚚  Delivery Only" },
                           { value: "PICKUP", label: "🏃  Pickup Only" },
+                          { value: "DINE_IN", label: "🍽️  Dine-in Only" },
                           { value: "BOTH", label: "🚚🏃  Delivery & Pickup" },
+                          { value: "DELIVERY_DINE_IN", label: "🚚🍽️  Delivery & Dine-in" },
+                          { value: "PICKUP_DINE_IN", label: "🏃🍽️  Pickup & Dine-in" },
+                          { value: "ALL", label: "🚚🏃🍽️  All (Delivery, Pickup, Dine-in)" },
                         ]}
                         onChange={(val) => setRestaurantForm({ ...restaurantForm, serviceType: val })}
                         placeholder="Select service type"
