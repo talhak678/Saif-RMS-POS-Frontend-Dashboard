@@ -5,7 +5,7 @@ import { Info } from "lucide-react";
 import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Building2,
   User,
@@ -135,6 +135,7 @@ export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("RESTAURANT_INFO");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -643,7 +644,7 @@ export default function ProfilePage() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
 
           <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <Button variant="outline" size="sm" className="text-gray-600 hover:text-brand-600 border-gray-200">
+            <Button onClick={() => router.push("/notifications")} variant="outline" size="sm" className="text-gray-600 hover:text-brand-600 border-gray-200">
               <History className="w-4 h-4" /> View Logs
             </Button>
           </div>
