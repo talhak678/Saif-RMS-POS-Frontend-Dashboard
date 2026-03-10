@@ -609,11 +609,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isSuperAdmin) {
-      setActiveTab("INFO");
+      const tabParam = searchParams.get("tab");
+      if (!tabParam) {
+        setActiveTab("INFO");
+      }
       fetchSubscriptionRequests();
       fetchTemplates();
     }
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, searchParams]);
 
   const restaurantUrl = restaurantForm.customDomain
     ? `https://${restaurantForm.customDomain}`
