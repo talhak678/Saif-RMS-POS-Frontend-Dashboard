@@ -24,6 +24,7 @@ import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import { Modal } from "@/components/ui/modal";
 import { loadStripe } from "@stripe/stripe-js";
+import FancySelect from "@/components/ui/FancySelect";
 import {
     Elements,
     PaymentElement,
@@ -420,16 +421,20 @@ function CustomerDetailsModal({
 
     const validate = () => {
         const e: Record<string, string> = {};
-        if (isDelivery && !details.name.trim()) e.name = "Name is required for delivery";
-        if (isDelivery && !details.phone.trim()) e.phone = "Phone is required for delivery";
-        if (isDelivery && !details.address.trim()) e.address = "Address is required for delivery";
+        if (!details.name.trim()) e.name = "Customer Name is required";
+        if (!details.phone.trim()) e.phone = "Phone Number is required";
+        if (isDelivery && !details.address.trim()) e.address = "Delivery Address is required";
         if (!selectedBranchId) e.branch = "Please select a branch";
         setErrors(e);
         return Object.keys(e).length === 0;
     };
 
     const handleConfirm = (withPrint = false) => {
-        if (validate()) onConfirm(details, selectedBranchId, withPrint);
+        if (validate()) {
+            onConfirm(details, selectedBranchId, withPrint);
+        } else {
+            toast.error("Please fill in all required customer details.");
+        }
     };
 
     return (
@@ -496,16 +501,15 @@ function CustomerDetailsModal({
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Branch <span className="text-red-500">*</span>
                         </label>
-                        <select
+                        <FancySelect
                             value={selectedBranchId}
-                            onChange={(e) => setSelectedBranchId(e.target.value)}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="">Select Branch</option>
-                            {branches.map((b) => (
-                                <option key={b.id} value={b.id}>{b.name}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setSelectedBranchId(val)}
+                            options={[
+                                { value: "", label: "Select Branch" },
+                                ...branches.map((b) => ({ value: b.id, label: b.name }))
+                            ]}
+                            placeholder="Select Branch"
+                        />
                         {errors.branch && <p className="text-red-500 text-xs mt-1">{errors.branch}</p>}
                     </div>
 
@@ -513,9 +517,6 @@ function CustomerDetailsModal({
                     <div>
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                             Customer Details
-                            {!isDelivery && (
-                                <span className="text-gray-400 font-normal ml-1">(Optional)</span>
-                            )}
                         </h3>
                         <div className="space-y-3">
                             {/* Name */}
@@ -524,7 +525,7 @@ function CustomerDetailsModal({
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <input
                                         type="text"
-                                        placeholder={`Customer Name${isDelivery ? " *" : ""}`}
+                                        placeholder="Customer Name *"
                                         value={details.name}
                                         onChange={(e) => setDetails({ ...details, name: e.target.value })}
                                         className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -539,7 +540,7 @@ function CustomerDetailsModal({
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <input
                                         type="email"
-                                        placeholder="Email (Optional)"
+                                        placeholder="Email Address"
                                         value={details.email}
                                         onChange={(e) => setDetails({ ...details, email: e.target.value })}
                                         className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -553,7 +554,7 @@ function CustomerDetailsModal({
                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <input
                                         type="number"
-                                        placeholder={`Phone Number${isDelivery ? " *" : ""}`}
+                                        placeholder="Phone Number *"
                                         value={details.phone}
                                         onChange={(e) => setDetails({ ...details, phone: e.target.value })}
                                         className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -566,7 +567,7 @@ function CustomerDetailsModal({
                             {orderType === "DINE_IN" && (
                                 <input
                                     type="text"
-                                    placeholder="Table Number (Optional)"
+                                    placeholder="Table Number"
                                     value={details.tableNumber}
                                     onChange={(e) => setDetails({ ...details, tableNumber: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -885,7 +886,7 @@ export default function POSPage() {
                 paymentMethod: paymentMethodMap[paymentMethod],
                 source: "POS",
                 items: cart.map((item) => ({
-                    menuItemId: item.id.split("-")[0], // strip variation suffix
+                    menuItemId: item.id.split("-")[0],
                     quantity: item.quantity,
                     price: item.unitPrice,
                     ...(item.selectedVariation && { variationId: item.selectedVariation.id }),
@@ -902,13 +903,16 @@ export default function POSPage() {
                     const customerPayload: any = { name: customerDetails.name };
                     if (customerDetails.phone) customerPayload.phone = customerDetails.phone;
                     if (customerDetails.email) customerPayload.email = customerDetails.email;
+
                     const custRes = await api.post("/customers", customerPayload);
                     if (custRes.data?.success) {
                         customerId = custRes.data.data?.id || null;
                     }
                 } catch (custErr: any) {
-                    // Non-blocking — order continues even if customer creation fails
-                    console.warn("Customer creation failed:", custErr?.response?.data?.message);
+                    const errMsg = custErr?.response?.data?.message || "";
+                    console.warn("Customer creation info:", errMsg);
+                    // If conflict (email/phone exists), we just proceed without linking ID.
+                    // The backend will still have the manual customerName/Phone in the order.
                 }
             }
 
@@ -921,31 +925,49 @@ export default function POSPage() {
 
             const res = await api.post("/orders", payload);
 
-            if (paymentMethod === "CARD") {
+            if (res.data.success) {
                 const order = res.data.data;
-                const intentRes = await api.post("/stripe-intent", {
-                    orderId: order.id,
-                    amount: total,
-                });
 
-                if (intentRes.data.success) {
-                    setStripeClientSecret(intentRes.data.data.clientSecret);
-                    setPaymentAmount(total);
-                    setShowCustomerModal(false);
+                if (paymentMethod === "CARD") {
+                    const intentRes = await api.post("/stripe-intent", {
+                        orderId: order.id,
+                        amount: total,
+                    });
+
+                    if (intentRes.data.success) {
+                        setStripeClientSecret(intentRes.data.data.clientSecret);
+                        setPaymentAmount(total);
+                        setShowCustomerModal(false);
+                    } else {
+                        toast.error("Failed to initiate Stripe payment.");
+                    }
                 } else {
-                    toast.error("Failed to initiate payment. Please try again.");
+                    toast.success(`Order #${order?.orderNo || ''} placed successfully!`);
+                    if (printAfter) {
+                        printReceipt({
+                            cart,
+                            subtotal,
+                            tax,
+                            total,
+                            orderType,
+                            paymentMethod,
+                            customerDetails,
+                            orderNo: order?.orderNo
+                        });
+                    }
+                    setCart([]);
+                    setShowCustomerModal(false);
                 }
-            } else {
-                toast.success("Order placed successfully!");
-                if (printAfter) {
-                    printReceipt({ cart, subtotal, tax, total, orderType, paymentMethod, customerDetails });
-                }
-                setCart([]);
-                setShowCustomerModal(false);
             }
         } catch (err: any) {
-            const msg = err?.response?.data?.message || "Failed to place order";
-            toast.error(msg);
+            const apiMsg = err?.response?.data?.message;
+            console.error("Order placement error:", err);
+
+            if (apiMsg === "Validation failed") {
+                toast.error("Validation failed: Please ensure all required customer fields are filled correctly.");
+            } else {
+                toast.error(apiMsg || err?.message || "Failed to place order");
+            }
         } finally {
             setPlacingOrder(false);
         }

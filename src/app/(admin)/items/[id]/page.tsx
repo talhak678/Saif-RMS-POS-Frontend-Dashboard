@@ -83,7 +83,7 @@ function ItemDetails() {
     try {
       setDeleteLoading(true);
       await api.delete(`/menu-items/${id}`);
-      router.push("/menu-items");
+      router.push("/items");
     } catch (error) {
       console.error("Delete failed", error);
       alert("Failed to delete item.");

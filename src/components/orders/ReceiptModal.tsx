@@ -27,89 +27,95 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
         <head>
           <title>Order Receipt #${order.orderNo}</title>
           <style>
-            @page { size: auto; margin: 0; }
+            @page { size: auto; margin: 5mm; }
             body { 
               font-family: 'Inter', sans-serif; 
-              padding: 40px; 
-              color: #333;
-              line-height: 1.5;
+              padding: 0; 
+              margin: 0;
+              color: #000;
+              line-height: 1.3;
+              -webkit-print-color-adjust: exact;
             }
             .receipt {
               width: 100%;
-              max-width: 450px;
+              max-width: 380px;
               margin: 0 auto;
             }
             .header {
               text-align: center;
-              margin-bottom: 30px;
+              margin-bottom: 15px;
             }
             .logo {
-              width: 80px;
-              height: 80px;
-              margin: 0 auto 10px;
+              width: 60px;
+              height: 60px;
+              margin: 0 auto 5px;
               background: #f0f0f0;
               border-radius: 50%;
               display: flex;
               align-items: center;
               justify-content: center;
               font-weight: bold;
-              font-size: 24px;
+              font-size: 20px;
             }
             .restaurant-name {
-              font-size: 20px;
+              font-size: 18px;
               font-weight: 800;
-              margin: 5px 0;
+              margin: 2px 0;
             }
             .order-meta {
               display: grid;
               grid-template-columns: 1fr 1fr;
-              gap: 15px;
-              margin-bottom: 30px;
-              font-size: 13px;
+              gap: 10px;
+              margin-bottom: 15px;
+              font-size: 12px;
             }
             .meta-item b {
               display: block;
-              color: #999;
+              color: #666;
               text-transform: uppercase;
-              font-size: 10px;
+              font-size: 9px;
               letter-spacing: 0.5px;
             }
             .customer-section {
-              border-top: 1px dashed #eee;
-              border-bottom: 1px dashed #eee;
-              padding: 20px 0;
-              margin-bottom: 25px;
-              font-size: 13px;
+              border-top: 1px dashed #ccc;
+              border-bottom: 1px dashed #ccc;
+              padding: 10px 0;
+              margin-bottom: 15px;
+              font-size: 12px;
             }
             .customer-grid {
-              display: grid;
-              grid-template-columns: 130px 1fr;
-              gap: 8px;
+              display: flex;
+              flex-direction: column;
+            }
+            .customer-grid div {
+              display: flex;
+              justify-content: space-between;
+              width: 100%;
             }
             .customer-grid b {
-              color: #666;
+              color: #444;
             }
             .items-section {
-              margin-bottom: 30px;
+              margin-bottom: 15px;
             }
             .category-title {
-              font-size: 11px;
+              font-size: 10px;
               font-weight: 900;
               text-transform: uppercase;
               color: #000;
-              margin: 20px 0 10px;
-              border-bottom: 1px solid #000;
-              padding-bottom: 5px;
+              margin: 10px 0 5px;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 3px;
             }
             .item-row {
               display: flex;
               justify-content: space-between;
-              margin-bottom: 10px;
-              font-size: 13px;
+              margin-bottom: 6px;
+              font-size: 12px;
             }
             .item-details {
               display: flex;
-              gap: 12px;
+              gap: 10px;
             }
             .item-qty {
               font-weight: 800;
@@ -121,33 +127,33 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
               font-weight: 800;
             }
             .item-unit {
-              font-size: 11px;
-              color: #888;
+              font-size: 10px;
+              color: #666;
             }
             .totals-section {
-              border-top: 2px solid #000;
-              padding-top: 15px;
-              font-size: 14px;
+              border-top: 1px solid #000;
+              padding-top: 10px;
+              font-size: 13px;
             }
             .total-row {
               display: flex;
               justify-content: space-between;
-              margin-bottom: 5px;
+              margin-bottom: 3px;
             }
             .grand-total {
-              font-size: 18px;
+              font-size: 16px;
               font-weight: 900;
-              margin-top: 10px;
-              padding-top: 10px;
+              margin-top: 8px;
+              padding-top: 8px;
               border-top: 1px solid #eee;
             }
             .footer {
               text-align: center;
-              font-size: 10px;
-              color: #999;
-              margin-top: 40px;
+              font-size: 9px;
+              color: #777;
+              margin-top: 20px;
               border-top: 1px solid #eee;
-              padding-top: 10px;
+              padding-top: 8px;
             }
           </style>
         </head>
@@ -176,6 +182,121 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} showCloseButton={false} className="max-w-4xl">
+      <style>{`
+        .receipt-preview {
+          font-family: 'Inter', sans-serif;
+          color: #000;
+          line-height: 1.3;
+        }
+        .receipt-preview .receipt {
+          width: 100%;
+        }
+        .receipt-preview .header {
+          text-align: center;
+          margin-bottom: 15px;
+        }
+        .receipt-preview .logo {
+          width: 60px;
+          height: 60px;
+          margin: 0 auto 5px;
+          background: #f0f0f0;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 20px;
+        }
+        .receipt-preview .restaurant-name {
+          font-size: 18px;
+          font-weight: 800;
+          margin: 2px 0;
+        }
+        .receipt-preview .order-meta {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 15px;
+          font-size: 12px;
+        }
+        .receipt-preview .meta-item b {
+          display: block;
+          color: #666;
+          text-transform: uppercase;
+          font-size: 9px;
+          letter-spacing: 0.5px;
+        }
+        .receipt-preview .customer-section {
+          border-top: 1px dashed #ccc;
+          border-bottom: 1px dashed #ccc;
+          padding: 10px 0;
+          margin-bottom: 15px;
+          font-size: 12px;
+        }
+        .receipt-preview .customer-grid {
+          display: flex;
+          flex-direction: column;
+        }
+        .receipt-preview .customer-grid div {
+          display: flex;
+          justify-content: space-between;
+        }
+        .receipt-preview .customer-grid b {
+          color: #444;
+        }
+        .receipt-preview .items-section {
+          margin-bottom: 15px;
+        }
+        .receipt-preview .category-title {
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+          color: #000;
+          margin: 10px 0 5px;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 3px;
+        }
+        .receipt-preview .item-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 6px;
+          font-size: 12px;
+        }
+        .receipt-preview .item-details {
+          display: flex;
+          gap: 10px;
+        }
+        .receipt-preview .item-qty {
+          font-weight: 800;
+        }
+        .receipt-preview .item-name {
+          font-weight: 700;
+        }
+        .receipt-preview .item-price {
+          font-weight: 800;
+        }
+        .receipt-preview .item-unit {
+          font-size: 10px;
+          color: #666;
+        }
+        .receipt-preview .totals-section {
+          border-top: 1px solid #000;
+          padding-top: 10px;
+          font-size: 13px;
+        }
+        .receipt-preview .total-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 3px;
+        }
+        .receipt-preview .grand-total {
+          font-size: 16px;
+          font-weight: 900;
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid #eee;
+        }
+      `}</style>
       <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
 
         {/* Modal Header */}
@@ -226,7 +347,7 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
           </div>
 
           {/* Receipt Preview Right */}
-          <div className="flex-1 bg-white dark:bg-white shadow-xl min-h-[600px] max-w-[450px] mx-auto p-10 text-gray-800" ref={printRef}>
+          <div className="flex-1 bg-white dark:bg-white shadow-xl min-h-[600px] max-w-[450px] mx-auto p-10 text-gray-800 receipt-preview" ref={printRef}>
             <div className="receipt">
               <div className="header">
                 <div className="logo">
@@ -257,17 +378,25 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
 
               <div className="customer-section">
                 <div className="customer-grid">
-                  <b>Address :</b>
-                  <span className="font-medium text-gray-600 leading-tight">{order.deliveryAddress || "N/A"}</span>
+                  <div className="flex justify-between items-start gap-4 mb-2">
+                    <b className="whitespace-nowrap">Address :</b>
+                    <span className="text-right font-medium text-gray-600 leading-tight flex-1">{order.deliveryAddress || "N/A"}</span>
+                  </div>
 
-                  <b>City :</b>
-                  <span className="font-medium text-gray-600">{order.branch?.city || "Quetta"}</span>
+                  <div className="flex justify-between items-center mb-1">
+                    <b>City :</b>
+                    <span className="font-medium text-gray-600">{order.branch?.city || "Quetta"}</span>
+                  </div>
 
-                  <b>Phone No :</b>
-                  <span className="font-bold">{order.customer?.phone || "N/A"}</span>
+                  <div className="flex justify-between items-center mb-1">
+                    <b>Phone No :</b>
+                    <span className="font-bold">{order.customer?.phone || "N/A"}</span>
+                  </div>
 
-                  <b>Payment Type :</b>
-                  <span className="font-bold underline">{order.payment?.method || "CASH"}</span>
+                  <div className="flex justify-between items-center">
+                    <b>Payment Type :</b>
+                    <span className="font-bold underline">{order.payment?.method || "CASH"}</span>
+                  </div>
                 </div>
               </div>
 
@@ -300,7 +429,7 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
                   <span className="text-gray-500 font-medium">Delivery Fee ({order.type})</span>
                   <span className="font-bold">Rs. {order.deliveryCharge || 0}</span>
                 </div>
-                <div className="total-row grand-total">
+                <div className="total-row grand-total flex justify-between">
                   <span className="font-black text-black">Due Amount :</span>
                   <span className="font-black text-black">Rs. {Number(order.total) + Number(order.deliveryCharge || 0)}</span>
                 </div>

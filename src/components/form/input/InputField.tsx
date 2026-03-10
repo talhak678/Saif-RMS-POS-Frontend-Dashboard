@@ -1,6 +1,5 @@
-"use client";
 import Loader from '@/components/common/Loader';
-import { File } from 'lucide-react';
+import { File, Eye, EyeOff } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 
@@ -68,6 +67,7 @@ const Input: React.FC<inputProps> = ({
     const [touched, setTouched] = useState(false)
     const [isInvalid, setIsInvalid] = useState(false)
     const [customError, setCustomError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const isEmpty = value?.toString().trim() === "";
@@ -101,40 +101,54 @@ const Input: React.FC<inputProps> = ({
             ? "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             : "focus:outline-none"
 
+    const isPassword = type === "password";
+    const currentType = isPassword ? (showPassword ? "text" : "password") : type;
+
     return (
         <div className="mb-2">
             {label && <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>}
-            <input
-                onFocus={() => {
-                    if (onFocus) {
-                        onFocus()
-                    }
-                }}
-                accept={accept}
-                step={step}
-                min={min}
-                max={max}
-                inputMode={inputMode}
-                onKeyPress={onKeyPress}
-                onPaste={onPaste}
-                checked={checked}
-                id={id}
-                disabled={disabled}
-                placeholder={placeholder}
-                name={name}
-                className={`${baseClasses} ${focusClasses} ${className}`}
-                type={type}
-                value={value !== undefined ? value : defaultValue}
-                onChange={onChange}
-                onBlur={() => {
-                    setTouched(true)
-                    if (onBlur) {
-                        onBlur()
-                    }
-                }}
-                ref={ref}
-                {...props}
-            />
+            <div className="relative">
+                <input
+                    onFocus={() => {
+                        if (onFocus) {
+                            onFocus()
+                        }
+                    }}
+                    accept={accept}
+                    step={step}
+                    min={min}
+                    max={max}
+                    inputMode={inputMode}
+                    onKeyPress={onKeyPress}
+                    onPaste={onPaste}
+                    checked={checked}
+                    id={id}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                    name={name}
+                    className={`${baseClasses} ${focusClasses} ${className} ${isPassword ? "pr-10" : ""}`}
+                    type={currentType}
+                    value={value !== undefined ? value : defaultValue}
+                    onChange={onChange}
+                    onBlur={() => {
+                        setTouched(true)
+                        if (onBlur) {
+                            onBlur()
+                        }
+                    }}
+                    ref={ref}
+                    {...props}
+                />
+                {isPassword && (
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                )}
+            </div>
             {isInvalid && <p className="text-sm text-red-500 mt-1 transition-opacity duration-200">{customError}</p>}
             {!isInvalid && hint && <p className={`text-sm mt-1 ${error ? "text-red-500" : success ? "text-green-500" : "text-gray-500"}`}>{hint}</p>}
         </div>

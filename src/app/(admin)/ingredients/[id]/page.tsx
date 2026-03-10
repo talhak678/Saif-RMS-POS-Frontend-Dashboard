@@ -18,6 +18,9 @@ import {
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
+import { Modal } from "@/components/ui/modal";
+import { X, AlertTriangle, Save } from "lucide-react";
 
 interface IngredientDetailProps {
     params: Promise<{ id: string }>;
@@ -28,6 +31,11 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
     const router = useRouter();
     const [ingredient, setIngredient] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [formData, setFormData] = useState({ name: "", unit: "", category: "", unitPrice: "", parLevel: "" });
+    const [submitting, setSubmitting] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const fetchIngredientDetails = useCallback(async () => {
         try {
@@ -46,6 +54,57 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
     useEffect(() => {
         fetchIngredientDetails();
     }, [fetchIngredientDetails]);
+
+    const handleEditOpen = () => {
+        if (!ingredient) return;
+        setFormData({
+            name: ingredient.name,
+            unit: ingredient.unit,
+            category: ingredient.category || "",
+            unitPrice: ingredient.unitPrice?.toString() || "",
+            parLevel: ingredient.parLevel?.toString() || ""
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const payload = {
+                ...formData,
+                unitPrice: formData.unitPrice ? parseFloat(formData.unitPrice) : undefined,
+                parLevel: formData.parLevel ? parseFloat(formData.parLevel) : undefined
+            };
+            const res = await api.put(`/ingredients/${id}`, payload);
+            if (res.data?.success) {
+                toast.success("Ingredient updated");
+                setIsEditModalOpen(false);
+                fetchIngredientDetails();
+            }
+        } catch (error) {
+            console.error("Update failed", error);
+            toast.error("Update failed");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setDeleting(true);
+        try {
+            const res = await api.delete(`/ingredients/${id}`);
+            if (res.data?.success) {
+                toast.success("Ingredient deleted");
+                router.push("/ingredients");
+            }
+        } catch (error) {
+            console.error("Delete failed", error);
+            toast.error("Delete failed");
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -88,10 +147,14 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-2 px-5 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition-all">
+                        <button
+                            onClick={handleEditOpen}
+                            className="flex items-center gap-2 px-5 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition-all">
                             <Edit size={14} /> Edit
                         </button>
-                        <button className="flex items-center gap-2 px-5 py-2 border border-gray-200 dark:border-gray-700 text-gray-500 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all">
+                        <button
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="flex items-center gap-2 px-5 py-2 border border-gray-200 dark:border-gray-700 text-gray-500 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all">
                             <Trash2 size={14} /> Delete
                         </button>
                     </div>
@@ -108,7 +171,8 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                                     <Package size={28} />
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-800 dark:text-white uppercase tracking-normal">{ingredient.name}</h2>
-                                <p className="text-xs text-brand-600 font-bold uppercase mt-1 tracking-wide bg-brand-50 dark:bg-brand-900/40 px-3 py-1 rounded-full">Base Unit: {ingredient.unit}</p>
+                                <p className="text-xs text-brand-600 font-bold uppercase mt-1 tracking-wide bg-brand-50 dark:bg-brand-900/40 px-3 py-1 rounded-full">{ingredient.category || "Uncategorized"}</p>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase mt-3 tracking-wide">Base Unit: {ingredient.unit}</p>
 
                                 <div className="w-full grid grid-cols-2 gap-px bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden mt-8">
                                     <div className="bg-white dark:bg-gray-900 p-4">
@@ -140,6 +204,17 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                                     <div className="flex-1">
                                         <p className="text-[10px] font-bold text-gray-400 uppercase">Last Activity</p>
                                         <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold">{new Date(ingredient.updatedAt).toLocaleDateString()} {new Date(ingredient.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 pt-2">
+                                    <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                                        <Tag size={16} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Pricing & Par</p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold">
+                                            ${ingredient.unitPrice ? parseFloat(ingredient.unitPrice).toFixed(2) : "0.00"} / {ingredient.parLevel ? `${ingredient.parLevel} ${ingredient.unit}` : "No Par"}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 pt-2">
@@ -247,8 +322,103 @@ export default function IngredientDetailPage({ params }: IngredientDetailProps) 
                         </div>
                     </div>
 
-                </div>
+                    {/* Edit Modal */}
+                    <Modal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        showCloseButton={false}
+                        className="max-w-md"
+                    >
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                                <h2 className="text-base font-bold text-gray-800 dark:text-white">Edit Ingredient</h2>
+                                <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm text-gray-700 dark:text-gray-200"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Unit</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={formData.unit}
+                                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm text-gray-700 dark:text-gray-200"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Category</label>
+                                    <input
+                                        type="text"
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm text-gray-700 dark:text-gray-200"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500">Unit Price</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.unitPrice}
+                                            onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
+                                            className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm text-gray-700 dark:text-gray-200"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500">Par Level</label>
+                                        <input
+                                            type="number"
+                                            value={formData.parLevel}
+                                            onChange={(e) => setFormData({ ...formData, parLevel: e.target.value })}
+                                            className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm text-gray-700 dark:text-gray-200"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-2.5 text-sm font-bold text-gray-400">Cancel</button>
+                                    <button type="submit" disabled={submitting} className="flex-[2] bg-brand-600 text-white py-2.5 rounded-xl text-sm font-bold">
+                                        {submitting ? "Saving..." : "Save Changes"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </Modal>
 
+                    {/* Delete Modal */}
+                    <Modal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => setIsDeleteModalOpen(false)}
+                        showCloseButton={false}
+                        className="max-w-sm"
+                    >
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 text-center">
+                            <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <AlertTriangle size={28} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Delete Ingredient?</h3>
+                            <p className="text-xs text-gray-500 mb-6">This will permanently remove this ingredient and its stock records.</p>
+                            <div className="flex gap-3">
+                                <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-2.5 text-sm font-bold text-gray-400">Cancel</button>
+                                <button onClick={handleDelete} disabled={deleting} className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-bold">
+                                    {deleting ? "Deleting..." : "Delete"}
+                                </button>
+                            </div>
+                        </div>
+                    </Modal>
+                </div>
             </div>
         </ProtectedRoute>
     );

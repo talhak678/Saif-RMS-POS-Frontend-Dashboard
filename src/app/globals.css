@@ -545,6 +545,7 @@
 }
 
 .flatpickr-calendar {
+  z-index: 9999999 !important;
   @apply mt-2 !bg-white !rounded-xl !p-5 !border !border-gray-200 dark:!border-gray-800 !text-gray-500 dark:!bg-gray-dark dark:!text-gray-400 dark:!shadow-theme-xl 2xsm:!w-auto;
 }
 

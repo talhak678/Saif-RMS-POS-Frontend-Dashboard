@@ -25,7 +25,8 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
                 onChange: (selectedDates, dateStr) => {
                     onChange(dateStr);
                 },
-                static: true, // helps with positioning in modals
+                static: false,
+                appendTo: document.body,
             });
         }
 
@@ -48,7 +49,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <input
                 ref={inputRef}
                 placeholder={placeholder}
-                className={`w-full bg-transparent outline-none cursor-pointer ${className}`}
+                className={`w-full bg-transparent outline-none cursor-pointer text-gray-700 dark:text-white ${className}`}
                 readOnly
             />
             <Calendar size={14} className="absolute right-0 text-gray-400 group-hover:text-brand-500 pointer-events-none transition-colors" />

@@ -803,7 +803,19 @@ export default function DashboardPage() {
           <SectionHeader icon={<Globe size={18} />} title="Outbound Links" sub="Engagement with social media links" />
           <div className="mt-2 divide-y dark:divide-gray-700/50">
             <SocialLinkRow name="Facebook" clicks="4%" count={33} icon={<Facebook size={22} />} color="bg-[#1877F2]" />
-            <SocialLinkRow name="Instagram" clicks="7%" count={58} icon={<Instagram size={22} />} color="bg-gradient-to-tr from-[#f09433] 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%" />
+            <SocialLinkRow
+              name="Instagram"
+              clicks="7%"
+              count={58}
+              icon={
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              }
+              color="bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]"
+            />
             <SocialLinkRow name="Google Maps" clicks="0%" count={2} icon={<MapPin size={22} />} color="bg-[#EA4335]" />
             <SocialLinkRow name="Website" clicks="12%" count={97} icon={<Globe size={22} />} color="bg-[#4f46e5]" />
           </div>

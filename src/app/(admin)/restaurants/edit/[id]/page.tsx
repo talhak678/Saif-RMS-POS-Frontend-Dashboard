@@ -8,6 +8,7 @@ import Loader from "@/components/common/Loader";
 import ImageUpload from "@/components/common/ImageUpload";
 import { useAuth } from "@/services/permission.service";
 import { toast } from "sonner";
+import Input from "@/components/form/input/InputField";
 
 const STATUS_OPTIONS = ["PENDING", "ACTIVE", "SUSPENDED"];
 const SUBSCRIPTION_OPTIONS = [
@@ -417,16 +418,17 @@ export default function EditRestaurantPage() {
                             />
                         </div>
 
+
                         {/* SMTP PASS */}
                         <div>
-                            <label className="text-sm font-semibold dark:text-gray-300">SMTP App Password</label>
-                            <input
+                            <Input
+                                label="SMTP App Password"
                                 name="smtpPass"
                                 type="password"
                                 value={form.smtpPass}
                                 onChange={handleChange}
                                 placeholder="••••••••••••••••"
-                                className="w-full p-2.5 mt-1 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                                className="p-2.5 mt-1"
                             />
                         </div>
 

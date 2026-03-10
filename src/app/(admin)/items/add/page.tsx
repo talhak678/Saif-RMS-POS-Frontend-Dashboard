@@ -361,7 +361,7 @@ function AddItemForm() {
           {/* --- FOOTER ACTIONS --- */}
           <div className="flex justify-end gap-4 pt-4 pb-20">
             <Link
-              href="/menu-items"
+              href="/items"
               className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
             >
               Cancel

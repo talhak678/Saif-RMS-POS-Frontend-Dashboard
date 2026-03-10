@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/services/api";
-import { Eye, ExternalLink, Plus, Edit, Trash2, Power } from "lucide-react";
+import { Eye, ExternalLink, Plus, Edit, Trash2, Power, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import { ViewDetailModal } from "@/components/ViewDetailModal";
@@ -293,7 +293,20 @@ export default function RestaurantsPage() {
                         { label: "Name", key: "name" },
                         { label: "Description", key: "description", fullWidth: true },
                         { label: "Slug", key: "slug" },
-                        { label: "Subscription", render: (data: any) => <span className={getSubscriptionBadge(data?.subscription)}>{data?.subscription}</span> },
+                        {
+                            label: "Subscription",
+                            render: (data: any) => (
+                                <div className="space-y-1.5">
+                                    <span className={getSubscriptionBadge(data?.subscription)}>{data?.subscription}</span>
+                                    {data?.subEndDate && (
+                                        <div className="flex items-center gap-1.5 text-theme-xs text-brand-600 dark:text-brand-400 font-medium">
+                                            <Clock size={12} className="shrink-0" />
+                                            <span>Expiring on {new Date(data.subEndDate).toLocaleDateString()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        },
                         { label: "Status", render: (data: any) => <span className={getStatusBadge(data?.status)}>{data?.status}</span> },
                         {
                             label: "Facebook",

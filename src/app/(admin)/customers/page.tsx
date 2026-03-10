@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
+import { CustomerDetailModal } from "@/components/customers/CustomerDetailModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Stats {
@@ -102,6 +103,11 @@ export default function CustomersPage() {
   const [loadingCustomers, setLoadingCustomers] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
 
+  // Detail Modal State
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
   // search
   const [searchName, setSearchName] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
@@ -161,6 +167,22 @@ export default function CustomersPage() {
     const segOk = activeSegment === null || matchesSegment(c, activeSegment);
     return nameOk && phoneOk && emailOk && segOk;
   });
+
+  const handleViewDetails = async (customer: any) => {
+    setSelectedCustomer(customer);
+    setIsModalOpen(true);
+    try {
+      setLoadingDetail(true);
+      const res = await api.get(`/customers/${customer.id}`);
+      if (res.data?.success) {
+        setSelectedCustomer(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch customer detail", err);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   const activeCfg = SEGMENT_CONFIG.find((s) => s.key === activeSegment) ?? null;
 
@@ -325,7 +347,8 @@ export default function CustomersPage() {
                     <td className="px-4 py-3 flex gap-2">
                       <button
                         title="View details"
-                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                        onClick={() => handleViewDetails(c)}
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       >
                         <Eye size={16} />
                       </button>
@@ -355,6 +378,12 @@ export default function CustomersPage() {
           )}
         </div>
 
+        <CustomerDetailModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          customer={selectedCustomer}
+          loading={loadingDetail}
+        />
       </div>
     </ProtectedRoute>
   );

@@ -66,11 +66,29 @@ const DEFAULT_CONFIG = {
                     contactPhone: "+123 456 789",
                     contactEmail: "info@example.com",
                     linksTitle: "OUR LINKS",
-                    links: "Home, About Us, Our Menu, Contact Us, FAQ",
+                    links: [
+                        { label: "Home", url: "/" },
+                        { label: "About Us", url: "/about-us" },
+                        { label: "Our Menu", url: "/our-menu" },
+                        { label: "Contact Us", url: "/contact-us" },
+                        { label: "FAQ", url: "/faq" }
+                    ],
                     servicesTitle: "OUR SERVICES",
-                    services: "Fast Delivery, Seat Reservation, Pickup In Store, Online Order, Table Booking",
+                    services: [
+                        { label: "Fast Delivery", url: "/our-menu" },
+                        { label: "Seat Reservation", url: "/contact-us" },
+                        { label: "Pickup In Store", url: "/our-menu" },
+                        { label: "Online Order", url: "/our-menu" },
+                        { label: "Table Booking", url: "/contact-us" }
+                    ],
                     helpCenterTitle: "HELP CENTER",
-                    helpCenter: "Support, Terms & Conditions, Privacy Policy, Account, Feedback",
+                    helpCenter: [
+                        { label: "Support", url: "/contact-us" },
+                        { label: "Terms & Conditions", url: "/terms" },
+                        { label: "Privacy Policy", url: "/privacy" },
+                        { label: "Account", url: "/account" },
+                        { label: "Feedback", url: "/contact-us" }
+                    ],
                     facebook: "",
                     instagram: "",
                     tiktok: ""
@@ -518,6 +536,8 @@ export default function CMSPage() {
                     bgImage: "",
                     rightImage: ""
                 };
+            } else if (['links', 'services', 'helpCenter'].includes(arrayField) && section === 'footer') {
+                newItem = { label: "New Link", url: "/" };
             }
 
             newConfig[page].sections[section].content[arrayField] = [...(newConfig[page].sections[section].content[arrayField] || []), newItem];
@@ -702,7 +722,7 @@ export default function CMSPage() {
                                                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && !(sectionKey === 'menuGallery' && k === 'description') && !(sectionKey === 'footer' && k === 'backgroundColor') && k !== 'accentColor').map((field) => {
+                                                        {Object.keys(section.content || {}).filter(k => k !== 'breadcrumb' && k !== 'cards' && k !== 'items' && k !== 'selectedCategoryIds' && k !== 'selectedItemIds' && k !== 'selectedReviewIds' && k !== 'selectedReviewId' && k !== 'showReview' && !(sectionKey === 'menuGallery' && k === 'description') && !(sectionKey === 'footer' && k === 'backgroundColor') && k !== 'accentColor' && !(sectionKey === 'footer' && ['links', 'services', 'helpCenter'].includes(k) && Array.isArray(section.content[k]))).map((field) => {
                                                             const isThemeColor = activeTab === 'theme' && sectionKey === 'colors';
                                                             const isThemeFont = activeTab === 'theme' && sectionKey === 'fonts';
                                                             const isThemeLogo = activeTab === 'theme' && sectionKey === 'logos';
@@ -1129,67 +1149,49 @@ export default function CMSPage() {
                                                         </div>
                                                     )}
 
-                                                    {sectionKey === 'banner' && activeTab === 'home' && (
-                                                        <div className="space-y-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <PlusCircle className="w-5 h-5 text-brand-500" />
-                                                                    <h3 className="text-sm font-bold text-gray-800 dark:text-white">Additional Banners</h3>
-                                                                </div>
-                                                                <button onClick={() => addArrayItem(activeTab, sectionKey, 'items')} className="flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm active:scale-95">
-                                                                    <Plus className="w-3.5 h-3.5" /> Add More
-                                                                </button>
+
+                                                    {/* SPECIAL: Banner Review Toggle */}
+                                                    {sectionKey === 'banner' && section.content?.showReview !== undefined && (
+                                                        <div className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+                                                            <div className="flex items-center gap-3">
+                                                                <Quote className="w-5 h-5 text-brand-500" />
+                                                                <h3 className="text-sm font-bold text-gray-800 dark:text-white">Banner Review Display</h3>
                                                             </div>
-                                                            <div className="space-y-6">
-                                                                {(section.content.items || []).map((item: any, idx: number) => (
-                                                                    <div key={idx} className="bg-gray-50/50 dark:bg-white/[0.02] p-6 rounded-2xl border border-gray-200 dark:border-gray-700 relative group/banner">
-                                                                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50 dark:border-gray-800">
-                                                                            <div className="flex items-center gap-4">
-                                                                                <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-sm">#{idx + 2}</div>
-                                                                                <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Extra Slide</h4>
-                                                                            </div>
-                                                                            <button onClick={() => removeArrayItem(activeTab, sectionKey, 'items', idx)} className="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm border border-red-100 dark:border-red-900/20 bg-white dark:bg-gray-800"><Trash2 className="w-4 h-4" /></button>
-                                                                        </div>
-
-                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                                            {/* Subheading */}
-                                                                            <div className="space-y-1.5">
-                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Subheading</label>
-                                                                                <input value={item.subtitle} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'subtitle', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400" placeholder="High Quality Test Station" />
-                                                                            </div>
-
-                                                                            {/* Heading */}
-                                                                            <div className="space-y-1.5">
-                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Heading</label>
-                                                                                <input value={item.title} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'title', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 font-bold" placeholder="Delicious Food For You" />
-                                                                            </div>
-
-                                                                            {/* Description (Full Width) */}
-                                                                            <div className="space-y-1.5 md:col-span-2">
-                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Description</label>
-                                                                                <textarea rows={2} value={item.description} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'description', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 resize-none leading-relaxed" placeholder="Enter banner details..." />
-                                                                            </div>
-
-                                                                            {/* Banner Image (Full Width) */}
-                                                                            <div className="space-y-1.5 md:col-span-2">
-                                                                                <div className="flex items-center justify-between">
-                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Image</label>
-                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">1920×1080 px</span>
-                                                                                </div>
-                                                                                <ImageUpload label="" value={item.bgImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'bgImage', url)} isBanner={true} recommendedSize="1920x1080" />
-                                                                            </div>
-
-                                                                            {/* Banner Dish Image (Full Width) */}
-                                                                            <div className="space-y-1.5 md:col-span-2">
-                                                                                <div className="flex items-center justify-between">
-                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Dish Image</label>
-                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">800×800 px</span>
-                                                                                </div>
-                                                                                <ImageUpload label="" value={item.rightImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'rightImage', url)} isBanner={true} recommendedSize="800x800" />
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
+                                                            <div className="flex items-center gap-4 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3">
+                                                                <span className={`text-xs font-bold ${section.content.showReview === 'true' || section.content.showReview === true ? 'text-green-600' : 'text-red-500'}`}>
+                                                                    {section.content.showReview === 'true' || section.content.showReview === true ? '✓ Enabled' : '✗ Disabled'}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleContentChange(activeTab, sectionKey, 'showReview', String(!(section.content.showReview === 'true' || section.content.showReview === true)))}
+                                                                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 focus:outline-none ${(section.content.showReview === 'true' || section.content.showReview === true)
+                                                                        ? 'bg-brand-500 shadow-md shadow-brand-500/30'
+                                                                        : 'bg-gray-300 dark:bg-gray-700'
+                                                                        }`}
+                                                                >
+                                                                    <span className={`inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${(section.content.showReview === 'true' || section.content.showReview === true) ? 'translate-x-8' : 'translate-x-1'
+                                                                        }`}>
+                                                                        {(section.content.showReview === 'true' || section.content.showReview === true)
+                                                                            ? <Check className="w-2.5 h-2.5 text-brand-500" />
+                                                                            : <X className="w-2.5 h-2.5 text-gray-400" />
+                                                                        }
+                                                                    </span>
+                                                                </button>
+                                                                <div className="flex items-center gap-2 ml-2">
+                                                                    {['true', 'false'].map((opt) => (
+                                                                        <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
+                                                                            <input
+                                                                                type="radio"
+                                                                                name={`banner-showReview-end`}
+                                                                                checked={String(section.content.showReview) === opt}
+                                                                                onChange={() => handleContentChange(activeTab, sectionKey, 'showReview', opt)}
+                                                                                className="accent-brand-500 w-3.5 h-3.5"
+                                                                            />
+                                                                            <span className={`text-xs font-semibold capitalize ${opt === 'true' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
+                                                                                }`}>{opt === 'true' ? 'Yes' : 'No'}</span>
+                                                                        </label>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -1315,6 +1317,148 @@ export default function CMSPage() {
                                                                 })}
                                                         </div>
                                                     )}
+                                                    {/* SPECIAL: Additional Banners List */}
+                                                    {sectionKey === 'banner' && activeTab === 'home' && (
+                                                        <div className="space-y-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                                                            <div className="space-y-6">
+                                                                {(section.content.items || []).map((item: any, idx: number) => (
+                                                                    <div key={idx} className="bg-gray-50/50 dark:bg-white/[0.02] p-6 rounded-2xl border border-gray-200 dark:border-gray-700 relative group/banner">
+                                                                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50 dark:border-gray-800">
+                                                                            <div className="flex items-center gap-4">
+                                                                                <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-sm">#{idx + 2}</div>
+                                                                                <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Extra Slide</h4>
+                                                                            </div>
+                                                                            <button onClick={() => removeArrayItem(activeTab, sectionKey, 'items', idx)} className="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm border border-red-100 dark:border-red-900/20 bg-white dark:bg-gray-800"><Trash2 className="w-4 h-4" /></button>
+                                                                        </div>
+
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Subheading</label>
+                                                                                <input value={item.subtitle} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'subtitle', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400" placeholder="High Quality Test Station" />
+                                                                            </div>
+                                                                            <div className="space-y-1.5">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Heading</label>
+                                                                                <input value={item.title} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'title', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 font-bold" placeholder="Delicious Food For You" />
+                                                                            </div>
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Description</label>
+                                                                                <textarea rows={2} value={item.description} onChange={(e) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'description', e.target.value)} className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-400 resize-none leading-relaxed" placeholder="Enter banner details..." />
+                                                                            </div>
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Image</label>
+                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">1920×1080 px</span>
+                                                                                </div>
+                                                                                <ImageUpload label="" value={item.bgImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'bgImage', url)} isBanner={true} recommendedSize="1920x1080" />
+                                                                            </div>
+                                                                            <div className="space-y-1.5 md:col-span-2">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Banner Dish Image</label>
+                                                                                    <span className="text-[10px] font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-900/30">800×800 px</span>
+                                                                                </div>
+                                                                                <ImageUpload label="" value={item.rightImage} onChange={(url) => handleArrayChange(activeTab, sectionKey, 'items', idx, 'rightImage', url)} isBanner={true} recommendedSize="800x800" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800/50">
+                                                                <div className="flex items-center gap-3">
+                                                                    <PlusCircle className="w-5 h-5 text-brand-500" />
+                                                                    <h3 className="text-sm font-bold text-gray-800 dark:text-white">Additional Banners</h3>
+                                                                </div>
+                                                                <button onClick={() => addArrayItem(activeTab, sectionKey, 'items')} className="flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm active:scale-95">
+                                                                    <Plus className="w-3.5 h-3.5" /> Add More
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* SPECIAL: Footer Links Manager */}
+                                                    {sectionKey === 'footer' && (
+                                                        <div className="space-y-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+                                                            {['links', 'services', 'helpCenter'].map((groupField) => {
+                                                                const groupValue = section.content[groupField];
+                                                                const groupLabel = groupField === 'links' ? 'Our Links' : groupField === 'services' ? 'Our Services' : 'Help Center';
+
+                                                                // If it's still the old string format, show a conversion button
+                                                                if (typeof groupValue === 'string') {
+                                                                    return (
+                                                                        <div key={groupField} className="bg-brand-50/50 dark:bg-brand-500/5 p-6 rounded-2xl border border-dashed border-brand-200 dark:border-brand-500/20">
+                                                                            <div className="flex items-center justify-between gap-4">
+                                                                                <div className="flex items-center gap-3 text-brand-500">
+                                                                                    {groupField === 'links' ? <ExternalLink className="w-5 h-5" /> : groupField === 'services' ? <Layout className="w-5 h-5" /> : <HelpCircle className="w-5 h-5" />}
+                                                                                    <h3 className="text-sm font-bold">{groupLabel}</h3>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        const converted = groupValue.split(',').map(s => ({ label: s.trim(), url: "/" }));
+                                                                                        handleContentChange(activeTab, sectionKey, groupField, converted);
+                                                                                    }}
+                                                                                    className="bg-brand-500 text-white px-4 py-2 rounded-xl text-[10px] font-bold shadow-sm hover:bg-brand-600 transition-all uppercase tracking-wider"
+                                                                                >
+                                                                                    Enable Advanced Links
+                                                                                </button>
+                                                                            </div>
+                                                                            <p className="text-[11px] text-gray-500 mt-2">Currently using basic text format. Enable advanced mode to add URLs to each link.</p>
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                // New Array format UI
+                                                                return (
+                                                                    <div key={groupField} className="space-y-4">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <div className="flex items-center gap-3">
+                                                                                {groupField === 'links' ? <ExternalLink className="w-5 h-5 text-brand-500" /> : groupField === 'services' ? <Layout className="w-5 h-5 text-brand-500" /> : <HelpCircle className="w-5 h-5 text-brand-500" />}
+                                                                                <h3 className="text-sm font-bold text-gray-800 dark:text-white">{groupLabel} Configuration</h3>
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => addArrayItem(activeTab, sectionKey, groupField)}
+                                                                                className="flex items-center gap-2 text-brand-500 hover:text-brand-600 font-bold text-[10px] uppercase tracking-wider"
+                                                                            >
+                                                                                <Plus className="w-3.5 h-3.5" /> Add New {groupField === 'helpCenter' ? 'Help' : 'Link'}
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                            {(groupValue || []).map((link: any, idx: number) => (
+                                                                                <div key={idx} className="bg-gray-50/50 dark:bg-white/[0.02] p-4 rounded-xl border border-gray-100 dark:border-gray-800 relative group">
+                                                                                    <button
+                                                                                        onClick={() => removeArrayItem(activeTab, sectionKey, groupField, idx)}
+                                                                                        className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 text-red-500 p-1.5 rounded-full border border-red-50 dark:border-red-900/20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                    >
+                                                                                        <Trash2 className="w-3 h-3" />
+                                                                                    </button>
+                                                                                    <div className="space-y-3">
+                                                                                        <div className="space-y-1">
+                                                                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Label</label>
+                                                                                            <input
+                                                                                                value={link.label}
+                                                                                                onChange={(e) => handleArrayChange(activeTab, sectionKey, groupField, idx, 'label', e.target.value)}
+                                                                                                className="w-full bg-white dark:bg-gray-800 border-none rounded-lg px-3 py-1.5 text-xs font-semibold focus:ring-1 focus:ring-brand-500 outline-none"
+                                                                                                placeholder="e.g. About Us"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <div className="space-y-1">
+                                                                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">URL / Path</label>
+                                                                                            <input
+                                                                                                value={link.url}
+                                                                                                onChange={(e) => handleArrayChange(activeTab, sectionKey, groupField, idx, 'url', e.target.value)}
+                                                                                                className="w-full bg-white dark:bg-gray-800 border-none rounded-lg px-3 py-1.5 text-xs font-semibold focus:ring-1 focus:ring-brand-500 outline-none"
+                                                                                                placeholder="e.g. /about-us"
+                                                                                            />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+
                                                     {/* SPECIAL: Embedded Managers */}
                                                     {(sectionKey === 'blogList' || sectionKey === 'faqList') && (
                                                         <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">

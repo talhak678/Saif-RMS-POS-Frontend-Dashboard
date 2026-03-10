@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import { Modal } from "@/components/ui/modal";
 import DatePicker from "@/components/common/DatePicker";
+import FancySelect from "@/components/ui/FancySelect";
 
 const RESERVATION_STATUSES = ["BOOKED", "ARRIVED", "COMPLETED", "CANCELLED"];
 
@@ -139,6 +140,7 @@ export default function ReservationsPage() {
         const startLocal = r.startTime
             ? new Date(r.startTime).toISOString().slice(0, 16)
             : "";
+        if (r.branchId) fetchTablesForBranch(r.branchId, setFormTables);
         setForm({
             customerName: r.customerName || "",
             phone: r.phone || "",
@@ -148,9 +150,6 @@ export default function ReservationsPage() {
             branchId: r.branchId || "",
             tableId: r.tableId || "",
         });
-        setFormError("");
-        setShowCreate(true);
-        if (r.branchId) fetchTablesForBranch(r.branchId, setFormTables);
     };
 
     const validateForm = () => {
@@ -247,26 +246,38 @@ export default function ReservationsPage() {
 
                     <div className="flex flex-wrap gap-2 items-center">
                         {/* Branch filter */}
-                        <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            <option value="ALL">All Branches</option>
-                            {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                        </select>
+                        <FancySelect
+                            value={branchFilter}
+                            onChange={(val) => setBranchFilter(val)}
+                            options={[
+                                { value: "ALL", label: "All Branches" },
+                                ...branches.map(b => ({ value: b.id, label: b.name }))
+                            ]}
+                            className="min-w-[150px]"
+                        />
 
                         {/* Status filter */}
-                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            <option value="ALL">All Statuses</option>
-                            {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
-                        </select>
+                        <FancySelect
+                            value={statusFilter}
+                            onChange={(val) => setStatusFilter(val)}
+                            options={[
+                                { value: "ALL", label: "All Statuses" },
+                                ...RESERVATION_STATUSES.map(s => ({ value: s, label: STATUS_CONFIG[s]?.label }))
+                            ]}
+                            className="min-w-[140px]"
+                        />
 
                         {/* Table filter (only if branch selected) */}
                         {tables.length > 0 && (
-                            <select value={tableFilter} onChange={(e) => setTableFilter(e.target.value)}
-                                className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="ALL">All Tables</option>
-                                {tables.map(t => <option key={t.id} value={t.id}>Table {t.number} (cap: {t.capacity})</option>)}
-                            </select>
+                            <FancySelect
+                                value={tableFilter}
+                                onChange={(val) => setTableFilter(val)}
+                                options={[
+                                    { value: "ALL", label: "All Tables" },
+                                    ...tables.map(t => ({ value: t.id, label: `Table ${t.number} (cap: ${t.capacity})` }))
+                                ]}
+                                className="min-w-[150px]"
+                            />
                         )}
 
                         <button onClick={fetchReservations} disabled={loading}
@@ -406,55 +417,56 @@ export default function ReservationsPage() {
                                 <div className="col-span-2">
                                     <label className={labelCls}>Customer Name *</label>
                                     <input type="text" value={form.customerName}
-                                        onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+                                        onChange={(e) => setForm(f => ({ ...f, customerName: e.target.value }))}
                                         placeholder="Ahmed Khan" className={inputCls} />
                                 </div>
                                 <div>
                                     <label className={labelCls}>Phone *</label>
-                                    <input type="tel" value={form.phone}
-                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                        placeholder="+1 300 1234567" className={inputCls} />
+                                    <input type="number" value={form.phone}
+                                        onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))}
+                                        placeholder="15551234567" className={inputCls} />
                                 </div>
                                 <div>
                                     <label className={labelCls}>Guests *</label>
                                     <input type="number" min={1} value={form.guestCount}
-                                        onChange={(e) => setForm({ ...form, guestCount: e.target.value })}
+                                        onChange={(e) => setForm(f => ({ ...f, guestCount: e.target.value }))}
                                         placeholder="4" className={inputCls} />
                                 </div>
                                 <div className="col-span-2">
                                     <label className={labelCls}>Reservation Date & Time *</label>
                                     <DatePicker
                                         value={form.startTime}
-                                        onChange={(val) => setForm({ ...form, startTime: val })}
-                                        showTime={true}
+                                        onChange={(date) => setForm(f => ({ ...f, startTime: date }))}
+                                        showTime
                                         className={inputCls}
                                     />
                                 </div>
                                 <div>
                                     <label className={labelCls}>Branch *</label>
-                                    <select value={form.branchId}
-                                        onChange={(e) => setForm({ ...form, branchId: e.target.value })}
-                                        className={inputCls}>
-                                        <option value="">Select branch</option>
-                                        {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                                    </select>
+                                    <FancySelect
+                                        value={form.branchId || ""}
+                                        onChange={(val) => setForm(f => ({ ...f, branchId: val }))}
+                                        options={[
+                                            { value: "", label: "Select branch" },
+                                            ...branches.map(b => ({ value: b.id, label: b.name }))
+                                        ]}
+                                        placeholder="Select branch"
+                                    />
                                 </div>
                                 <div>
                                     <label className={labelCls}>Table (Optional)</label>
-                                    <select value={form.tableId}
-                                        onChange={(e) => setForm({ ...form, tableId: e.target.value })}
+                                    <FancySelect
+                                        value={form.tableId || ""}
+                                        onChange={(val) => setForm(f => ({ ...f, tableId: val }))}
                                         disabled={!form.branchId || formTables.length === 0}
-                                        className={inputCls + " disabled:opacity-50"}>
-                                        <option value="">No table</option>
-                                        {formTables
-                                            .filter((t: any) => t.status === "AVAILABLE" || t.id === form.tableId)
-                                            .map(t => (
-                                                <option key={t.id} value={t.id}>
-                                                    Table {t.number} (cap: {t.capacity})
-                                                    {t.status !== "AVAILABLE" ? ` — ${t.status}` : ""}
-                                                </option>
-                                            ))}
-                                    </select>
+                                        options={[
+                                            { value: "", label: "No table" },
+                                            ...formTables
+                                                .filter((t: any) => t.status === "AVAILABLE" || t.id === form.tableId)
+                                                .map(t => ({ value: t.id, label: `Table ${t.number} (cap: ${t.capacity})${t.status !== "AVAILABLE" ? ` — ${t.status}` : ""}` }))
+                                        ]}
+                                        placeholder="No table"
+                                    />
                                     {form.branchId && formTables.length === 0 && (
                                         <p className="text-[11px] text-gray-400 mt-1">No tables found for this branch</p>
                                     )}
@@ -462,11 +474,11 @@ export default function ReservationsPage() {
                                 {editItem && (
                                     <div>
                                         <label className={labelCls}>Status</label>
-                                        <select value={form.status}
-                                            onChange={(e) => setForm({ ...form, status: e.target.value })}
-                                            className={inputCls}>
-                                            {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
-                                        </select>
+                                        <FancySelect
+                                            value={form.status}
+                                            onChange={(val) => setForm(f => ({ ...f, status: val }))}
+                                            options={RESERVATION_STATUSES.map(s => ({ value: s, label: STATUS_CONFIG[s]?.label }))}
+                                        />
                                     </div>
                                 )}
                             </div>

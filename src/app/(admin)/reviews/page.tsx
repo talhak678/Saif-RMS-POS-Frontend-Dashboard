@@ -139,10 +139,10 @@ export default function ReviewsPage() {
             <div className="min-h-screen p-3 md:p-6 dark:bg-gray-900 dark:text-gray-200 uppercase tracking-tight font-medium">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-800 dark:text-gray-200">
+                        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                             Customer Reviews
                         </h1>
-                        <p className="text-gray-500 text-xs mt-1">Manage and reply to customer feedback</p>
+             
                     </div>
                 </div>
 

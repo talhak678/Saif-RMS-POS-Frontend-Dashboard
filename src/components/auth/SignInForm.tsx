@@ -63,7 +63,7 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl  bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10">
+    <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 dark:border-white/10">
       <div className="flex justify-center mb-8">
         <Image
           src="/images/authentication-images/logo-black.png"
@@ -79,15 +79,6 @@ export default function SignInForm() {
           height={48}
           className="hidden dark:block"
         />
-      </div>
-      <div className="w-full mx-auto mb-5">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          <ChevronLeftIcon />
-          Back to dashboard
-        </Link>
       </div>
       <div className="flex flex-col justify-center w-full mx-auto">
         <div>
@@ -126,24 +117,12 @@ export default function SignInForm() {
                   <Label>
                     Password <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
-                      )}
-                    </span>
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   {/* <div className="flex items-center gap-3">

@@ -31,10 +31,12 @@ function AddBranchForm() {
         whatsappNumber: "",
         isOpen: true,
         timing: "",
+        openTime: "09:00",
+        closeTime: "22:00",
         deliveryRadius: 0,
         freeDeliveryThreshold: 0,
         deliveryCharge: 0,
-        deliveryOffTime: '',
+        deliveryOffTime: '23:00',
         lat: 30.1575,
         lng: 66.9961,
         restaurantId: presetRestaurantId || "",
@@ -135,7 +137,8 @@ function AddBranchForm() {
                 freeDeliveryThreshold: Number(form.freeDeliveryThreshold),
                 deliveryCharge: Number(form.deliveryCharge),
                 lat: Number(form.lat),
-                lng: Number(form.lng)
+                lng: Number(form.lng),
+                timing: `${form.openTime} - ${form.closeTime}`
             };
             const res = await api.post("/branches", payload);
             if (res.data?.success) {
@@ -219,12 +222,13 @@ function AddBranchForm() {
                     <div>
                         <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Phone *</label>
                         <input
+                            type="number"
                             name="phone"
                             value={form.phone}
                             onChange={handleChange}
                             required
-                            placeholder="+1 300 1234567"
-                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                            placeholder="13001234567"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all appearance-none"
                         />
                     </div>
 
@@ -267,13 +271,16 @@ function AddBranchForm() {
                     {/* DELIVERY OFF TIME */}
                     <div>
                         <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Delivery Off Time</label>
-                        <input
-                            type="time"
-                            name="deliveryOffTime"
-                            value={form.deliveryOffTime}
-                            onChange={handleChange}
-                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
-                        />
+                        <div className="relative">
+                            <Clock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                            <input
+                                type="time"
+                                name="deliveryOffTime"
+                                value={form.deliveryOffTime}
+                                onChange={handleChange}
+                                className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all text-sm"
+                            />
+                        </div>
                     </div>
 
                     {/* MAP SELECTION */}
@@ -339,26 +346,39 @@ function AddBranchForm() {
                         <div className="relative">
                             <MessageSquare className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
                             <input
+                                type="number"
                                 name="whatsappNumber"
                                 value={form.whatsappNumber}
                                 onChange={handleChange}
-                                placeholder="+1 300 7654321"
-                                className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
+                                placeholder="13007654321"
+                                className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all appearance-none"
                             />
                         </div>
                     </div>
 
-                    <div className="md:col-span-1">
-                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Branch Timing</label>
-                        <div className="relative">
-                            <Clock className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
-                            <input
-                                name="timing"
-                                value={form.timing}
-                                onChange={handleChange}
-                                placeholder="9:00 AM - 11:00 PM"
-                                className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all"
-                            />
+                    <div className="md:col-span-1 text-gray-400">
+                        <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">Branch Timing (Open - Close)</label>
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Clock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                                <input
+                                    type="time"
+                                    name="openTime"
+                                    value={form.openTime}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 p-2.5 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm"
+                                />
+                            </div>
+                            <span className="text-gray-400 font-bold">-</span>
+                            <div className="relative flex-1">
+                                <input
+                                    type="time"
+                                    name="closeTime"
+                                    value={form.closeTime}
+                                    onChange={handleChange}
+                                    className="w-full p-2.5 border border-gray-200 dark:border-gray-700 rounded-xl dark:bg-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm"
+                                />
+                            </div>
                         </div>
                     </div>
 

@@ -58,6 +58,8 @@ export default function SignUpForm() {
     name: "",
     email: "",
     phone: "",
+    restaurantName: "",
+    city: "",
   });
   const [description, setDescription] = useState("");
 
@@ -87,6 +89,8 @@ export default function SignUpForm() {
       name: `${form.fname} ${form.lname}`,
       email: form.email,
       phone: "",
+      restaurantName: "",
+      city: "",
     });
     setDescription("");
 
@@ -128,6 +132,8 @@ export default function SignUpForm() {
         contactName: contactInfo.name,
         contactEmail: contactInfo.email,
         contactPhone: contactInfo.phone,
+        restaurantName: contactInfo.restaurantName,
+        city: contactInfo.city,
       });
 
       if (res.data?.success) {
@@ -157,7 +163,7 @@ export default function SignUpForm() {
   ];
 
   return (
-    <div className="w-full max-w-[600px] p-6 sm:p-10 rounded-3xl shadow-2xl  bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10 my-10">
+    <div className="w-full max-w-[600px] p-6 sm:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 dark:border-white/10 my-10">
 
       {/* Logo */}
       <div className="flex justify-center mb-8">
@@ -177,18 +183,6 @@ export default function SignUpForm() {
         />
       </div>
 
-      {/* Back to dashboard – only on step 1 */}
-      {step === 1 && (
-        <div className="w-full mx-auto mb-5">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-          >
-            <ChevronLeftIcon />
-            Back to dashboard
-          </Link>
-        </div>
-      )}
 
       {/* Step Indicator (steps 2-4) */}
       {step >= 2 && step <= 4 && (
@@ -204,18 +198,18 @@ export default function SignUpForm() {
                 <div className="flex flex-col items-center gap-1">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done || s === 0
-                        ? "bg-emerald-500 text-white"
-                        : isCurrent
-                          ? "bg-brand-500 text-white shadow-lg shadow-brand-500/30"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-500"
+                      ? "bg-emerald-500 text-white"
+                      : isCurrent
+                        ? "bg-brand-500 text-white shadow-lg shadow-brand-500/30"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-500"
                       }`}
                   >
                     {done ? <CheckCircle2 size={16} /> : s + 1}
                   </div>
                   <span
                     className={`text-[10px] font-semibold ${isCurrent
-                        ? "text-brand-600 dark:text-brand-400"
-                        : "text-gray-400"
+                      ? "text-brand-600 dark:text-brand-400"
+                      : "text-gray-400"
                       }`}
                   >
                     {label}
@@ -224,8 +218,8 @@ export default function SignUpForm() {
                 {i < stepLabels.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-1 rounded ${step > s + 1
-                        ? "bg-emerald-400"
-                        : "bg-gray-200 dark:bg-gray-700"
+                      ? "bg-emerald-400"
+                      : "bg-gray-200 dark:bg-gray-700"
                       }`}
                   />
                 )}
@@ -296,25 +290,13 @@ export default function SignUpForm() {
                 <Label>
                   Password<span className="text-error-500">*</span>
                 </Label>
-                <div className="relative">
-                  <Input
-                    placeholder="Enter your password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleInputChange}
-                    type={showPassword ? "text" : "password"}
-                  />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                  >
-                    {showPassword ? (
-                      <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
-                    ) : (
-                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
-                    )}
-                  </span>
-                </div>
+                <Input
+                  placeholder="Enter your password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleInputChange}
+                  type="password"
+                />
               </div>
 
               <div className="flex items-center gap-3">
@@ -390,8 +372,8 @@ export default function SignUpForm() {
                       key={plan.id}
                       onClick={() => setSelectedPlan(plan)}
                       className={`group relative text-left rounded-2xl border-2 p-6 transition-all duration-300 ${isSelected
-                          ? "border-brand-500 bg-brand-500/5 dark:bg-brand-500/10 shadow-xl shadow-brand-500/10 scale-[1.02]"
-                          : "border-gray-200/50 dark:border-white/5 hover:border-brand-300 dark:hover:border-brand-500/50 hover:bg-white/40 dark:hover:bg-white/5"
+                        ? "border-brand-500 bg-brand-500/5 dark:bg-brand-500/10 shadow-xl shadow-brand-500/10 scale-[1.02]"
+                        : "border-gray-200/50 dark:border-white/5 hover:border-brand-300 dark:hover:border-brand-500/50 hover:bg-white/40 dark:hover:bg-white/5"
                         }`}
                     >
                       <div
@@ -507,6 +489,29 @@ export default function SignUpForm() {
             />
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>Restaurant Name</Label>
+              <Input
+                placeholder="Enter restaurant name"
+                value={contactInfo.restaurantName}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, restaurantName: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>City</Label>
+              <Input
+                placeholder="Enter your city"
+                value={contactInfo.city}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, city: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Business Details (Optional)</Label>
             <textarea
@@ -526,7 +531,7 @@ export default function SignUpForm() {
             </button>
             <button
               onClick={() => {
-                if (!contactInfo.name || !contactInfo.email || !contactInfo.phone) {
+                if (!contactInfo.name || !contactInfo.email || !contactInfo.phone || !contactInfo.restaurantName || !contactInfo.city) {
                   toast.error("Please fill all required business contact fields");
                   return;
                 }
@@ -570,6 +575,14 @@ export default function SignUpForm() {
               </span>
               <span className="text-sm font-bold text-brand-600">
                 ${selectedPlan.price} / {selectedPlan.billingCycle.toLowerCase()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200/50 dark:border-white/5 pb-3">
+              <span className="text-xs font-bold text-gray-500 uppercase">
+                Restaurant
+              </span>
+              <span className="text-sm font-bold text-gray-800 dark:text-white">
+                {contactInfo.restaurantName} ({contactInfo.city})
               </span>
             </div>
             <div className="space-y-2">

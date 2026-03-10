@@ -31,12 +31,16 @@ export default function IngredientsPage() {
 
     // --- MODAL STATES ---
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
-    const [formData, setFormData] = useState({ name: "", unit: "" });
+    const [formData, setFormData] = useState({ name: "", unit: "", category: "", unitPrice: "", parLevel: "" });
+    const [bulkData, setBulkData] = useState("");
     const [formLoading, setFormLoading] = useState(false);
+    const [bulkLoading, setBulkLoading] = useState(false);
 
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState<"all" | "low" | "history">("all");
 
     useEffect(() => {
         fetchIngredients();
@@ -63,13 +67,19 @@ export default function IngredientsPage() {
 
     const openAddModal = () => {
         setEditingItem(null);
-        setFormData({ name: "", unit: "" });
+        setFormData({ name: "", unit: "", category: "", unitPrice: "", parLevel: "" });
         setIsFormModalOpen(true);
     };
 
     const openEditModal = (item: any) => {
         setEditingItem(item);
-        setFormData({ name: item.name, unit: item.unit });
+        setFormData({
+            name: item.name,
+            unit: item.unit,
+            category: item.category || "",
+            unitPrice: item.unitPrice?.toString() || "",
+            parLevel: item.parLevel?.toString() || ""
+        });
         setIsFormModalOpen(true);
     };
 
@@ -77,11 +87,17 @@ export default function IngredientsPage() {
         e.preventDefault();
         setFormLoading(true);
         try {
+            const payload = {
+                ...formData,
+                unitPrice: formData.unitPrice ? parseFloat(formData.unitPrice) : undefined,
+                parLevel: formData.parLevel ? parseFloat(formData.parLevel) : undefined
+            };
+
             if (editingItem) {
-                await api.put(`/ingredients/${editingItem.id}`, formData);
+                await api.put(`/ingredients/${editingItem.id}`, payload);
                 toast.success("Ingredient updated");
             } else {
-                await api.post("/ingredients", formData);
+                await api.post("/ingredients", payload);
                 toast.success("Ingredient created");
             }
             setIsFormModalOpen(false);
@@ -91,6 +107,43 @@ export default function IngredientsPage() {
             toast.error("Operation failed");
         } finally {
             setFormLoading(false);
+        }
+    };
+
+    const handleBulkSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBulkLoading(true);
+        try {
+            // Parse CSV format: Name, Unit, Category, UnitPrice, ParLevel
+            const lines = bulkData.split("\n").filter(line => line.trim().length > 0);
+            const items = lines.map(line => {
+                const parts = line.split(",").map(p => p.trim());
+                return {
+                    name: parts[0],
+                    unit: parts[1] || "pcs",
+                    category: parts[2] || undefined,
+                    unitPrice: parts[3] ? parseFloat(parts[3]) : undefined,
+                    parLevel: parts[4] ? parseFloat(parts[4]) : undefined
+                };
+            }).filter(item => item.name);
+
+            if (items.length === 0) {
+                toast.error("No valid items found");
+                return;
+            }
+
+            const res = await api.post("/ingredients/bulk", items);
+            if (res.data?.success) {
+                toast.success(`Broadcasting added: ${res.data.message}`);
+                setIsBulkModalOpen(false);
+                setBulkData("");
+                fetchIngredients();
+            }
+        } catch (error: any) {
+            console.error("Bulk upload failed", error);
+            toast.error("Bulk upload failed: " + (error.response?.data?.message || error.message));
+        } finally {
+            setBulkLoading(false);
         }
     };
 
@@ -110,15 +163,31 @@ export default function IngredientsPage() {
         }
     };
 
-    const filteredIngredients = useMemo(() => {
-        return ingredients.filter(ing =>
-            ing.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [ingredients, searchQuery]);
-
     const getOnHand = (stocks: any[] = []) => {
         return stocks.reduce((sum, s) => sum + Number(s.quantity), 0);
     };
+
+    const filteredIngredients = useMemo(() => {
+        let list = ingredients.filter(ing =>
+            ing.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        if (activeTab === "low") {
+            // Low stock: onHand is 0 OR below parLevel
+            list = list.filter(ing => {
+                const onHand = getOnHand(ing.stocks);
+                if (ing.parLevel) return onHand < ing.parLevel;
+                return onHand === 0;
+            });
+        } else if (activeTab === "history") {
+            // History: sorted by most recently updated
+            list = [...list].sort(
+                (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            );
+        }
+
+        return list;
+    }, [ingredients, searchQuery, activeTab]);
 
     return (
         <ProtectedRoute module="inventory-recipes:ingredients">
@@ -144,7 +213,7 @@ export default function IngredientsPage() {
                                 placeholder="Search inventory..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl outline-none text-sm transition-all"
+                                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-brand-500 rounded-xl outline-none text-sm transition-all text-gray-700 dark:text-gray-200"
                             />
                         </div>
                         <button className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 hover:text-brand-600 transition-all">
@@ -158,12 +227,29 @@ export default function IngredientsPage() {
                     {/* --- ACTIONS BAR --- */}
                     <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm gap-4">
                         <div className="flex gap-4">
-                            <button className="text-xs font-bold text-brand-600">All Items</button>
-                            <button className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors">Low Stocks</button>
-                            <button className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors">History</button>
+                            <button
+                                onClick={() => setActiveTab("all")}
+                                className={`text-xs font-bold transition-colors ${activeTab === "all" ? "text-brand-600" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                All Items
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("low")}
+                                className={`text-xs font-bold transition-colors ${activeTab === "low" ? "text-brand-600" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                Low Stocks
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("history")}
+                                className={`text-xs font-bold transition-colors ${activeTab === "history" ? "text-brand-600" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                History
+                            </button>
                         </div>
                         <div className="flex gap-3 w-full sm:w-auto">
-                            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 hover:bg-gray-100 transition-all">
+                            <button
+                                onClick={() => setIsBulkModalOpen(true)}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 hover:bg-gray-100 transition-all">
                                 <Upload size={14} /> Bulk
                             </button>
                             <button
@@ -208,16 +294,18 @@ export default function IngredientsPage() {
                                                         <span className="block text-[10px] text-gray-400 mt-0.5 font-medium uppercase">{ing.id.slice(-6)}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-xs text-gray-500 font-medium">Liquor / Bar</td>
+                                                <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400 font-medium">{ing.category || "Uncategorized"}</td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="inline-flex items-baseline gap-1 px-3 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 rounded-lg">
                                                         <span className="text-sm font-bold">{getOnHand(ing.stocks)}</span>
                                                         <span className="text-[10px] font-medium opacity-70 uppercase">{ing.unit}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-center text-xs text-gray-400 font-medium italic">Not set</td>
-                                                <td className="px-6 py-4 text-right text-xs text-gray-500 font-semibold">$0.00</td>
-                                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-800 dark:text-gray-200 pr-8">$0.00</td>
+                                                <td className="px-6 py-4 text-center text-xs text-gray-400 dark:text-gray-500 font-medium italic">{ing.parLevel ? `${ing.parLevel} ${ing.unit}` : "Not set"}</td>
+                                                <td className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 font-semibold">${ing.unitPrice ? parseFloat(ing.unitPrice).toFixed(2) : "0.00"}</td>
+                                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-800 dark:text-gray-200 pr-8">
+                                                    ${(getOnHand(ing.stocks) * (ing.unitPrice ? parseFloat(ing.unitPrice) : 0)).toFixed(2)}
+                                                </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                                                         <button onClick={() => openEditModal(ing)} className="p-2 text-gray-400 hover:text-brand-600 transition-colors">
@@ -256,26 +344,59 @@ export default function IngredientsPage() {
 
                         <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 ml-1">Name</label>
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Name</label>
                                 <input
                                     required
                                     type="text"
                                     placeholder="Tomatoes, Flour, etc."
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 ml-1">Base Unit</label>
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Base Unit</label>
                                 <input
                                     required
                                     type="text"
                                     placeholder="kg, box, litre"
                                     value={formData.unit}
                                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium"
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
                                 />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Category</label>
+                                <input
+                                    type="text"
+                                    placeholder="Liquor, Veggies, etc."
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Unit Price</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        value={formData.unitPrice}
+                                        onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Par Level</label>
+                                    <input
+                                        type="number"
+                                        placeholder="0"
+                                        value={formData.parLevel}
+                                        onChange={(e) => setFormData({ ...formData, parLevel: e.target.value })}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-2">
@@ -292,6 +413,57 @@ export default function IngredientsPage() {
                                     className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
                                 >
                                     {formLoading ? "Saving..." : "Save Item"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </Modal>
+
+                {/* --- BULK ADD MODAL --- */}
+                <Modal
+                    isOpen={isBulkModalOpen}
+                    onClose={() => setIsBulkModalOpen(false)}
+                    showCloseButton={false}
+                    className="max-w-md"
+                >
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                            <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                                Bulk Create Ingredients
+                            </h2>
+                            <button onClick={() => setIsBulkModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleBulkSubmit} className="p-6 space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Entries (Format: Name, Unit)</label>
+                                <textarea
+                                    required
+                                    rows={8}
+                                    placeholder="Tomatoes, kg&#10;Onion, box&#10;Cheese, grams"
+                                    value={bulkData}
+                                    onChange={(e) => setBulkData(e.target.value)}
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium font-mono text-gray-700 dark:text-gray-200"
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1 italic">Enter one ingredient per line. Separate Name and Unit with a comma.</p>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsBulkModalOpen(false)}
+                                    className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={bulkLoading}
+                                    className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
+                                >
+                                    {bulkLoading ? "Creating..." : "Create Items"}
                                 </button>
                             </div>
                         </form>

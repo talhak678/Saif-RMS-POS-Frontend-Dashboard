@@ -20,6 +20,7 @@ import {
   Globe,
   MoreVertical,
   Calendar,
+  MapPin,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
@@ -263,6 +264,43 @@ export default function OrdersPage() {
     setStatusModal(true);
   };
 
+  const exportToCSV = () => {
+    if (filteredOrders.length === 0) return;
+
+    // Define headers
+    const headers = ["Order#", "Customer", "Phone", "Branch", "Type", "Payment", "Total", "Status", "Platform", "Date"];
+
+    // Create rows
+    const rows = filteredOrders.map((o: any) => [
+      `#${o.orderNo}`,
+      o.customer?.name || "Guest",
+      o.customer?.phone || "N/A",
+      o.branch?.name || "Main",
+      o.type,
+      o.payment?.method || "CASH",
+      o.total,
+      o.status,
+      o.source || "WEB",
+      new Date(o.createdAt).toLocaleString()
+    ]);
+
+    // Combine into CSV string
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r: any[]) => r.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    // Trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `orders_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <ProtectedRoute module="customers-orders:orders-history">
       <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -324,7 +362,7 @@ export default function OrdersPage() {
                     placeholder="Search by Ref #"
                     value={searchRef}
                     onChange={(e) => setSearchRef(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -337,7 +375,7 @@ export default function OrdersPage() {
                     placeholder="Customer Ref #"
                     value={searchCustomerRef}
                     onChange={(e) => setSearchCustomerRef(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -350,7 +388,7 @@ export default function OrdersPage() {
                     placeholder="Search by Phone"
                     value={searchPhone}
                     onChange={(e) => setSearchPhone(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -363,7 +401,7 @@ export default function OrdersPage() {
                     placeholder="Search by Name"
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-xs text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -373,7 +411,7 @@ export default function OrdersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 text-xs font-medium focus:ring-2 focus:ring-brand-500 outline-none"
+                className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 text-xs font-medium text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
               >
                 <option value="ALL">Select status</option>
                 {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -381,7 +419,7 @@ export default function OrdersPage() {
               <select
                 value={paymentFilter}
                 onChange={(e) => setPaymentFilter(e.target.value)}
-                className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 text-xs font-medium focus:ring-2 focus:ring-brand-500 outline-none"
+                className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 text-xs font-medium text-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
               >
                 <option value="ALL">Payment Type</option>
                 <option value="CASH">CASH</option>
@@ -397,6 +435,8 @@ export default function OrdersPage() {
                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} /> Reload Orders
               </button>
               <button
+                onClick={exportToCSV}
+                disabled={filteredOrders.length === 0}
                 className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-5 py-2 rounded-xl text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all active:scale-95 border border-gray-200 dark:border-gray-600"
               >
                 <Download size={14} /> Export Details
@@ -467,32 +507,28 @@ export default function OrdersPage() {
                         className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                       />
                     </th>
-                    <th className="p-4 w-14"></th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Ref#</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Cust Ref#</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Branch Name</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Name</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Contact Phone</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Type</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Payment</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Total</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Tax</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Final</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Status</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Platform</th>
-                    <th className="p-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Date</th>
+                    <th className="p-4 w-20 text-[10px] font-black uppercase text-gray-400 tracking-widest">Actions</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Order Info</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Branch</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Customer</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Mode</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Payment</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Pricing</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Status</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Platform</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {loading ? (
                     <tr><td colSpan={15} className="py-20 text-center"><Loader size="md" /></td></tr>
                   ) : filteredOrders.length === 0 ? (
-                    <tr><td colSpan={15} className="py-20 text-center text-gray-400 text-sm font-medium italic">No orders found match your criteria</td></tr>
+                    <tr><td colSpan={15} className="py-20 text-center text-gray-400 text-xs font-bold italic">No orders found match your criteria</td></tr>
                   ) : (
                     filteredOrders.map((o: any) => (
                       <tr
                         key={o.id}
-                        className="group hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
+                        className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors border-b dark:border-gray-800/50 last:border-0"
                       >
                         <td className="p-4">
                           <input
@@ -503,77 +539,79 @@ export default function OrdersPage() {
                           />
                         </td>
                         <td className="p-4">
-                          <div className="flex items-center gap-1 opacity-100 dark:opacity-40 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1.5 transition-opacity">
                             <button
                               onClick={() => openPrintModal(o)}
-                              className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg shadow-sm border border-transparent hover:border-gray-100 transition-all text-gray-500"
-                              title="Print Receipt"
+                              className="p-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 transition-all text-gray-500 dark:text-gray-400"
                             >
-                              <Printer size={14} />
+                              <Printer size={13} />
                             </button>
                             <button
                               onClick={() => openStatusModal(o)}
-                              className="p-1.5 hover:bg-brand-600 hover:text-white rounded-lg transition-all text-brand-600"
-                              title="Update Status"
+                              className="p-2 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-600 hover:text-white rounded-lg transition-all text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-500/10"
                             >
-                              <RefreshCw size={14} />
+                              <RefreshCw size={13} />
                             </button>
                           </div>
                         </td>
                         <td className="p-4">
-                          <span className="text-xs font-bold text-gray-800 dark:text-gray-200">#{o.orderNo}</span>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-[10px] text-gray-400 font-mono italic">{o.customerId?.slice(-8) || o.id?.slice(-8)}</span>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">{o.branch?.name || "Main Branch"}</span>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-xs font-bold text-brand-600 dark:text-brand-400 truncate max-w-[120px] block">{o.customer?.name || "Guest User"}</span>
-                        </td>
-                        <td className="p-4 font-medium">
-                          <span className="text-xs text-gray-600 dark:text-gray-300">{o.customer?.phone || "N/A"}</span>
-                        </td>
-                        <td className="p-4 text-center">
-                          <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${o.type === "DELIVERY" ? "bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400" :
-                            o.type === "PICKUP" ? "bg-amber-50 text-amber-600 dark:bg-amber-900/30" :
-                              "bg-gray-100 text-gray-600 dark:bg-gray-700"
-                            }`}>
-                            {getTypeIcon(o.type)} {o.type}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black text-gray-900 dark:text-white leading-none tracking-tight">#{o.orderNo}</span>
+                            <span className="text-[10px] text-gray-400 font-bold mt-1 uppercase">ID: {o.id?.slice(-6)}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase ${o.payment?.method === "CASH" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40" : "bg-blue-50 text-blue-600 dark:bg-blue-900/40"
-                            }`}>
-                            {o.payment?.method || "CASH"}
-                          </span>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-gray-300">
+                            <MapPin size={12} className="text-gray-300" />
+                            {o.branch?.name || "Main"}
+                          </div>
                         </td>
-                        <td className="p-4 text-right font-medium">
-                          <span className="text-xs text-gray-800 dark:text-gray-200">${o.total}</span>
+                        <td className="p-4">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-brand-600 dark:text-brand-400">{o.customer?.name || "Guest"}</span>
+                            <span className="text-[10px] text-gray-400 font-medium mt-0.5 tracking-wider">{o.customer?.phone || "NO PHONE"}</span>
+                          </div>
                         </td>
-                        <td className="p-4 text-right font-medium">
-                          <span className="text-xs text-gray-400">$0</span>
+                        <td className="p-4">
+                          <div className="flex justify-center">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${o.type === "DELIVERY" ? "bg-brand-50 text-brand-600 dark:bg-brand-900/40" : "bg-amber-50 text-amber-600 dark:bg-amber-900/40"
+                              }`}>
+                              {o.type}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex justify-center">
+                            <span className={`px-2.5 py-1 rounded border text-[9px] font-black uppercase tracking-widest ${o.payment?.method === "CASH"
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-500/20"
+                              : "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:border-blue-500/20"
+                              }`}>
+                              {o.payment?.method || "CASH"}
+                            </span>
+                          </div>
                         </td>
                         <td className="p-4 text-right">
-                          <span className="text-xs font-bold text-gray-800 dark:text-white">${o.total}</span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex flex-col gap-1 items-start">
-                            <span className={getStatusBadge(o.status)}>{o.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : o.status}</span>
-                            <button onClick={() => openViewModal(o)} className="text-[9px] text-brand-500 font-bold hover:underline">View History</button>
+                          <div className="flex flex-col items-end">
+                            <span className="text-sm font-black text-gray-900 dark:text-white tracking-widest">${o.total}</span>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase opacity-60">Net Total</span>
                           </div>
                         </td>
                         <td className="p-4">
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">
-                            {getSourceIcon(o.source)}
-                            <span>web/{o.source?.toLowerCase() || 'pos'}</span>
+                          <div className="flex flex-col gap-1.5 items-start">
+                            <span className={getStatusBadge(o.status)}>{o.status}</span>
+                            <button onClick={() => openViewModal(o)} className="text-[9px] text-brand-600 font-black uppercase tracking-widest hover:underline">View History</button>
                           </div>
                         </td>
-                        <td className="p-4 opacity-70">
-                          <div className="text-[10px] leading-tight">
-                            <span className="block font-bold">{new Date(o.createdAt).toLocaleDateString()}</span>
-                            <span>{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            {o.source || 'POS'}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                            <span className="text-gray-900 dark:text-white">{new Date(o.createdAt).toLocaleDateString()}</span>
+                            <span className="opacity-60">{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </td>
                       </tr>
@@ -584,10 +622,10 @@ export default function OrdersPage() {
             </div>
 
             {/* Pagination / Footer */}
-            <div className="p-4 bg-gray-50 dark:bg-gray-700/30 border-t dark:border-gray-700 flex justify-between items-center text-xs text-gray-500">
+            <div className="p-4 bg-gray-50 dark:bg-gray-700/30 border-t dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-2">
                 <span>Show</span>
-                <select className="bg-transparent border-gray-300 dark:border-gray-600 rounded p-1">
+                <select className="bg-transparent border-gray-300 dark:border-gray-600 rounded p-1 text-gray-700 dark:text-gray-300">
                   <option>10</option>
                   <option>25</option>
                   <option>50</option>

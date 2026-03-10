@@ -42,7 +42,7 @@ import ImageUpload from "@/components/common/ImageUpload";
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import RenewModal from "./renew-modal";
 
-type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY" | "SUBSCRIPTION_REQUESTS";
+type TabType = "RESTAURANT_INFO" | "INFO" | "LOGIN_INFO" | "MAP" | "MEMBERSHIP" | "PAYMENT_HISTORY" | "SUBSCRIPTION_REQUESTS" | "NOTIFICATION_TEMPLATES";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyAhwD5EE1C7J_K5qaqlPuBX6o0SjqJ2wYw";
 
@@ -201,6 +201,8 @@ export default function ProfilePage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
   const [subReqLoading, setSubReqLoading] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [savingTemplates, setSavingTemplates] = useState(false);
 
   const getSubStatus = () => {
     if (restaurantForm.subscription === 'FREE') return { label: "FREE PLAN", color: "info" };
@@ -508,6 +510,37 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/notifications/templates");
+      if (res.data?.success) {
+        setTemplates(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch templates", error);
+      toast.error("Failed to load templates");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveTemplates = async () => {
+    try {
+      setSavingTemplates(true);
+      const res = await api.post("/notifications/templates", { templates });
+      if (res.data?.success) {
+        toast.success("Notification settings saved successfully!");
+        fetchTemplates();
+      }
+    } catch (error) {
+      console.error("Failed to save templates", error);
+      toast.error("Failed to save templates");
+    } finally {
+      setSavingTemplates(false);
+    }
+  };
+
   const handleApproveReject = async (id: string, status: 'APPROVED' | 'REJECTED') => {
     const label = status === 'APPROVED' ? 'approve' : 'reject';
     if (!confirm(`Are you sure you want to ${label} this request?`)) return;
@@ -546,6 +579,7 @@ export default function ProfilePage() {
       { id: "INFO", label: "Information", icon: <User className="w-4 h-4" /> },
       { id: "LOGIN_INFO", label: "Login Information", icon: <Lock className="w-4 h-4" /> },
       { id: "SUBSCRIPTION_REQUESTS", label: "Subscription Requests", icon: <Bell className="w-4 h-4" /> },
+      { id: "NOTIFICATION_TEMPLATES", label: "Notification Templates", icon: <Bell className="w-4 h-4" /> },
     ]
     : [
       { id: "RESTAURANT_INFO", label: "Restaurant Information", icon: <Building2 className="w-4 h-4" /> },
@@ -573,6 +607,7 @@ export default function ProfilePage() {
     if (isSuperAdmin) {
       setActiveTab("INFO");
       fetchSubscriptionRequests();
+      fetchTemplates();
     }
   }, [isSuperAdmin]);
 
@@ -594,7 +629,7 @@ export default function ProfilePage() {
 
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-black text-brand-600 dark:text-brand-400">
-            {isSuperAdmin ? "Super Admin" : "Merchant"}
+            Profile Setting
           </h1>
         </div>
 
@@ -1622,6 +1657,72 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* 7. NOTIFICATION TEMPLATES (SUPER ADMIN ONLY) */}
+            {activeTab === "NOTIFICATION_TEMPLATES" && isSuperAdmin && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Notification Templates</h2>
+                    <p className="text-sm text-gray-400 font-medium italic">Edit the text of system-wide notifications using placeholders like #{"{orderNo}"}.</p>
+                  </div>
+                  <Button
+                    onClick={handleSaveTemplates}
+                    disabled={savingTemplates || loading}
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-black px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/30 text-xs uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95"
+                  >
+                    {savingTemplates ? <Loader size="sm" /> : <Save size={16} />}
+                    Save Changes
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  {templates.map((template) => {
+                    const eventMapping: Record<string, { title: string; desc: string; vars: string[] }> = {
+                      'NEW_ORDER_WEB': { title: 'Website Orders', desc: 'Merchant notification for orders placed on the website.', vars: ['#{orderNo}'] },
+                      'NEW_ORDER_POS': { title: 'POS Orders', desc: 'Staff notification for orders placed through the POS system.', vars: ['#{orderNo}', '#{restaurantName}'] },
+                      'SUB_REQUEST': { title: 'Subscription Requests', desc: 'Super Admin notification for merchant upgrade requests.', vars: ['#{restaurantName}', '#{plan}'] }
+                    };
+                    const info = eventMapping[template.event] || { title: template.event, desc: 'System template', vars: [] };
+
+                    return (
+                      <div key={template.id} className="bg-white dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700 p-6 space-y-4 hover:border-brand-500/30 transition-all shadow-sm">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-0.5">
+                            <h3 className="text-base font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">{info.title}</h3>
+                            <p className="text-[11px] text-gray-400 font-medium">{info.desc}</p>
+                          </div>
+                          <span className="bg-gray-100 dark:bg-gray-900 px-2.5 py-1 rounded text-[9px] font-black text-gray-400 uppercase tracking-widest">{template.event}</span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <textarea
+                            value={template.message}
+                            onChange={(e) => setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, message: e.target.value } : t))}
+                            className="w-full h-24 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 text-sm font-medium focus:ring-2 focus:ring-brand-500 transition-all resize-none"
+                            placeholder="Enter template message..."
+                          />
+                          {info.vars.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 items-center">
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-1">Variables:</span>
+                              {info.vars.map((v: string) => (
+                                <button
+                                  key={v}
+                                  onClick={() => setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, message: t.message + ' ' + v } : t))}
+                                  className="px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-[10px] font-black hover:bg-brand-100 transition-colors"
+                                >
+                                  {v}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

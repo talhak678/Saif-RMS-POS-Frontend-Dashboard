@@ -174,52 +174,44 @@ const EditUser = ({ onAction, user }: { onAction?: () => void; user: iUser }) =>
                         <form id="edit-user-form" onSubmit={saveUser} className="space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
-                                        Full Name
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            name="name"
-                                            value={UserForm.name}
-                                            onChange={handleChange}
-                                            placeholder="John Doe"
-                                            className={`w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-900/50 border ${errors.name ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-gray-200`}
-                                            disabled={savingUser}
-                                        />
-                                        {errors.name && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.name}</p>}
-                                    </div>
+                                    <Input
+                                        label="Full Name"
+                                        name="name"
+                                        value={UserForm.name}
+                                        onChange={handleChange}
+                                        placeholder="John Doe"
+                                        disabled={savingUser}
+                                        error={!!errors.name}
+                                        hint={errors.name}
+                                    />
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
-                                        Email Address
-                                    </label>
-                                    <input
+                                    <Input
+                                        label="Email Address"
                                         name="email"
                                         type="email"
                                         value={UserForm.email}
                                         onChange={handleChange}
                                         placeholder="john@example.com"
-                                        className={`w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-900/50 border ${errors.email ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-gray-200`}
                                         disabled={savingUser}
+                                        error={!!errors.email}
+                                        hint={errors.email}
                                     />
-                                    {errors.email && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.email}</p>}
                                 </div>
 
                                 <div className="md:col-span-2 p-4 bg-blue-50/30 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-2">
-                                        Password <span className="text-[10px] font-normal text-blue-500 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Leave blank to keep current</span>
-                                    </label>
-                                    <input
+                                    <Input
+                                        label="Password (Leave blank to keep current)"
                                         name="password"
                                         type="password"
                                         value={UserForm.password}
                                         onChange={handleChange}
                                         placeholder="••••••••"
-                                        className={`w-full px-4 py-2.5 bg-white dark:bg-gray-900/80 border ${errors.password ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-gray-200`}
                                         disabled={savingUser}
+                                        error={!!errors.password}
+                                        hint={errors.password}
                                     />
-                                    {errors.password && <p className="text-[10px] text-red-500 mt-1 ml-1">{errors.password}</p>}
                                 </div>
 
                                 {isSuperAdmin && (
