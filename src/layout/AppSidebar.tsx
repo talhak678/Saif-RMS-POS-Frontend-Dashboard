@@ -161,10 +161,9 @@ const AppSidebar: React.FC = () => {
 
   // Helper function to check if a permission exists
   const hasPermission = useCallback((permission?: string) => {
-    if (isSuperAdmin) return true;
     if (!permission) return true;
     return permissions?.some(p => p.action === permission);
-  }, [permissions, isSuperAdmin]);
+  }, [permissions]);
 
   // Filter items based on permissions
   const filteredNavItems = useMemo(() => {
