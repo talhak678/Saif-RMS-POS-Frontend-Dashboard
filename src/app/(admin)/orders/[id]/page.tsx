@@ -404,6 +404,12 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                                             <span>Delivery Charge</span>
                                             <span className="text-gray-800 dark:text-white font-black">${Number(order.deliveryCharge || 0).toLocaleString()}</span>
                                         </div>
+                                        {order.loyaltyAmount > 0 && (
+                                            <div className="flex justify-between items-center text-sm font-bold text-orange-600">
+                                                <span>Loyalty Discount</span>
+                                                <span className="font-black">-${Number(order.loyaltyAmount).toLocaleString()}</span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between items-center pt-2">
                                             <span className="text-lg font-black text-gray-800 dark:text-white">Total Amount</span>
                                             <span className="text-xl font-black text-brand-600 dark:text-brand-400 tracking-tight">${(Number(order.total) + Number(order.deliveryCharge || 0)).toLocaleString()}</span>

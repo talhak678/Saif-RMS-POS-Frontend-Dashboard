@@ -48,7 +48,7 @@ export default function SignInForm() {
         authService.setEncryptedCookie(tokenKey, res.data.data.token);
 
         console.log("Login successful:", res.data);
-        router.push("/");
+        window.location.replace("/");
         // Using location replace to ensure clean state and bypass router issues
 
 

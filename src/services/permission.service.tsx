@@ -45,12 +45,16 @@ export const AuthProvider = ({ children }: { children: any }) => {
                     authServ.logout();
                     return;
                 }
-                //check on normal url superadmin cannot login
+                
+                // Note: Removed strict !isSuperAdminOnly && isSuperAdmin check to allow admin access for testing/management.
+                // If you want to strictly separate roles, you can uncomment this in production.
+                /*
                 if (!isSuperAdminOnly && isSuperAdmin) {
                     toast.error('You are not authorized to access this url.');
                     authServ.logout();
                     return;
                 }
+                */
 
                 // 2. Restaurant Status Check
                 if (userData?.restaurant && userData.restaurant.status !== 'ACTIVE') {

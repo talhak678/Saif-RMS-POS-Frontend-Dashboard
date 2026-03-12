@@ -58,9 +58,14 @@ export default function LoyaltyPage() {
     // Customer Search
     const [customerSearch, setCustomerSearch] = useState("");
 
+    // Loyalty Percentage Setting
+    const [loyaltyPercentage, setLoyaltyPercentage] = useState("2");
+    const [savingSettings, setSavingSettings] = useState(false);
+
     useEffect(() => {
         fetchCustomers();
         fetchTransactions();
+        fetchLoyaltySetting();
     }, []);
 
     useEffect(() => {
@@ -104,6 +109,35 @@ export default function LoyaltyPage() {
             toast.error("Failed to fetch loyalty transactions");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchLoyaltySetting = async () => {
+        try {
+            const res = await api.get("/settings");
+            const settings = res.data?.data || res.data || [];
+            const loyaltyPerc = settings.find((s: any) => s.key === "loyalty_percentage");
+            if (loyaltyPerc) {
+                setLoyaltyPercentage(loyaltyPerc.value);
+            }
+        } catch (err) {
+            console.error("Failed to fetch loyalty setting", err);
+        }
+    };
+
+    const handleSaveLoyaltySetting = async () => {
+        try {
+            setSavingSettings(true);
+            await api.post("/settings", {
+                key: "loyalty_percentage",
+                value: loyaltyPercentage
+            });
+            toast.success("Loyalty percentage updated!");
+        } catch (err) {
+            console.error("Failed to save loyalty setting", err);
+            toast.error("Failed to save loyalty setting");
+        } finally {
+            setSavingSettings(false);
         }
     };
 
@@ -174,27 +208,86 @@ export default function LoyaltyPage() {
                         Loyalty Transactions
                     </h1>
 
-                    <div className="flex gap-3">
-                        {/* CUSTOMER SEARCH */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                type="text"
-                                value={customerSearch}
-                                onChange={(e) => setCustomerSearch(e.target.value)}
-                                placeholder="Search customer..."
-                                className="pl-10 pr-4 py-2 rounded border dark:bg-gray-800 dark:border-gray-700 min-w-[250px]"
-                            />
-                        </div>
-
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
-                        >
-                            <Plus size={18} />
-                            Add Transaction
-                        </button>
                     </div>
+
+                {/* LOYALTY SETTINGS CARD */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-2">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Loyalty Points Percentage</h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Set the percentage of order total that customers earn as points.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        value={loyaltyPercentage}
+                                        onChange={(e) => setLoyaltyPercentage(e.target.value)}
+                                        className="w-24 p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-brand-500 pr-8"
+                                        placeholder="2"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
+                                    />
+                                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">%</span>
+                                </div>
+                                <button
+                                    onClick={handleSaveLoyaltySetting}
+                                    disabled={savingSettings}
+                                    className="px-6 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-all font-bold shadow-sm disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {savingSettings ? <Loader size="sm" className="space-y-0" /> : "Save"}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30 text-xs text-blue-700 dark:text-blue-300">
+                            <b>Example:</b> If set to 2%, a $100 order will earn the customer 2 points. (1 Point = $1 for redemption).
+                        </div>
+                    </div>
+
+                    <div className="bg-brand-600 p-6 rounded-xl shadow-lg text-white flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-white/80 text-sm font-medium uppercase tracking-wider">Total Transactions</h3>
+                            <p className="text-3xl font-bold mt-1">{allTransactions.length}</p>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-end">
+                            <div>
+                                <h3 className="text-white/80 text-xs font-medium">Points Earned Today</h3>
+                                <p className="text-xl font-bold mt-1">
+                                    {allTransactions.filter(t => t.type === 'EARNED' && new Date(t.createdAt).toDateString() === new Date().toDateString()).reduce((acc, curr) => acc + curr.points, 0).toFixed(0)}
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <h3 className="text-white/80 text-xs font-medium">Points Used Today</h3>
+                                <p className="text-xl font-bold mt-1">
+                                    {allTransactions.filter(t => t.type === 'REDEEMED' && new Date(t.createdAt).toDateString() === new Date().toDateString()).reduce((acc, curr) => acc + curr.points, 0).toFixed(0)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-end items-center gap-3 mb-5">
+                    {/* CUSTOMER SEARCH */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            value={customerSearch}
+                            onChange={(e) => setCustomerSearch(e.target.value)}
+                            placeholder="Search customer..."
+                            className="pl-10 pr-4 py-2 rounded border dark:bg-gray-800 dark:border-gray-700 min-w-[250px]"
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-100 dark:shadow-none"
+                    >
+                        <Plus size={18} />
+                        Add Transaction
+                    </button>
                 </div>
 
                 <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">

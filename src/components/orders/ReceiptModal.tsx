@@ -429,6 +429,12 @@ export default function ReceiptModal({ isOpen, onClose, order }: ReceiptModalPro
                   <span className="text-gray-500 font-medium">Delivery Fee ({order.type})</span>
                   <span className="font-bold">Rs. {order.deliveryCharge || 0}</span>
                 </div>
+                {order.loyaltyAmount > 0 && (
+                  <div className="total-row" style={{ color: '#e67e22' }}>
+                    <span>Loyalty Points Used</span>
+                    <span className="font-bold">-Rs. {order.loyaltyAmount}</span>
+                  </div>
+                )}
                 <div className="total-row grand-total flex justify-between">
                   <span className="font-black text-black">Due Amount :</span>
                   <span className="font-black text-black">Rs. {Number(order.total) + Number(order.deliveryCharge || 0)}</span>

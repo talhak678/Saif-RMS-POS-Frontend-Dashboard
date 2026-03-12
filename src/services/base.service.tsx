@@ -17,11 +17,13 @@ class BaseService extends EncryptionService {
 
     // function to get cookie item
     protected getCookie(name: string): string | undefined | null {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) {
-            const part = parts.pop();
-            return part ? part.split(';').shift() : null;
+        if (typeof document === 'undefined') return null;
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
         return null;
     }
@@ -49,7 +51,15 @@ class BaseService extends EncryptionService {
     ): void {
         const expires = new Date();
         expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
-        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;secure;samesite=strict`;
+        const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+        if (isLocalhost) {
+            // Localhost HTTP: Minimal flags to avoid browser security blocks
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+        } else {
+            // Production HTTPS: Standard secure flags
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; Secure; SameSite=Lax`;
+        }
     };
 
     public getTodayDateInfo = (userDate?: Date): { day: string, formattedDate: string, year: number } => {
@@ -186,11 +196,18 @@ class BaseService extends EncryptionService {
     }
 
     public deleteAllCookies(): void {
+        if (typeof document === 'undefined') return;
         const cookies = document.cookie.split(";");
+        const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
         for (const cookie of cookies) {
             const eqPos = cookie.indexOf("=");
-            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;secure;samesite=strict";
+            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+            if (isLocalhost) {
+                document.cookie = name + `=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            } else {
+                document.cookie = name + `=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure; SameSite=Lax`;
+            }
         }
     }
 

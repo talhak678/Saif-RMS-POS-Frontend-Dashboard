@@ -593,6 +593,9 @@ export default function OrdersPage() {
                         <td className="p-4 text-right">
                           <div className="flex flex-col items-end">
                             <span className="text-sm font-black text-gray-900 dark:text-white tracking-widest">${o.total}</span>
+                            {o.loyaltyAmount > 0 && (
+                              <span className="text-[9px] text-orange-500 font-bold uppercase">-${o.loyaltyAmount} Loyalty</span>
+                            )}
                             <span className="text-[9px] text-gray-400 font-bold uppercase opacity-60">Net Total</span>
                           </div>
                         </td>
