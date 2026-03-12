@@ -427,6 +427,8 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<Period>("30d");
   const [chartTab, setChartTab] = useState<"revenue" | "orders">("revenue");
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   const fetchData = useCallback(async (p: Period, silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true);
@@ -442,6 +444,23 @@ export default function DashboardPage() {
       setLoading(false); setRefreshing(false);
     }
   }, [isSuperAdmin]);
+
+  const handleGenerateSummary = async () => {
+    try {
+      setGeneratingSummary(true);
+      const res = await api.post("/ai/sales-summary", {
+        date: new Date().toISOString(),
+        restaurantId: user?.restaurant?.id
+      });
+      if (res.data?.summary) {
+        setAiSummary(res.data.summary);
+      }
+    } catch (err) {
+      console.error("AI Summary failed", err);
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
 
   useEffect(() => { fetchData(period); }, [period, fetchData]);
 
@@ -543,6 +562,22 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* AI Summary Button */}
+          {!isSuperAdmin && (
+            <button
+              onClick={handleGenerateSummary}
+              disabled={generatingSummary}
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            >
+              {generatingSummary ? (
+                <RefreshCw size={14} className="animate-spin" />
+              ) : (
+                <TrendingUp size={14} />
+              )}
+              {generatingSummary ? "Analyzing..." : "AI Performance Summary"}
+            </button>
+          )}
+
           {/* Period Selector */}
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-0.5">
             {PERIODS.map(p => (
@@ -561,6 +596,28 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* AI Summary Display */}
+      {aiSummary && (
+        <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-2xl p-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="absolute top-0 right-0 p-3">
+            <button onClick={() => setAiSummary(null)} className="text-indigo-400 hover:text-indigo-600">
+              <XCircle size={20} />
+            </button>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
+              <TrendingUp size={24} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-300 mb-2">AI Daily Performance Insights</h3>
+              <div className="text-indigo-800 dark:text-indigo-400 text-sm leading-relaxed whitespace-pre-wrap">
+                {aiSummary}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── KPI CARDS ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">

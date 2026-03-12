@@ -59,7 +59,8 @@ export default function ReviewsPage() {
     });
     const [updating, setUpdating] = useState(false);
 
-    // Delete
+    // AI Draft
+    const [generatingDraft, setGeneratingDraft] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
 
     useEffect(() => {
@@ -106,6 +107,29 @@ export default function ReviewsPage() {
             toast.error("Failed to update reply");
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const handleAIDraft = async () => {
+        if (!selectedReview) return;
+
+        try {
+            setGeneratingDraft(true);
+            const res = await api.post("/ai/complaint-response", {
+                complaint: selectedReview.comment,
+                customerName: selectedReview.order.customer.name,
+                restaurantName: "our restaurant" // Could be dynamic if needed
+            });
+
+            if (res.data?.response) {
+                setReplyData({ ...replyData, reply: res.data.response });
+                toast.success("AI Draft generated!");
+            }
+        } catch (err) {
+            console.error("AI Draft failed", err);
+            toast.error("Failed to generate AI draft");
+        } finally {
+            setGeneratingDraft(false);
         }
     };
 
@@ -263,7 +287,16 @@ export default function ReviewsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Your Response</label>
+                                    <div className="flex justify-between items-center px-1">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Your Response</label>
+                                        <button
+                                            onClick={handleAIDraft}
+                                            disabled={generatingDraft}
+                                            className="text-[10px] font-black text-brand-600 uppercase tracking-widest flex items-center gap-1 hover:text-brand-700 disabled:opacity-50"
+                                        >
+                                            {generatingDraft ? "Drafting..." : "✨ Draft with AI"}
+                                        </button>
+                                    </div>
                                     <textarea
                                         value={replyData.reply}
                                         onChange={(e) =>
