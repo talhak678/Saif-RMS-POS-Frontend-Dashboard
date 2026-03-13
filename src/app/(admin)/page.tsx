@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
 import api from "@/services/api";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import Loader from "@/components/common/Loader";
 import { useAuth } from "@/services/permission.service";
+import toast from "react-hot-toast";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -429,6 +431,8 @@ export default function DashboardPage() {
   const [chartTab, setChartTab] = useState<"revenue" | "orders">("revenue");
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSummaryDate, setAiSummaryDate] = useState(new Date().toISOString().split('T')[0]);
 
   const fetchData = useCallback(async (p: Period, silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true);
@@ -449,17 +453,86 @@ export default function DashboardPage() {
     try {
       setGeneratingSummary(true);
       const res = await api.post("/ai/sales-summary", {
-        date: new Date().toISOString(),
-        restaurantId: user?.restaurant?.id
+        date: aiSummaryDate,
+        restaurantId: user?.restaurant?.id,
+        instructions: aiPrompt
       });
       if (res.data?.summary) {
         setAiSummary(res.data.summary);
+      } else {
+        toast.error("AI returned no response. Try again.");
       }
     } catch (err) {
       console.error("AI Summary failed", err);
+      toast.error("AI report failed. Please check your backend logs.");
     } finally {
       setGeneratingSummary(false);
     }
+  };
+
+  const downloadSummaryPDF = () => {
+    if (!aiSummary) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const html = `
+      <html>
+        <head>
+          <title>Daily Sales Summary - ${new Date().toLocaleDateString()}</title>
+          <style>
+            body { font-family: 'Helvetica', 'Arial', sans-serif; padding: 40px; color: #333; }
+            .header { text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
+            h1 { color: #6366f1; margin: 0; }
+            .date { color: #888; font-size: 14px; margin-top: 5px; }
+            .summary-content { line-height: 1.6; font-size: 14px; white-space: pre-wrap; background: #f9fafb; padding: 25px; border-radius: 12px; border: 1px solid #e5e7eb; }
+            .stats-grid { display: grid; grid-template-cols: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+            .stat-box { background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #eee; text-align: center; }
+            .stat-label { font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; }
+            .stat-value { font-size: 18px; font-weight: bold; color: #333; margin-top: 4px; }
+            .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
+            @media print {
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Sales Performance Summary</h1>
+            <div class="date">Generated on ${new Date().toLocaleString()} for ${user?.restaurant?.name || 'Restaurant'}</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Total Sales</div>
+              <div class="stat-value">$${Number(data?.totalSales).toLocaleString()}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Total Revenue</div>
+              <div class="stat-value">$${Number(data?.totalRevenue).toLocaleString()}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Total Orders</div>
+              <div class="stat-value">${data?.totalOrders}</div>
+            </div>
+          </div>
+
+          <div class="summary-content">
+            ${aiSummary}
+          </div>
+
+          <div class="footer">
+            &copy; ${new Date().getFullYear()} ${user?.restaurant?.name || 'RMS POS System'} - AI Generated Report
+          </div>
+          <script>
+            window.onload = () => { window.print(); };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   useEffect(() => { fetchData(period); }, [period, fetchData]);
@@ -562,20 +635,37 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* AI Summary Button */}
+          {/* AI Summary Controls */}
           {!isSuperAdmin && (
-            <button
-              onClick={handleGenerateSummary}
-              disabled={generatingSummary}
-              className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
-            >
-              {generatingSummary ? (
-                <RefreshCw size={14} className="animate-spin" />
-              ) : (
-                <TrendingUp size={14} />
-              )}
-              {generatingSummary ? "Analyzing..." : "AI Performance Summary"}
-            </button>
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <input
+                type="date"
+                value={aiSummaryDate}
+                onChange={(e) => setAiSummaryDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-gray-600 dark:text-gray-300 px-2 py-1.5 focus:outline-none border-r border-gray-100 dark:border-gray-700"
+              />
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder="Ask AI (e.g. 'Who bought Pizza?')"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  className="pl-3 pr-8 py-1.5 bg-transparent text-xs text-gray-600 dark:text-gray-300 focus:outline-none w-48"
+                />
+              </div>
+              <button
+                onClick={handleGenerateSummary}
+                disabled={generatingSummary}
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+              >
+                {generatingSummary ? (
+                  <RefreshCw size={12} className="animate-spin" />
+                ) : (
+                  <Activity size={12} />
+                )}
+                {generatingSummary ? "Analysing..." : "Get AI Report"}
+              </button>
+            </div>
           )}
 
           {/* Period Selector */}
@@ -597,23 +687,58 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* AI Summary Display */}
+      {/* AI Summary Document Display */}
       {aiSummary && (
-        <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-2xl p-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="absolute top-0 right-0 p-3">
-            <button onClick={() => setAiSummary(null)} className="text-indigo-400 hover:text-indigo-600">
-              <XCircle size={20} />
-            </button>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
-              <TrendingUp size={24} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-300 mb-2">AI Daily Performance Insights</h3>
-              <div className="text-indigo-800 dark:text-indigo-400 text-sm leading-relaxed whitespace-pre-wrap">
-                {aiSummary}
+        <div className="bg-white dark:bg-gray-800 border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl shadow-2xl shadow-indigo-500/10 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 max-w-4xl mx-auto">
+          {/* Document Header Bar */}
+          <div className="px-8 py-4 bg-indigo-600 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <BarChart2 size={20} className="text-white" />
               </div>
+              <div>
+                <h3 className="text-white font-black uppercase tracking-widest text-xs">AI Business Report</h3>
+                <p className="text-indigo-100 text-[10px] font-bold">{new Date(aiSummaryDate).toDateString()}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={downloadSummaryPDF}
+                className="px-4 py-2 bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+              >
+                <Package size={14} /> Download PDF
+              </button>
+              <button 
+                onClick={() => setAiSummary(null)} 
+                className="w-10 h-10 flex items-center justify-center bg-black/10 hover:bg-black/20 text-white rounded-xl transition-all"
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-10">
+            <div className="ai-report-content prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed">
+              <ReactMarkdown
+                components={{
+                  h1: (props) => <h1 className="text-xl font-black text-indigo-700 dark:text-indigo-300 mt-6 mb-3 border-b border-indigo-100 pb-2">{props.children}</h1>,
+                  h2: (props) => <h2 className="text-base font-black text-gray-800 dark:text-gray-200 mt-5 mb-2">{props.children}</h2>,
+                  h3: (props) => <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-4 mb-1">{props.children}</h3>,
+                  strong: (props) => <strong className="font-black text-indigo-600 dark:text-indigo-400">{props.children}</strong>,
+                  ul: (props) => <ul className="list-disc pl-5 space-y-1 my-2">{props.children}</ul>,
+                  ol: (props) => <ol className="list-decimal pl-5 space-y-1 my-2">{props.children}</ol>,
+                  li: (props) => <li className="text-gray-700 dark:text-gray-300">{props.children}</li>,
+                  p: (props) => <p className="my-2 text-gray-700 dark:text-gray-300">{props.children}</p>,
+                  hr: () => <hr className="my-4 border-gray-200 dark:border-gray-700" />,
+                }}
+              >
+                {aiSummary || ""}
+              </ReactMarkdown>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center italic text-[10px] text-gray-400">
+              <p>Requested Insight: "{aiPrompt || "Full Daily Overview"}"</p>
+              <p>Generated by RMS Intelligence • {new Date().toLocaleTimeString()}</p>
             </div>
           </div>
         </div>

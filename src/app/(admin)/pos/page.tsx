@@ -396,6 +396,7 @@ function CustomerDetailsModal({
     tax,
     total,
     paymentMethod,
+    isLoading,
 }: {
     orderType: OrderType;
     branches: Branch[];
@@ -406,6 +407,7 @@ function CustomerDetailsModal({
     tax: number;
     total: number;
     paymentMethod: PaymentMethod;
+    isLoading: boolean;
 }) {
     const [details, setDetails] = useState<CustomerDetails>({
         name: "",
@@ -604,18 +606,38 @@ function CustomerDetailsModal({
                         </button>
                         <button
                             onClick={() => handleConfirm(false)}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                            disabled={isLoading}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                         >
-                            <ShoppingCart className="w-4 h-4" />
-                            Place Order
+                            {isLoading ? (
+                                <>
+                                    <Loader size="sm" showText={false} className="space-y-0" />
+                                    Placing...
+                                </>
+                            ) : (
+                                <>
+                                    <ShoppingCart className="w-4 h-4" />
+                                    Place Order
+                                </>
+                            )}
                         </button>
                     </div>
                     <button
                         onClick={() => handleConfirm(true)}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                        disabled={isLoading}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                        <Printer className="w-4 h-4" />
-                        Place Order &amp; Print Receipt
+                        {isLoading ? (
+                            <>
+                                <Loader size="sm" showText={false} className="space-y-0" />
+                                Placing...
+                            </>
+                        ) : (
+                            <>
+                                <Printer className="w-4 h-4" />
+                                Place Order &amp; Print Receipt
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
@@ -997,6 +1019,7 @@ export default function POSPage() {
                         paymentMethod={paymentMethod}
                         onClose={() => setShowCustomerModal(false)}
                         onConfirm={(details, branchId, printAfter) => handlePlaceOrder(details, branchId, printAfter)}
+                        isLoading={placingOrder}
                     />
                 )}
 

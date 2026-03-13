@@ -110,6 +110,8 @@ export default function ReviewsPage() {
         }
     };
 
+    const [aiPrompt, setAiPrompt] = useState("");
+
     const handleAIDraft = async () => {
         if (!selectedReview) return;
 
@@ -118,7 +120,9 @@ export default function ReviewsPage() {
             const res = await api.post("/ai/complaint-response", {
                 complaint: selectedReview.comment,
                 customerName: selectedReview.order.customer.name,
-                restaurantName: "our restaurant" // Could be dynamic if needed
+                instructions: aiPrompt,
+                menuItemName: selectedReview.menuItem?.name || "the meal",
+                restaurantName: "our restaurant"
             });
 
             if (res.data?.response) {
@@ -297,6 +301,13 @@ export default function ReviewsPage() {
                                             {generatingDraft ? "Drafting..." : "✨ Draft with AI"}
                                         </button>
                                     </div>
+                                    <input
+                                        type="text"
+                                        value={aiPrompt}
+                                        onChange={(e) => setAiPrompt(e.target.value)}
+                                        className="w-full px-4 py-2 mb-2 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50/30 dark:bg-gray-900/30 focus:border-brand-500 transition-colors outline-none text-xs"
+                                        placeholder="Add instructions (e.g., be apologetic, offer a discount)"
+                                    />
                                     <textarea
                                         value={replyData.reply}
                                         onChange={(e) =>
