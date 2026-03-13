@@ -67,8 +67,8 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
 
   useEffect(() => {
     fetchNotifications();
-    // Setup interval to poll for new notifications every 15 seconds
-    const interval = setInterval(fetchNotifications, 15000);
+    // Setup interval to poll for new notifications every 40 seconds
+    const interval = setInterval(fetchNotifications, 40000);
     return () => clearInterval(interval);
   }, []);
 

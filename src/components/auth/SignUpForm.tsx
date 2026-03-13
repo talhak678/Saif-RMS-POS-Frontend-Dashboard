@@ -15,6 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import api from "@/services/api";
+import { endpoints } from "@/types/environment";
 
 interface PlanPrice {
   id: string;
@@ -102,7 +103,9 @@ export default function SignUpForm() {
   const fetchPlans = async () => {
     setPlansLoading(true);
     try {
-      const res = await api.get("/subscription-prices");
+      const res = await api.get(endpoints.getSubscriptionPrices, {
+        params: { isDefault: true },
+      });
       if (res.data?.success) {
         const allPlans: PlanPrice[] = res.data.data || [];
         const sorted = allPlans
