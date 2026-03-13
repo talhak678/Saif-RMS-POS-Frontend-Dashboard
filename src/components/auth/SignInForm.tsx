@@ -23,7 +23,7 @@ export default function SignInForm() {
   const [error, setError] = useState("");
 
 
-  // const isSuperAdmin = process.env.NEXT_PUBLIC_IS_SUPER_ADMIN_ONLY === 'true';
+  const isSuperAdmin = process.env.NEXT_PUBLIC_IS_SUPER_ADMIN_ONLY === 'true';
 
 
   // 4. Handle Login Function
@@ -44,14 +44,29 @@ export default function SignInForm() {
       if (res.data.success) {
         // Save token using AuthService (which handles encryption and cookies)
         const authService = AuthServiceInstance();
+        const token = res.data.data.token;
+        const decoded = authService.decryptToken(token);
+        const userRole = decoded.role;
+
+        // Check for role mismatch based on URL type
+        if (isSuperAdmin && userRole !== 'SUPER_ADMIN') {
+          setError("This login page is for Super Admins only.");
+          setLoading(false);
+          return;
+        }
+
+        if (!isSuperAdmin && userRole === 'SUPER_ADMIN') {
+          setError("Super Admins cannot sign in through this portal.");
+          setLoading(false);
+          return;
+        }
+
         const tokenKey = authService.getTokenKey();
-        authService.setEncryptedCookie(tokenKey, res.data.data.token);
+        authService.setEncryptedCookie(tokenKey, token);
 
         console.log("Login successful:", res.data);
         window.location.replace("/");
         // Using location replace to ensure clean state and bypass router issues
-
-
       }
     } catch (err: any) {
       console.error("Login Error:", err);
