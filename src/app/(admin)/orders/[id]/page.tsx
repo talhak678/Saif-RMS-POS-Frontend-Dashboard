@@ -23,12 +23,14 @@ import {
     Phone,
     MapPin,
     Trash2,
+    Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import ReceiptModal from "@/components/orders/ReceiptModal";
 import Loader from "@/components/common/Loader";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/modal";
 
 interface OrderDetailProps {
     params: Promise<{ id: string }>;
@@ -68,6 +70,11 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    
+    // Rider Assignment Status
+    const [riders, setRiders] = useState<any[]>([]);
+    const [isRiderModalOpen, setIsRiderModalOpen] = useState(false);
+    const [fetchingRiders, setFetchingRiders] = useState(false);
 
     const fetchOrderDetails = useCallback(async () => {
         try {
@@ -99,6 +106,55 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
         } catch (err) {
             console.error("Failed to update status", err);
             toast.error("Status update failed");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const fetchRiders = async () => {
+        try {
+            setFetchingRiders(true);
+            const res = await api.get("/riders?status=AVAILABLE");
+            if (res.data?.success) {
+                setRiders(res.data.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch riders", err);
+            toast.error("Could not load riders");
+        } finally {
+            setFetchingRiders(false);
+        }
+    };
+
+    const assignRider = async (riderId: string) => {
+        try {
+            setUpdating(true);
+            const res = await api.put(`/orders/${id}`, { riderId });
+            if (res.data?.success) {
+                toast.success("Rider assigned successfully");
+                setIsRiderModalOpen(false);
+                fetchOrderDetails();
+            }
+        } catch (err) {
+            console.error("Failed to assign rider", err);
+            toast.error("Assignment failed");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const deleteOrder = async () => {
+        if (!confirm("Are you sure you want to delete this order? This action cannot be undone.")) return;
+        try {
+            setUpdating(true);
+            const res = await api.delete(`/orders/${id}`);
+            if (res.data?.success) {
+                toast.success("Order deleted");
+                router.push("/orders");
+            }
+        } catch (err) {
+            console.error("Failed to delete order", err);
+            toast.error("Delete failed");
         } finally {
             setUpdating(false);
         }
@@ -146,68 +202,81 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
             <div className="min-h-screen bg-[#FDFDFD] dark:bg-gray-950 pb-20 font-outfit">
 
                 {/* --- TOP HEADER SECTION --- */}
-                <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-20">
+                <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-20 shadow-sm">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                            <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
+                        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                            <ArrowLeft size={20} className="text-gray-500" />
                         </button>
-                        <h1 className="text-xl font-bold text-gray-800 dark:text-white">Order ID #{order.orderNo || order.id.slice(-6)}</h1>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                        <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase mr-1">Mark Order As:</span>
-                            <button
-                                onClick={() => updateStatus("CANCELLED")}
-                                disabled={updating}
-                                className="flex items-center gap-1 px-4 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition-all disabled:opacity-50"
-                            >
-                                <X size={14} /> Cancelled
-                            </button>
-                            <button
-                                onClick={() => updateStatus("CONFIRMED")}
-                                disabled={updating}
-                                className="flex items-center gap-1 px-4 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-all disabled:opacity-50"
-                            >
-                                <Check size={14} /> Accept
-                            </button>
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Order Details</h1>
+                            <p className="text-xs text-brand-600 font-medium mt-1">Ref No: #{order.orderNo || order.id.slice(-6)}</p>
                         </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            onClick={() => updateStatus("CANCELLED")}
+                            disabled={updating || order.status === "CANCELLED"}
+                            className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-rose-50 hover:text-rose-600 transition-all disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => updateStatus("CONFIRMED")}
+                            disabled={updating || order.status !== "PENDING"}
+                            className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 shadow-md shadow-emerald-600/10"
+                        >
+                            Confirm Order
+                        </button>
                         <button
                             onClick={handleWhatsapp}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-brand-600 text-white rounded-lg text-xs font-bold shadow-md shadow-brand-600/20 hover:bg-brand-700 transition-all"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-all"
                         >
-                            Send Whatsapp to Customer <MessageSquare size={14} />
+                            <MessageSquare size={14} /> WhatsApp
                         </button>
                     </div>
                 </div>
 
-                {/* --- BREADCRUMB ACTIONS --- */}
-                <div className="px-8 py-4 flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                        <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-400 text-white rounded-lg text-[11px] font-bold hover:bg-orange-500 transition-all shadow-sm">
-                            <Printer size={12} /> Print
-                        </button>
-                        <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-[11px] font-bold hover:bg-orange-600 transition-all shadow-sm">
-                            <Printer size={12} /> Print KOT
-                        </button>
-                        <div className="relative group">
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500 text-white rounded-lg text-[11px] font-bold hover:bg-cyan-600 transition-all shadow-sm">
-                                Change Status <ChevronDown size={12} />
+                {/* --- ACTION BAR --- */}
+                <div className="px-8 py-6 flex flex-wrap items-center justify-between gap-4 border-b border-gray-50 dark:border-gray-800/50">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+                            <button onClick={handlePrint} className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold hover:bg-gray-50 border-r dark:border-gray-700">
+                                <Printer size={14} /> Receipt
                             </button>
-                            <div className="absolute top-full left-0 mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl py-2 hidden group-hover:block z-30">
+                            <button onClick={handlePrint} className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold hover:bg-gray-50">
+                                <Printer size={14} /> KOT
+                            </button>
+                        </div>
+
+                        <div className="relative group">
+                            <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-lg shadow-gray-200 dark:shadow-none">
+                                Status: {order.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : order.status} <ChevronDown size={14} />
+                            </button>
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-2xl py-2 hidden group-hover:block z-30 overflow-hidden animate-in fade-in slide-in-from-top-1">
                                 {ORDER_STATUSES.map(s => (
                                     <button
                                         key={s}
                                         onClick={() => updateStatus(s)}
-                                        className="w-full text-left px-4 py-1.5 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 uppercase"
+                                        className={`w-full text-left px-5 py-2.5 text-xs font-bold transition-colors uppercase ${order.status === s ? 'text-brand-600 bg-brand-50' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                                     >
                                         {s === "OUT_FOR_DELIVERY" ? "ON THE WAY" : s}
                                     </button>
                                 ))}
                             </div>
                         </div>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-[11px] font-bold hover:bg-cyan-700 transition-all shadow-sm">
-                            Change Branch
-                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Progress</span>
+                        <div className="flex gap-1">
+                            {ORDER_STATUSES.slice(0, 6).map((s, i) => {
+                                const currentIndex = ORDER_STATUSES.indexOf(order.status);
+                                const isCompleted = ORDER_STATUSES.indexOf(s) <= currentIndex;
+                                return (
+                                    <div key={i} className={`h-1.5 w-6 rounded-full ${isCompleted ? 'bg-brand-500' : 'bg-gray-100 dark:bg-gray-700'}`} />
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
@@ -217,60 +286,45 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                     <div className="lg:col-span-3 space-y-6">
 
                         {/* Profile Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-gray-100/50 dark:border-gray-700 p-6 flex flex-col items-center">
-                            <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden mb-4 border-4 border-gray-50 dark:border-gray-600">
-                                <User size={48} className="text-gray-300" />
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center">
+                            <div className="w-20 h-20 rounded-2xl bg-brand-50 dark:bg-brand-900/20 text-brand-600 flex items-center justify-center mb-4 border border-brand-100 dark:border-brand-500/20">
+                                <User size={36} />
                             </div>
-                            <h2 className="text-lg font-black text-gray-800 dark:text-white mb-3 text-center">{order.customer?.name || "Guest Customer"}</h2>
-                            <button className="flex items-center gap-2 px-6 py-1.5 bg-brand-600 text-white rounded-lg text-[10px] font-bold shadow-lg shadow-brand-600/30 hover:scale-105 transition-all">
-                                <Wallet size={12} /> Add to Wallet
-                            </button>
-
-                            <div className="w-full mt-8 space-y-4">
-                                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest text-center">Customer Details</h3>
-                                <div className="border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-                                    <table className="w-full text-[11px]">
-                                        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 w-1/3 text-center border-r dark:border-gray-700">Name</td>
-                                                <td className="p-2.5 font-bold text-gray-600 dark:text-gray-300 text-center">{order.customer?.name || "N/A"}</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 text-center border-r dark:border-gray-700">Phone</td>
-                                                <td className="p-2.5 font-bold text-blue-500 text-center flex items-center justify-center gap-2">
-                                                    {order.customer?.phone || "N/A"} <Phone size={10} />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 text-center border-r dark:border-gray-700">Email</td>
-                                                <td className="p-2.5 font-bold text-gray-600 dark:text-gray-300 text-center truncate max-w-[120px]">{order.customer?.email || "N/A"}</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 text-center border-r dark:border-gray-700">Delivery Address</td>
-                                                <td className="p-2.5 font-bold text-gray-600 dark:text-gray-300 text-center leading-tight">
-                                                    {order.deliveryAddress || "Not specified"}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 text-center">{order.customer?.name || "Guest Customer"}</h2>
+                            
+                            <div className="w-full space-y-3">
+                                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-2">Customer Info</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Phone</p>
+                                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5">{order.customer?.phone || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Email</p>
+                                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5 truncate">{order.customer?.email || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Delivery Address</p>
+                                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-0.5 leading-relaxed italic">{order.deliveryAddress || "Not specified"}</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="w-full mt-6 space-y-4">
-                                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest text-center">Order Information</h3>
-                                <div className="border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-                                    <table className="w-full text-[11px]">
-                                        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 w-1/3 text-center border-r dark:border-gray-700">Source</td>
-                                                <td className="p-2.5 font-bold text-gray-600 dark:text-gray-300 text-center uppercase">{order.source}</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="p-2.5 font-bold text-gray-400 bg-gray-50/50 dark:bg-gray-700/30 text-center border-r dark:border-gray-700">Branch</td>
-                                                <td className="p-2.5 font-bold text-gray-600 dark:text-gray-300 text-center">{order.branch?.name || "Main Branch"}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div className="w-full mt-6 space-y-3">
+                                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-2">Order Info</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Mode</p>
+                                        <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">{order.type}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Source</p>
+                                        <span className="text-[10px] font-bold bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded uppercase">{order.source}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Branch</p>
+                                        <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{order.branch?.name || "Main Branch"}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -311,65 +365,54 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
-                                {/* Order Meta Info */}
+                                {/* Simplified Meta Section */}
                                 <div className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-px bg-gray-100 dark:bg-gray-700 border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ref #</p>
-                                            <p className="text-sm font-bold text-gray-700 dark:text-gray-200">#{order.orderNo}</p>
+                                    <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 space-y-4">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="font-bold text-gray-400 uppercase tracking-widest">Order Mode</span>
+                                            <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase">{order.type}</span>
                                         </div>
-                                        <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Type</p>
-                                            <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{order.type}</p>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="font-bold text-gray-400 uppercase tracking-widest">Platform</span>
+                                            <span className="font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded uppercase">{order.source}</span>
                                         </div>
-                                        <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Status</p>
-                                            <div className="pt-1">
-                                                <span className={getStatusBadge(order.status)}>{order.status === "OUT_FOR_DELIVERY" ? "ON THE WAY" : order.status}</span>
-                                            </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="font-bold text-gray-400 uppercase tracking-widest">Payment Status</span>
+                                            <span className="font-black text-orange-600 uppercase italic">{order.payment?.status || "PENDING"}</span>
                                         </div>
-                                        <div className="bg-white dark:bg-gray-800 p-4 space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment Status</p>
-                                            <p className="text-xs font-bold text-orange-500 uppercase">{order.payment?.status}</p>
+                                        <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center text-xs">
+                                            <span className="font-bold text-gray-400 uppercase tracking-widest">Branch</span>
+                                            <span className="text-gray-700 dark:text-gray-300 font-bold">{order.branch?.name || "Main Branch"}</span>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4 px-1">
-                                        {[
-                                            { label: "Branch Name", value: order.branch?.name || "Main Branch" },
-                                            { label: "Payment Type", value: <div className="flex items-center gap-2">{order.payment?.method} <div className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-200 flex items-center gap-1"> <Banknote size={12} /> </div> </div> },
-                                            { label: "Order Date", value: <div className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] font-bold shadow-sm">{new Date(order.createdAt).toLocaleDateString()}</div> },
-                                            { label: "Platform", value: <div className="px-2 py-0.5 bg-cyan-600 text-white rounded text-[9px] font-black italic uppercase">{order.source}</div> }
-                                        ].map((row, idx) => (
-                                            <div key={idx} className="flex justify-between items-center py-2.5 border-b border-gray-50 dark:border-gray-700 last:border-0">
-                                                <span className="text-xs font-bold text-gray-800 dark:text-gray-300">{row.label}</span>
-                                                <div className="text-xs text-gray-400 font-medium">{row.value}</div>
+                                    {/* Rider Assignment Info */}
+                                    <div className="w-full bg-brand-50/30 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-500/10 rounded-2xl p-6">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-brand-600 shadow-sm">
+                                                <Bike size={20} />
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Action Banner */}
-                                    <div className="space-y-3">
-                                        <div className="w-full bg-brand-600/5 dark:bg-brand-600/10 border border-brand-100 dark:border-brand-500/20 rounded-2xl p-4 flex items-center justify-between text-brand-600 dark:text-brand-400">
-                                            <div className="flex items-center gap-3">
-                                                <Bike size={24} />
-                                                <div className="text-left">
-                                                    <p className="text-[10px] font-black uppercase opacity-60">Order Mode</p>
-                                                    <p className="text-sm font-black italic uppercase">{order.type} Order</p>
-                                                </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Delivery Partner</p>
+                                                <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{order.rider ? order.rider.name : "Unassigned"}</p>
                                             </div>
-                                            {order.rider && (
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-black uppercase opacity-60">Rider</p>
-                                                    <p className="text-xs font-bold">{order.rider.name}</p>
-                                                </div>
-                                            )}
                                         </div>
+                                        
                                         <button
-                                            className="w-full bg-brand-600 text-white rounded-2xl p-4 flex items-center justify-center font-black uppercase text-sm shadow-lg shadow-brand-600/30 active:scale-95 transition-all hover:bg-brand-700"
+                                            disabled={order.status !== "OUT_FOR_DELIVERY"}
+                                            onClick={() => { fetchRiders(); setIsRiderModalOpen(true); }}
+                                            className={`w-full py-3 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 ${
+                                                order.status === "OUT_FOR_DELIVERY" 
+                                                ? "bg-brand-600 text-white hover:bg-brand-700 shadow-lg shadow-brand-600/10"
+                                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            }`}
                                         >
-                                            {order.riderId ? "Change Rider" : "Assign a Rider"}
+                                            <Users size={14} /> {order.rider ? "Change Rider" : "Assign a Rider"}
                                         </button>
+                                        
+                                        {order.status !== "OUT_FOR_DELIVERY" && (
+                                            <p className="text-[9px] text-gray-400 font-medium text-center mt-3 bg-white/50 dark:bg-gray-800/50 py-1 rounded-full border border-gray-100 dark:border-gray-700">Assignment enabled only when <b>ON THE WAY</b></p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -395,32 +438,39 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                                         </div>
                                     ))}
 
-                                    <div className="pt-8 border-t border-gray-100 dark:border-gray-700 space-y-3">
-                                        <div className="flex justify-between items-center text-sm font-bold text-gray-500">
-                                            <span>Sub Total</span>
-                                            <span className="text-gray-800 dark:text-white font-black">${Number(order.total).toLocaleString()}</span>
+                                    <div className="p-6 bg-gray-50 rounded-2xl dark:bg-gray-950/20 space-y-3">
+                                        <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                                            <span className="uppercase tracking-widest">Order Total</span>
+                                            <span className="text-gray-800 dark:text-white">${Number(order.total).toLocaleString()}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm font-bold text-gray-500">
-                                            <span>Delivery Charge</span>
-                                            <span className="text-gray-800 dark:text-white font-black">${Number(order.deliveryCharge || 0).toLocaleString()}</span>
+                                        <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                                            <span className="uppercase tracking-widest">Delivery Fee</span>
+                                            <span className="text-gray-800 dark:text-white">${Number(order.deliveryCharge || 0).toLocaleString()}</span>
                                         </div>
                                         {order.loyaltyAmount > 0 && (
-                                            <div className="flex justify-between items-center text-sm font-bold text-orange-600">
-                                                <span>Loyalty Discount</span>
-                                                <span className="font-black">-${Number(order.loyaltyAmount).toLocaleString()}</span>
+                                            <div className="flex justify-between items-center text-xs font-bold text-emerald-600">
+                                                <span className="uppercase tracking-widest">Loyalty Reward</span>
+                                                <span>-${Number(order.loyaltyAmount).toLocaleString()}</span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between items-center pt-2">
-                                            <span className="text-lg font-black text-gray-800 dark:text-white">Total Amount</span>
-                                            <span className="text-xl font-black text-brand-600 dark:text-brand-400 tracking-tight">${(Number(order.total) + Number(order.deliveryCharge || 0)).toLocaleString()}</span>
+                                        <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-800">
+                                            <span className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-widest">Grand Total</span>
+                                            <span className="text-xl font-black text-brand-600 dark:text-brand-400">${(Number(order.total) + Number(order.deliveryCharge || 0) - (order.loyaltyAmount || 0)).toLocaleString()}</span>
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end pt-6 gap-3">
-                                        <button className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-black uppercase hover:bg-red-100 transition-all active:scale-95">
-                                            <Trash2 size={14} /> Cancel Order
+                                    <div className="flex justify-end pt-8 gap-3">
+                                        <button 
+                                            onClick={deleteOrder}
+                                            disabled={updating}
+                                            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-400 rounded-xl text-[11px] font-bold uppercase hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 transition-all active:scale-95"
+                                        >
+                                            <Trash2 size={14} /> Delete
                                         </button>
-                                        <button className="flex items-center gap-2 px-8 py-3 bg-brand-600 text-white rounded-xl text-xs font-black uppercase shadow-xl shadow-brand-600/30 hover:bg-brand-700 transition-all active:scale-95">
+                                        <button 
+                                            onClick={() => router.push(`/pos?orderId=${id}`)}
+                                            className="flex items-center gap-2 px-8 py-3 bg-brand-600 text-white rounded-xl text-[11px] font-bold uppercase shadow-xl shadow-brand-600/10 hover:bg-brand-700 transition-all active:scale-95"
+                                        >
                                             <Edit size={14} /> Edit Order
                                         </button>
                                     </div>
@@ -437,6 +487,51 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
                     onClose={() => setIsPrintModalOpen(false)}
                     order={order}
                 />
+
+                {/* Rider Selection Modal */}
+                <Modal isOpen={isRiderModalOpen} onClose={() => setIsRiderModalOpen(false)} className="max-w-md">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden">
+                        <div className="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white">Assign a Rider</h2>
+                            <button onClick={() => setIsRiderModalOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                                <X size={18} className="text-gray-400" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-wider leading-relaxed">
+                                Only AVAILABLE riders are shown below. Assigning a rider will notify them instantly.
+                            </div>
+                            
+                            <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                                {fetchingRiders ? (
+                                    <div className="py-20 text-center"><Loader size="sm" /></div>
+                                ) : riders.length === 0 ? (
+                                    <div className="py-20 text-center text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-loose">No riders available right now.<br/>Change rider status in Riders menu.</div>
+                                ) : (
+                                    riders.map(r => (
+                                        <button
+                                            key={r.id}
+                                            onClick={() => assignRider(r.id)}
+                                            disabled={updating}
+                                            className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 hover:bg-brand-50 dark:hover:bg-brand-900/20 border border-transparent hover:border-brand-200 dark:hover:border-brand-500/30 rounded-2xl transition-all group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-brand-600 transition-colors shadow-sm">
+                                                    <User size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <p className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">{r.name}</p>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{r.phone}</p>
+                                                </div>
+                                            </div>
+                                            <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
 
             </div>
         </ProtectedRoute>
