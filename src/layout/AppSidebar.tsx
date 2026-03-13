@@ -378,22 +378,23 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed top-4 left-3 bottom-4 flex flex-col px-5 bg-white/60 dark:bg-gray-900/60  text-gray-900 h-[calc(100vh-32px)] transition-all duration-300 ease-in-out z-50 border border-gray-200/50 dark:border-gray-800/50 shadow-xl rounded-[1.5rem]
+      className={`fixed top-4 left-3 bottom-4 flex flex-col px-5 bg-white dark:bg-gray-900  text-gray-900 h-[calc(100vh-32px)] transition-all duration-300 ease-in-out z-50 border border-gray-200 dark:border-gray-800 shadow-2xl rounded-[1.5rem]
         ${isExpanded || isMobileOpen
-          ? "w-[330px]"
+          ? "w-[290px] sm:w-[330px]"
           : isHovered
             ? "w-[330px]"
             : "w-[90px]"
         }
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-[110%]"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="py-8 flex justify-center items-center w-full overflow-hidden">
+      {/* Sidebar Header/Logo - Hidden on mobile as header shows it */}
+      <div className="hidden lg:flex py-8 justify-center items-center w-full overflow-hidden">
         <Link href="/" className="flex justify-center items-center w-full px-2">
           <div
-            className={`relative flex justify-center items-center transition-all duration-300 overflow-hidden ${isExpanded || isHovered || isMobileOpen
+            className={`relative flex justify-center items-center transition-all duration-300 overflow-hidden ${isExpanded || isHovered
               ? "w-full h-24 lg:h-28 px-4"
               : "w-12 h-12"
               }`}
@@ -415,6 +416,9 @@ const AppSidebar: React.FC = () => {
           </div>
         </Link>
       </div>
+
+      {/* Mobile Spacer to push menu items below the sticky header */}
+      <div className="lg:hidden h-24 flex-none" />
 
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         {/* Profile Section

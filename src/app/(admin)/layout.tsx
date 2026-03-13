@@ -46,8 +46,8 @@ export default function AdminLayout({
 
                 {/* Page Content Container - Adjusted Padding to match header left spacing */}
                 <div className="flex-1 px-4 lg:px-2 pt-2 pb-4 overflow-hidden">
-                  {/* Internal Scrollable Glass Box */}
-                  <div className="h-full bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl border border-white/20 dark:border-gray-800/30 rounded-[1.5rem] p-6 overflow-y-auto no-scrollbar shadow-2xl relative">
+                  {/* Internal Scrollable Box - Solid background for better readability on mobile */}
+                  <div className="h-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-[1.5rem] p-4 sm:p-6 overflow-y-auto no-scrollbar shadow-xl relative">
                     {children}
                   </div>
                 </div>
