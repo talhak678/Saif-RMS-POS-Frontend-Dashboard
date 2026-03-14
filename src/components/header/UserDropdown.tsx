@@ -108,7 +108,7 @@ const UserDropdown = ({ isOpen, toggle, close }: UserDropdownProps) => {
                   fill=""
                 />
               </svg>
-              Profile
+              Profile Settings
             </DropdownItem>
           </li>
 

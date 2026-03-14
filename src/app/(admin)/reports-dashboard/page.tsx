@@ -268,7 +268,7 @@ export default function ReportsDashboard() {
                                     <select
                                         value={selectedRestaurantId}
                                         onChange={handleRestaurantChange}
-                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
                                     >
                                         <option value="">Select Restaurant</option>
                                         {restaurants.map((res) => (

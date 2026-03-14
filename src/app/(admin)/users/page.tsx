@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { AuthServiceInstance } from "@/services/auth.service";
 import { toast } from "sonner";
 import { Eye, ShieldCheck } from "lucide-react"; // Added ShieldCheck icon for permissions
@@ -109,7 +109,9 @@ export default function UsersPage() {
                                 ))}
                             </select>
                         )}
-                        <AddUser onAction={fetchUsers} />
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <AddUser onAction={fetchUsers} />
+                        </Suspense>
                     </div>
                 </div>
 

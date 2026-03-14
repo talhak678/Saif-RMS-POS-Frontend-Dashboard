@@ -13,6 +13,7 @@ import { useAuth } from "@/services/permission.service";
 import api from "@/services/api";
 import Button from "@/components/ui/button/Button";
 import { RoleServiceInstance } from "@/services/role.service";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const AddUser = ({ onAction }: { onAction?: () => void }) => {
     const { user: currentUser } = useAuth();
@@ -32,6 +33,9 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
     const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
     const [loadingRestaurants, setLoadingRestaurants] = useState<boolean>(false);
     const [errors, setErrors] = useState<Partial<Record<keyof iUser, any>>>({});
+
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
     const baseServ = BaseServiceInstance();
     const authServ = AuthServiceInstance();
@@ -116,6 +120,21 @@ const AddUser = ({ onAction }: { onAction?: () => void }) => {
             }
         }
     }, [modal, isSuperAdmin]);
+
+    useEffect(() => {
+        if (searchParams?.get("openAddUser") === "true") {
+            setModal(true);
+            setUserForm(prev => ({
+                ...prev,
+                name: searchParams.get("reqName") || "",
+                email: searchParams.get("reqEmail") || "",
+                password: searchParams.get("reqPassword") || "",
+                restaurantId: searchParams.get("reqRestaurantId") || "",
+            }));
+            // We can optionally replace the URL to remove the query params so it doesn't stick around on refresh
+            router.replace("/users");
+        }
+    }, [searchParams, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserForm({ ...UserForm, [e.target.name]: e.target.value });

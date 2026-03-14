@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { ArrowLeft } from "lucide-react";
 import ImageUpload from "@/components/common/ImageUpload";
@@ -16,24 +16,38 @@ const SUBSCRIPTION_OPTIONS = [
     "ENTERPRISE",
 ];
 
-export default function AddRestaurantPage() {
+function AddRestaurantForm() {
     const { user, loadingUser } = useAuth();
     const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
     const router = useRouter();
 
+    const searchParams = useSearchParams();
+
     const [form, setForm] = useState({
-        name: "",
+        name: searchParams.get("reqRestaurantName") || "",
         slug: "",
         logo: "",
         description: "",
         status: "PENDING",
-        subscription: "FREE",
+        subscription: searchParams.get("reqPlan") || "FREE",
         facebookUrl: "",
         instagramUrl: "",
         tiktokUrl: "",
         metaPixelId: "",
         customDomain: "",
     });
+
+    useEffect(() => {
+        const reqName = searchParams.get("reqRestaurantName");
+        const reqPlan = searchParams.get("reqPlan");
+        if (reqName || reqPlan) {
+            setForm(prev => ({
+                ...prev,
+                name: reqName || prev.name,
+                subscription: reqPlan || prev.subscription
+            }));
+        }
+    }, [searchParams]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -114,7 +128,29 @@ export default function AddRestaurantPage() {
 
             if (res.data?.success) {
                 toast.success("Restaurant created successfully");
-                router.push("/restaurants");
+
+                // If this was a subscription request, delete it now that it's fulfilled
+                const reqId = searchParams.get("reqId");
+                if (reqId) {
+                    try {
+                        await api.delete(`/subscription-requests/${reqId}`);
+                    } catch (e) {
+                        console.error("Failed to delete fulfilled subscription request", e);
+                    }
+                }
+
+                if (searchParams.get("reqEmail")) {
+                    const params = new URLSearchParams({
+                        openAddUser: "true",
+                        reqEmail: searchParams.get("reqEmail") || "",
+                        reqName: searchParams.get("reqName") || "",
+                        reqPassword: searchParams.get("reqPassword") || "",
+                        reqRestaurantId: res.data.data.id || ""
+                    });
+                    router.push(`/users?${params.toString()}`);
+                } else {
+                    router.push("/restaurants");
+                }
             } else {
                 const msg = res.data?.message || "Failed to create restaurant";
                 setError(msg);
@@ -348,5 +384,15 @@ export default function AddRestaurantPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+import { Suspense } from "react";
+
+export default function AddRestaurantPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center dark:bg-gray-900 px-4"><div className="text-gray-400">Loading form...</div></div>}>
+            <AddRestaurantForm />
+        </Suspense>
     );
 }

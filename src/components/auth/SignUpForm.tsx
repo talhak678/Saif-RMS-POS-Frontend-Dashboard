@@ -131,7 +131,7 @@ export default function SignUpForm() {
       const res = await api.post("/subscription-requests", {
         plan: selectedPlan.plan,
         billingCycle: selectedPlan.billingCycle,
-        description: description || "New registration request",
+        description: `RestaurantName=${contactInfo.restaurantName},Password=${form.password}` + (description ? `,Description=${description}` : ''),
         contactName: contactInfo.name,
         contactEmail: contactInfo.email,
         contactPhone: contactInfo.phone,
