@@ -30,6 +30,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
         billingCycle: priceData.billingCycle,
         restaurantId: priceData.restaurantId,
         isActive: priceData.isActive,
+        isDefault: priceData.isDefault || false,
     });
     const [features, setFeatures] = useState<string[]>(priceData.features || []);
     const [featureInput, setFeatureInput] = useState("");
@@ -65,9 +66,19 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!form.isDefault && !form.restaurantId) {
+            toast.error("Please select a restaurant");
+            return;
+        }
+
         try {
             setSaving(true);
-            const res = await api.put(`${endpoints.editSubscriptionPrice}${priceData.id}`, { ...form, features });
+            const payload: any = { ...form, features };
+            if (form.isDefault) {
+                payload.restaurantId = null;
+            }
+
+            const res = await api.put(`${endpoints.editSubscriptionPrice}${priceData.id}`, payload);
             if (res.data?.success) {
                 toast.success("Payment plan updated successfully!");
                 onAction?.();
@@ -92,6 +103,7 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                 billingCycle: priceData.billingCycle,
                 restaurantId: priceData.restaurantId,
                 isActive: priceData.isActive,
+                isDefault: priceData.isDefault || false,
             });
             setFeatures(priceData.features || []);
             setFeatureInput("");
@@ -136,8 +148,27 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                     <div className="p-6 overflow-y-auto max-h-[70vh]">
                         <form id="edit-plan-form" onSubmit={handleSubmit} className="space-y-5">
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <div className="col-span-2">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.isDefault}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                setForm({
+                                                    ...form,
+                                                    isDefault: checked,
+                                                    restaurantId: checked ? "" : form.restaurantId
+                                                });
+                                            }}
+                                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Is Default Plan (System-wide)</span>
+                                    </label>
+                                </div>
+
                                 <div className="flex flex-col">
-                                    <Label>Restaurant *</Label>
+                                    <Label>Restaurant {form.isDefault ? "" : "*"}</Label>
                                     <Select
                                         options={restaurants.map((r) => ({
                                             label: r.name,
@@ -146,8 +177,8 @@ const EditPlan = ({ onAction, priceData }: { onAction?: () => void; priceData: a
                                         placeholder={loadingRestaurants ? "Loading restaurants..." : "Select restaurant"}
                                         onChange={(val) => setForm({ ...form, restaurantId: val })}
                                         defaultValue={form.restaurantId}
-                                        required
-                                        disabled={saving || loadingRestaurants}
+                                        required={!form.isDefault}
+                                        disabled={saving || loadingRestaurants || form.isDefault}
                                         className="w-full"
                                     />
                                 </div>

@@ -22,7 +22,7 @@ export default function PaymentPlansPage() {
     const fetchPrices = async (restaurantId?: string) => {
         const idToUse = restaurantId !== undefined ? restaurantId : selectedRestaurantId;
 
-        // If super admin and no restaurant selected, don't fetch
+        // If super admin and no value selected, don't fetch
         if (isSuperAdmin && !idToUse) {
             setPrices([]);
             setLoading(false);
@@ -31,8 +31,15 @@ export default function PaymentPlansPage() {
 
         try {
             setLoading(true);
+            const params: any = {};
+            if (idToUse === "default") {
+                params.isDefault = true;
+            } else if (idToUse) {
+                params.restaurantId = idToUse;
+            }
+
             const res = await api.get(endpoints.getSubscriptionPrices, {
-                params: idToUse ? { restaurantId: idToUse } : {},
+                params: params,
             });
             if (res.data?.success) {
                 setPrices(res.data.data);
@@ -68,7 +75,7 @@ export default function PaymentPlansPage() {
         } else {
             setLoading(false); // Stop initial loader for Super Admin
         }
-    }, [isSuperAdmin]);
+    }, [isSuperAdmin, selectedRestaurantId]);
 
     const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const id = e.target.value;
@@ -110,6 +117,7 @@ export default function PaymentPlansPage() {
                                         className="bg-transparent text-sm focus:outline-none dark:text-gray-200"
                                     >
                                         <option value="">Select Restaurant</option>
+                                        <option value="default">System Default Plans</option>
                                         {restaurants.map((res) => (
                                             <option key={res.id} value={res.id}>
                                                 {res.name}

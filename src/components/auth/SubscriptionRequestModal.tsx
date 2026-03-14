@@ -67,7 +67,7 @@ const SubscriptionRequestModal = ({ isOpen, onClose, initialContact }: Subscript
         const fetchPlans = async () => {
             setPlansLoading(true);
             try {
-                const res = await api.get("/subscription-prices");
+                const res = await api.get("/subscription-prices", { params: { isDefault: true } });
                 if (res.data?.success) {
                     const allPlans: PlanPrice[] = res.data.data || [];
                     const sorted = allPlans
