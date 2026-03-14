@@ -61,6 +61,7 @@ export default function ReviewsPage() {
 
     // AI Draft
     const [generatingDraft, setGeneratingDraft] = useState(false);
+    const [showAIInput, setShowAIInput] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
 
     useEffect(() => {
@@ -158,6 +159,7 @@ export default function ReviewsPage() {
         setReplyData({
             reply: review.reply || "",
         });
+        setShowAIInput(false);
         setShowReplyModal(true);
     };
 
@@ -294,20 +296,35 @@ export default function ReviewsPage() {
                                     <div className="flex justify-between items-center px-1">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Your Response</label>
                                         <button
-                                            onClick={handleAIDraft}
-                                            disabled={generatingDraft}
-                                            className="text-[10px] font-black text-brand-600 uppercase tracking-widest flex items-center gap-1 hover:text-brand-700 disabled:opacity-50"
+                                            onClick={() => setShowAIInput(!showAIInput)}
+                                            className="text-[10px] font-black text-brand-600 uppercase tracking-widest flex items-center gap-1 hover:text-brand-700 disabled:opacity-50 px-2 py-1 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition-all"
                                         >
-                                            {generatingDraft ? "Drafting..." : "✨ Draft with AI"}
+                                            Draft reply with AI
                                         </button>
                                     </div>
-                                    <input
-                                        type="text"
-                                        value={aiPrompt}
-                                        onChange={(e) => setAiPrompt(e.target.value)}
-                                        className="w-full px-4 py-2 mb-2 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50/30 dark:bg-gray-900/30 focus:border-brand-500 transition-colors outline-none text-xs"
-                                        placeholder="Add instructions (e.g., be apologetic, offer a discount)"
-                                    />
+                                    
+                                    {showAIInput && (
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700 space-y-2 animate-in slide-in-from-top-1 duration-200">
+                                             <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block px-1">AI Instructions</label>
+                                             <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={aiPrompt}
+                                                    onChange={(e) => setAiPrompt(e.target.value)}
+                                                    className="flex-1 px-4 py-2 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:border-brand-500 transition-colors outline-none text-xs"
+                                                    placeholder="e.g. be apologetic"
+                                                />
+                                                <button
+                                                    onClick={handleAIDraft}
+                                                    disabled={generatingDraft}
+                                                    className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 disabled:opacity-50 transition-all"
+                                                >
+                                                    {generatingDraft ? "..." : "Draft"}
+                                                </button>
+                                             </div>
+                                        </div>
+                                    )}
+
                                     <textarea
                                         value={replyData.reply}
                                         onChange={(e) =>

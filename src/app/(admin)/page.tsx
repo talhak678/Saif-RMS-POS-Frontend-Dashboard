@@ -432,6 +432,7 @@ export default function DashboardPage() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [showAIInput, setShowAIInput] = useState(false);
   const [aiSummaryDate, setAiSummaryDate] = useState(new Date().toISOString().split('T')[0]);
 
   const fetchData = useCallback(async (p: Period, silent = false) => {
@@ -637,34 +638,45 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           {/* AI Summary Controls */}
           {!isSuperAdmin && (
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-              <input
-                type="date"
-                value={aiSummaryDate}
-                onChange={(e) => setAiSummaryDate(e.target.value)}
-                className="bg-transparent text-xs font-bold text-gray-600 dark:text-gray-300 px-2 py-1.5 focus:outline-none border-r border-gray-100 dark:border-gray-700"
-              />
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder="Ask AI (e.g. 'Who bought Pizza?')"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  className="pl-3 pr-8 py-1.5 bg-transparent text-xs text-gray-600 dark:text-gray-300 focus:outline-none w-48"
-                />
-              </div>
-              <button
-                onClick={handleGenerateSummary}
-                disabled={generatingSummary}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {generatingSummary ? (
-                  <RefreshCw size={12} className="animate-spin" />
-                ) : (
-                  <Activity size={12} />
-                )}
-                {generatingSummary ? "Analysing..." : "Get AI Report"}
-              </button>
+            <div className="flex items-center gap-2">
+               <button
+                  onClick={() => setShowAIInput(!showAIInput)}
+                  className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl border-2 transition-all active:scale-95 ${showAIInput ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500 hover:border-indigo-500'}`}
+               >
+                  Analyze with AI
+               </button>
+
+               {showAIInput && (
+                  <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm animate-in slide-in-from-right-4 duration-300">
+                    <input
+                      type="date"
+                      value={aiSummaryDate}
+                      onChange={(e) => setAiSummaryDate(e.target.value)}
+                      className="bg-transparent text-xs font-bold text-gray-600 dark:text-gray-300 px-2 py-1.5 focus:outline-none border-r border-gray-100 dark:border-gray-700"
+                    />
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        placeholder="Ask AI..."
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        className="pl-3 pr-8 py-1.5 bg-transparent text-xs text-gray-600 dark:text-gray-300 focus:outline-none w-32"
+                      />
+                    </div>
+                    <button
+                      onClick={handleGenerateSummary}
+                      disabled={generatingSummary}
+                      className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {generatingSummary ? (
+                        <RefreshCw size={12} className="animate-spin" />
+                      ) : (
+                        <Activity size={12} />
+                      )}
+                      {generatingSummary ? "..." : "Report"}
+                    </button>
+                  </div>
+               )}
             </div>
           )}
 
