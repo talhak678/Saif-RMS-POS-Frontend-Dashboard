@@ -396,7 +396,7 @@ function CustomerDetailsModal({
     tax,
     total,
     paymentMethod,
-    isLoading,
+    loadingType,
 }: {
     orderType: OrderType;
     branches: Branch[];
@@ -407,7 +407,7 @@ function CustomerDetailsModal({
     tax: number;
     total: number;
     paymentMethod: PaymentMethod;
-    isLoading: boolean;
+    loadingType: "order" | "print" | null;
 }) {
     const [details, setDetails] = useState<CustomerDetails>({
         name: "",
@@ -438,6 +438,8 @@ function CustomerDetailsModal({
             toast.error("Please fill in all required customer details.");
         }
     };
+
+    const isAnyLoading = loadingType !== null;
 
     return (
         <Modal isOpen={true} onClose={onClose} showCloseButton={false} className="max-w-lg p-0 overflow-hidden bg-transparent shadow-none border-none">
@@ -606,10 +608,10 @@ function CustomerDetailsModal({
                         </button>
                         <button
                             onClick={() => handleConfirm(false)}
-                            disabled={isLoading}
+                            disabled={isAnyLoading}
                             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                         >
-                            {isLoading ? (
+                            {loadingType === "order" ? (
                                 <>
                                     <Loader size="sm" showText={false} className="space-y-0" />
                                     Placing...
@@ -624,10 +626,10 @@ function CustomerDetailsModal({
                     </div>
                     <button
                         onClick={() => handleConfirm(true)}
-                        disabled={isLoading}
+                        disabled={isAnyLoading}
                         className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                        {isLoading ? (
+                        {loadingType === "print" ? (
                             <>
                                 <Loader size="sm" showText={false} className="space-y-0" />
                                 Placing...
@@ -774,7 +776,7 @@ export default function POSPage() {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
     const [loadingItems, setLoadingItems] = useState(true);
-    const [placingOrder, setPlacingOrder] = useState(false);
+    const [orderLoadingType, setOrderLoadingType] = useState<"order" | "print" | null>(null);
 
     // Modal States
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -887,7 +889,7 @@ export default function POSPage() {
 
     const handlePlaceOrder = async (customerDetails: CustomerDetails, branchId: string, printAfter = false) => {
         try {
-            setPlacingOrder(true);
+            setOrderLoadingType(printAfter ? "print" : "order");
 
             const paymentMethodMap: Record<PaymentMethod, string> = {
                 CASH: "CASH",
@@ -991,7 +993,7 @@ export default function POSPage() {
                 toast.error(apiMsg || err?.message || "Failed to place order");
             }
         } finally {
-            setPlacingOrder(false);
+            setOrderLoadingType(null);
         }
     };
 
@@ -1019,7 +1021,7 @@ export default function POSPage() {
                         paymentMethod={paymentMethod}
                         onClose={() => setShowCustomerModal(false)}
                         onConfirm={(details, branchId, printAfter) => handlePlaceOrder(details, branchId, printAfter)}
-                        isLoading={placingOrder}
+                        loadingType={orderLoadingType}
                     />
                 )}
 
@@ -1329,7 +1331,7 @@ export default function POSPage() {
                                     if (cart.length === 0) { toast.error("Cart is empty!"); return; }
                                     setShowCustomerModal(true);
                                 }}
-                                disabled={cart.length === 0 || placingOrder}
+                                disabled={cart.length === 0 || orderLoadingType !== null}
                                 className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-3.5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-100 dark:shadow-none"
                             >
                                 <ShoppingCart className="w-5 h-5" />
