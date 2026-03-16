@@ -546,15 +546,43 @@ export default function ProfilePage() {
     }
   };
 
-  const handleApproveReject = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+  const handleApproveReject = async (req: any, status: 'APPROVED' | 'REJECTED') => {
     const label = status === 'APPROVED' ? 'approve' : 'reject';
     if (!confirm(`Are you sure you want to ${label} this request?`)) return;
     try {
       setLoading(true);
-      const res = await api.put(`/subscription-requests/${id}`, { status });
+      const res = await api.put(`/subscription-requests/${req.id}`, { status });
       if (res.data?.success) {
         toast.success(`Request ${status.toLowerCase()} successfully!`);
-        fetchSubscriptionRequests();
+        if (status === 'APPROVED') {
+          let parsedPassword = "";
+          let reqRestaurantName = req.restaurantName || "";
+          let cleanedDescription = req.description || "";
+
+          if (cleanedDescription.includes("RestaurantName=") || cleanedDescription.includes("Password=")) {
+            const parts = cleanedDescription.split(",Description=");
+            const credentialsPart = parts[0];
+            const credentials = credentialsPart.split(",");
+            for (const cred of credentials) {
+              if (cred.startsWith("Password=")) parsedPassword = cred.replace("Password=", "");
+              if (cred.startsWith("RestaurantName=")) reqRestaurantName = cred.replace("RestaurantName=", "");
+            }
+          }
+          const params = new URLSearchParams({
+            reqId: req.id || '',
+            reqName: req.contactName || '',
+            reqEmail: req.contactEmail || '',
+            reqPhone: req.contactPhone || '',
+            reqRestaurantName: reqRestaurantName,
+            reqPassword: parsedPassword,
+            reqPlan: req.plan || '',
+            reqBillingCycle: req.billingCycle || ''
+          });
+          router.push(`/restaurants/new?${params.toString()}`);
+          return;
+        } else {
+          fetchSubscriptionRequests();
+        }
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || `Failed to ${label} request`);
@@ -1607,7 +1635,7 @@ export default function ProfilePage() {
                                   : req.status === 'REJECTED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                     : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                   }`}>
-                                  {req.status}
+                                  {req.status === 'APPROVED' ? 'APPROVED (Rest. Not Created)' : req.status}
                                 </span>
                               </div>
                               <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
@@ -1649,7 +1677,7 @@ export default function ProfilePage() {
                           {req.status === 'PENDING' ? (
                             <div className="flex flex-row md:flex-col gap-2 shrink-0">
                               <button
-                                onClick={() => handleApproveReject(req.id, 'APPROVED')}
+                                onClick={() => handleApproveReject(req, 'APPROVED')}
                                 disabled={loading}
                                 className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/20"
                               >
@@ -1657,7 +1685,7 @@ export default function ProfilePage() {
                                 Approve
                               </button>
                               <button
-                                onClick={() => handleApproveReject(req.id, 'REJECTED')}
+                                onClick={() => handleApproveReject(req, 'REJECTED')}
                                 disabled={loading}
                                 className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-red-500/20"
                               >
@@ -1732,7 +1760,7 @@ export default function ProfilePage() {
                           <textarea
                             value={template.message}
                             onChange={(e) => setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, message: e.target.value } : t))}
-                            className="w-full h-24 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 text-sm font-medium focus:ring-2 focus:ring-brand-500 transition-all resize-none"
+                            className="w-full h-24 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 text-sm font-medium focus:ring-2 focus:ring-brand-500 transition-all resize-none dark:text-white"
                             placeholder="Enter template message..."
                           />
                           {info.vars.length > 0 && (

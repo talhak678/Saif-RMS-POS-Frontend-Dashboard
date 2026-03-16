@@ -114,15 +114,19 @@ export default function PaymentPlansPage() {
                                     <select
                                         value={selectedRestaurantId}
                                         onChange={handleRestaurantChange}
-                                        className="bg-transparent text-sm focus:outline-none dark:text-gray-200"
+                                        className="bg-transparent text-sm focus:outline-none dark:text-gray-200 dark:bg-gray-800"
                                     >
                                         <option value="">Select Restaurant</option>
-                                        <option value="default">System Default Plans</option>
-                                        {restaurants.map((res) => (
-                                            <option key={res.id} value={res.id}>
-                                                {res.name}
-                                            </option>
-                                        ))}
+                                        <optgroup label="Default Plan">
+                                            <option value="default">System Default Plans</option>
+                                        </optgroup>
+                                        <optgroup label="Restaurants">
+                                            {restaurants.map((res) => (
+                                                <option key={res.id} value={res.id}>
+                                                    {res.name}
+                                                </option>
+                                            ))}
+                                        </optgroup>
                                     </select>
                                 </div>
                                 <AddPlan onAction={fetchPrices} />
