@@ -33,9 +33,33 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
         audioRef.current = new Audio("/Shop_bell.wav");
       }
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+      audioRef.current.play().catch(e => {
+        console.warn("Audio play failed (maybe user interaction required):", e);
+      });
     } catch (e) {
       console.error("Audio error:", e);
+    }
+  };
+
+  const showBrowserNotification = (message: string) => {
+    if ("Notification" in window) {
+      if (Notification.permission === "granted") {
+        const notification = new Notification("New Order!", {
+          body: message,
+          icon: "/icon.png", // Using the icon.png from app directory
+          badge: "/favicon-32x32.png",
+          tag: "new-order", // Prevents multiple notifications for the same event
+          requireInteraction: true // Keeps notification visible until user clicks
+        });
+
+        notification.onclick = (e) => {
+          e.preventDefault();
+          window.focus();
+          notification.close();
+        };
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
     }
   };
 
@@ -48,13 +72,17 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
 
         // Check for new notifications
         if (fetched.length > 0) {
-          const latestId = fetched[0].id; // Assuming newest first
+          const latestId = fetched[0].id;
           const isUnread = !fetched[0].isRead;
 
           if (!initialLoadRef.current && latestNotifIdRef.current !== latestId && isUnread) {
             // A new incoming notification detected!
             playAlertSound();
-            toast.info(`🔔 ${fetched[0].message}`);
+            showBrowserNotification(fetched[0].message);
+            toast.info(`🔔 ${fetched[0].message}`, {
+              description: "Dashboard pe check karein.",
+              duration: 10000,
+            });
           }
           latestNotifIdRef.current = latestId;
         }
@@ -66,9 +94,14 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
   };
 
   useEffect(() => {
+    // Request permission on mount
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     fetchNotifications();
-    // Setup interval to poll for new notifications every 40 seconds
-    const interval = setInterval(fetchNotifications, 40000);
+    // Reduced interval to 15 seconds for a more responsive feel
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
 
