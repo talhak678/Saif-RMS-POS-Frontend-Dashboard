@@ -273,7 +273,6 @@ const DEFAULT_CONFIG = {
                     bannerTextColor: "#ffffff",
                     footerBgColor: "#0d0d0d",
                     footerTextColor: "#ffffff",
-                    todaysSpecialBgColor: "#222222"
                 }
             },
             fonts: {
@@ -405,6 +404,7 @@ export default function CMSPage() {
                                     // REMOVE ACCENT COLOR FROM BRANDING COLORS (DEPRECATED)
                                     if (page === 'theme' && sec === 'colors') {
                                         delete mergedConfig[page].sections[sec].content.accentColor;
+                                        delete mergedConfig[page].sections[sec].content.todaysSpecialBgColor;
                                     }
                                 }
                             });

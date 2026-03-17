@@ -18,6 +18,7 @@ import {
 import Loader from "@/components/common/Loader";
 import { useAuth } from "@/services/permission.service";
 import toast from "react-hot-toast";
+import { Modal } from "@/components/ui/modal";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -434,6 +435,7 @@ export default function DashboardPage() {
   const [aiPrompt, setAiPrompt] = useState("");
   const [showAIInput, setShowAIInput] = useState(false);
   const [aiSummaryDate, setAiSummaryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   const fetchData = useCallback(async (p: Period, silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true);
@@ -460,6 +462,7 @@ export default function DashboardPage() {
       });
       if (res.data?.summary) {
         setAiSummary(res.data.summary);
+        if (res.data.date) setAiSummaryDate(res.data.date);
       } else {
         toast.error("AI returned no response. Try again.");
       }
@@ -636,48 +639,14 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* AI Summary Controls */}
           {!isSuperAdmin && (
-            <div className="flex items-center gap-2">
-               <button
-                  onClick={() => setShowAIInput(!showAIInput)}
-                  className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl border-2 transition-all active:scale-95 ${showAIInput ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500 hover:border-indigo-500'}`}
-               >
-                  Analyze with AI
-               </button>
-
-               {showAIInput && (
-                  <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm animate-in slide-in-from-right-4 duration-300">
-                    <input
-                      type="date"
-                      value={aiSummaryDate}
-                      onChange={(e) => setAiSummaryDate(e.target.value)}
-                      className="bg-transparent text-xs font-bold text-gray-600 dark:text-gray-300 px-2 py-1.5 focus:outline-none border-r border-gray-100 dark:border-gray-700"
-                    />
-                    <div className="relative group">
-                      <input
-                        type="text"
-                        placeholder="Ask AI..."
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        className="pl-3 pr-8 py-1.5 bg-transparent text-xs text-gray-600 dark:text-gray-300 focus:outline-none w-32"
-                      />
-                    </div>
-                    <button
-                      onClick={handleGenerateSummary}
-                      disabled={generatingSummary}
-                      className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
-                    >
-                      {generatingSummary ? (
-                        <RefreshCw size={12} className="animate-spin" />
-                      ) : (
-                        <Activity size={12} />
-                      )}
-                      {generatingSummary ? "..." : "Report"}
-                    </button>
-                  </div>
-               )}
-            </div>
+            <button
+              onClick={() => setIsAiModalOpen(true)}
+              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-200 dark:shadow-none"
+            >
+              <Activity size={14} className={generatingSummary ? "animate-spin" : ""} />
+              AI Report Summary
+            </button>
           )}
 
           {/* Period Selector */}
@@ -699,62 +668,107 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* AI Summary Document Display */}
-      {aiSummary && (
-        <div className="bg-white dark:bg-gray-800 border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl shadow-2xl shadow-indigo-500/10 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 max-w-4xl mx-auto">
-          {/* Document Header Bar */}
-          <div className="px-8 py-4 bg-indigo-600 flex justify-between items-center">
+      {/* AI Summary Modal */}
+      <Modal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} className="max-w-4xl">
+        <div className="flex flex-col h-[85vh]">
+          {/* Modal Header */}
+          <div className="px-8 py-4 bg-indigo-600 flex justify-between items-center rounded-t-3xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <BarChart2 size={20} className="text-white" />
+                <Activity size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase tracking-widest text-xs">AI Business Report</h3>
-                <p className="text-indigo-100 text-[10px] font-bold">{new Date(aiSummaryDate).toDateString()}</p>
+                <h3 className="text-white font-black uppercase tracking-widest text-xs">Insight AI Report</h3>
+                <p className="text-indigo-100 text-[10px] font-bold">AI-Powered Business Intelligence</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={downloadSummaryPDF}
-                className="px-4 py-2 bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
-              >
-                <Package size={14} /> Download PDF
-              </button>
-              <button
-                onClick={() => setAiSummary(null)}
-                className="w-10 h-10 flex items-center justify-center bg-black/10 hover:bg-black/20 text-white rounded-xl transition-all"
-              >
-                <XCircle size={20} />
-              </button>
+            <div className="flex gap-2 mr-10">
+               {aiSummary && (
+                  <button
+                    onClick={downloadSummaryPDF}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all backdrop-blur-md active:scale-95"
+                  >
+                    <Package size={14} /> PDF
+                  </button>
+               )}
             </div>
           </div>
 
-          <div className="p-10">
-            <div className="ai-report-content prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed">
-              <ReactMarkdown
-                components={{
-                  h1: (props) => <h1 className="text-xl font-black text-indigo-700 dark:text-indigo-300 mt-6 mb-3 border-b border-indigo-100 pb-2">{props.children}</h1>,
-                  h2: (props) => <h2 className="text-base font-black text-gray-800 dark:text-gray-200 mt-5 mb-2">{props.children}</h2>,
-                  h3: (props) => <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-4 mb-1">{props.children}</h3>,
-                  strong: (props) => <strong className="font-black text-indigo-600 dark:text-indigo-400">{props.children}</strong>,
-                  ul: (props) => <ul className="list-disc pl-5 space-y-1 my-2">{props.children}</ul>,
-                  ol: (props) => <ol className="list-decimal pl-5 space-y-1 my-2">{props.children}</ol>,
-                  li: (props) => <li className="text-gray-700 dark:text-gray-300">{props.children}</li>,
-                  p: (props) => <p className="my-2 text-gray-700 dark:text-gray-300">{props.children}</p>,
-                  hr: () => <hr className="my-4 border-gray-200 dark:border-gray-700" />,
-                }}
-              >
-                {aiSummary || ""}
-              </ReactMarkdown>
-            </div>
+          {/* Modal Body */}
+          <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50 dark:bg-gray-900/50">
+            {!aiSummary && !generatingSummary ? (
+               <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="w-20 h-20 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                    <MessageSquare size={40} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-800 dark:text-white">Ask anything about your reports</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Example: "How were the sales yesterday?" or "What items sold best on Monday?"</p>
+                  </div>
+               </div>
+            ) : generatingSummary ? (
+              <div className="h-full flex flex-col items-center justify-center space-y-4">
+                <RefreshCw size={48} className="text-indigo-600 animate-spin" />
+                <p className="text-sm font-bold text-indigo-600 animate-pulse">Extracting data & generating insights...</p>
+              </div>
+            ) : (
+              <div className="ai-report-content animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 flex justify-between items-center">
+                   <div>
+                      <p className="text-[10px] uppercase font-black text-indigo-500">Reporting Date</p>
+                      <p className="text-sm font-bold text-gray-800 dark:text-white">{new Date(aiSummaryDate).toDateString()}</p>
+                   </div>
+                   <div className="text-right">
+                      <p className="text-[10px] uppercase font-black text-emerald-500">Status</p>
+                      <p className="text-sm font-bold text-gray-800 dark:text-white">Analysis Complete</p>
+                   </div>
+                </div>
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      h1: (props) => <h1 className="text-xl font-black text-indigo-700 dark:text-indigo-300 mt-6 mb-3 border-b border-indigo-100 pb-2">{props.children}</h1>,
+                      h2: (props) => <h2 className="text-base font-black text-gray-800 dark:text-gray-200 mt-5 mb-2">{props.children}</h2>,
+                      h3: (props) => <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-4 mb-1">{props.children}</h3>,
+                      strong: (props) => <strong className="font-black text-indigo-600 dark:text-indigo-400">{props.children}</strong>,
+                      ul: (props) => <ul className="list-disc pl-5 space-y-1 my-2">{props.children}</ul>,
+                      ol: (props) => <ol className="list-decimal pl-5 space-y-1 my-2">{props.children}</ol>,
+                      li: (props) => <li className="text-gray-700 dark:text-gray-300">{props.children}</li>,
+                      p: (props) => <p className="my-2 text-gray-700 dark:text-gray-300">{props.children}</p>,
+                      hr: () => <hr className="my-4 border-gray-200 dark:border-gray-700" />,
+                    }}
+                  >
+                    {aiSummary || ""}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center italic text-[10px] text-gray-400">
-              <p>Requested Insight: "{aiPrompt || "Full Daily Overview"}"</p>
-              <p>Generated by RMS Intelligence • {new Date().toLocaleTimeString()}</p>
-            </div>
+          {/* Modal Footer / Input Area */}
+          <div className="p-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 rounded-b-3xl">
+             <div className="relative flex items-center">
+                <input
+                  type="text"
+                  placeholder="Tell me about yesterday's total orders..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !generatingSummary && handleGenerateSummary()}
+                  className="w-full pl-6 pr-32 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all text-sm font-medium"
+                />
+                <button
+                  onClick={handleGenerateSummary}
+                  disabled={generatingSummary || !aiPrompt.trim()}
+                  className="absolute right-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all disabled:opacity-50 active:scale-95"
+                >
+                  {generatingSummary ? <RefreshCw size={14} className="animate-spin" /> : "Analyze"}
+                </button>
+             </div>
+             <p className="mt-3 text-[10px] text-center text-gray-400 font-medium italic">
+                Powered by Gemini AI • Ask about dates, specific items, or platform trends.
+             </p>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── KPI CARDS ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -1016,7 +1030,6 @@ export default function DashboardPage() {
         </div>
 
       </div>
-
     </div>
   );
 }

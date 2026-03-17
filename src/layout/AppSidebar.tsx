@@ -121,12 +121,6 @@ const navItems: NavItem[] = [
       { name: "FAQs", path: "/cms/faqs", pro: false, permission: "cms-website:faqs" },
     ],
   },
-  {
-    icon: <Settings className="w-5 h-5" />,
-    name: "Profile Setting",
-    path: "/profile",
-    permission: "settings:all",
-  },
 ];
 
 const othersItems: NavItem[] = [
