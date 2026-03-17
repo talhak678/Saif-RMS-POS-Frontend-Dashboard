@@ -430,11 +430,12 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<Period>("30d");
   const [chartTab, setChartTab] = useState<"revenue" | "orders">("revenue");
+
+  // AI Summary State
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
-  const [showAIInput, setShowAIInput] = useState(false);
-  const [aiSummaryDate, setAiSummaryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [aiSummaryDate, setAiSummaryDate] = useState<string | null>(null);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   const fetchData = useCallback(async (p: Period, silent = false) => {
@@ -453,12 +454,14 @@ export default function DashboardPage() {
   }, [isSuperAdmin]);
 
   const handleGenerateSummary = async () => {
+    if (!aiPrompt.trim()) return;
     try {
       setGeneratingSummary(true);
       const res = await api.post("/ai/sales-summary", {
-        date: aiSummaryDate,
         restaurantId: user?.restaurant?.id,
-        instructions: aiPrompt
+        instructions: aiPrompt,
+        // Send local date so backend knows what "today" means
+        clientDate: new Date().toISOString().split('T')[0]
       });
       if (res.data?.summary) {
         setAiSummary(res.data.summary);
@@ -669,72 +672,102 @@ export default function DashboardPage() {
       </div>
 
       {/* AI Summary Modal */}
-      <Modal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} className="max-w-4xl">
-        <div className="flex flex-col h-[85vh]">
+      {/* AI Summary Modal — Simple & Professional */}
+      <Modal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} className="max-w-3xl">
+        <div className="flex flex-col h-[80vh] bg-white dark:bg-gray-900 overflow-hidden rounded-3xl">
           {/* Modal Header */}
-          <div className="px-8 py-4 bg-indigo-600 flex justify-between items-center rounded-t-3xl">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Activity size={20} className="text-white" />
+              <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none">
+                <BarChart2 size={20} className="text-white" />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase tracking-widest text-xs">Insight AI Report</h3>
-                <p className="text-indigo-100 text-[10px] font-bold">AI-Powered Business Intelligence</p>
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg">AI Report Summary</h3>
+                <p className="text-gray-400 dark:text-gray-500 text-xs">Instant insights about your business</p>
               </div>
             </div>
-            <div className="flex gap-2 mr-10">
+            <div className="flex gap-2">
                {aiSummary && (
                   <button
                     onClick={downloadSummaryPDF}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all backdrop-blur-md active:scale-95"
+                    className="p-2.5 bg-gray-50 dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-gray-600 dark:text-gray-300 rounded-xl transition-all active:scale-95"
+                    title="Download Report"
                   >
-                    <Package size={14} /> PDF
+                    <Package size={20} />
                   </button>
                )}
             </div>
           </div>
 
           {/* Modal Body */}
-          <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50 dark:bg-gray-900/50">
+          <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
             {!aiSummary && !generatingSummary ? (
-               <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-20 h-20 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
-                    <MessageSquare size={40} />
+               <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                  <div className="w-24 h-24 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
+                    <MessageSquare size={48} />
                   </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-800 dark:text-white">Ask anything about your reports</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Example: "How were the sales yesterday?" or "What items sold best on Monday?"</p>
+                  <div className="max-w-md mx-auto">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">How can I help you today?</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                      Ask about specific dates, sales trends, or item performance. I'll analyze your data and give you a detailed breakdown.
+                    </p>
+                    <div className="mt-8 flex flex-wrap justify-center gap-2">
+                      {["Today's sales", "Yesterday's summary", "Best items last week"].map(q => (
+                        <button
+                          key={q}
+                          onClick={() => { setAiPrompt(q); }}
+                          className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-indigo-600 hover:text-white rounded-full text-xs font-semibold text-gray-600 dark:text-gray-300 transition-all border border-transparent"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                </div>
             ) : generatingSummary ? (
               <div className="h-full flex flex-col items-center justify-center space-y-4">
-                <RefreshCw size={48} className="text-indigo-600 animate-spin" />
-                <p className="text-sm font-bold text-indigo-600 animate-pulse">Extracting data & generating insights...</p>
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-indigo-100 dark:border-indigo-900/30 border-t-indigo-600 animate-spin" />
+                  <BarChart2 size={24} className="absolute inset-0 m-auto text-indigo-600" />
+                </div>
+                <div className="text-center">
+                  <p className="text-base font-bold text-gray-900 dark:text-white">Analyzing Data</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Synthesizing reports into insights...</p>
+                </div>
               </div>
             ) : (
               <div className="ai-report-content animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 flex justify-between items-center">
-                   <div>
-                      <p className="text-[10px] uppercase font-black text-indigo-500">Reporting Date</p>
-                      <p className="text-sm font-bold text-gray-800 dark:text-white">{new Date(aiSummaryDate).toDateString()}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] uppercase font-black text-emerald-500">Status</p>
-                      <p className="text-sm font-bold text-gray-800 dark:text-white">Analysis Complete</p>
-                   </div>
-                </div>
-                <div className="prose prose-slate dark:prose-invert max-w-none">
+                {aiSummaryDate && (
+                  <div className="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
+                         <CalendarDays size={20} className="text-indigo-600" />
+                       </div>
+                       <div>
+                          <p className="text-[10px] uppercase font-black text-indigo-500 tracking-wider">Report for</p>
+                          <p className="text-sm font-bold text-gray-800 dark:text-white">{new Date(aiSummaryDate).toDateString()}</p>
+                       </div>
+                     </div>
+                     <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full">
+                       Verified Report
+                     </span>
+                  </div>
+                )}
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-li:my-1">
                   <ReactMarkdown
                     components={{
-                      h1: (props) => <h1 className="text-xl font-black text-indigo-700 dark:text-indigo-300 mt-6 mb-3 border-b border-indigo-100 pb-2">{props.children}</h1>,
-                      h2: (props) => <h2 className="text-base font-black text-gray-800 dark:text-gray-200 mt-5 mb-2">{props.children}</h2>,
-                      h3: (props) => <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-4 mb-1">{props.children}</h3>,
-                      strong: (props) => <strong className="font-black text-indigo-600 dark:text-indigo-400">{props.children}</strong>,
-                      ul: (props) => <ul className="list-disc pl-5 space-y-1 my-2">{props.children}</ul>,
-                      ol: (props) => <ol className="list-decimal pl-5 space-y-1 my-2">{props.children}</ol>,
-                      li: (props) => <li className="text-gray-700 dark:text-gray-300">{props.children}</li>,
-                      p: (props) => <p className="my-2 text-gray-700 dark:text-gray-300">{props.children}</p>,
-                      hr: () => <hr className="my-4 border-gray-200 dark:border-gray-700" />,
+                      h1: (props) => <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-8 mb-4">{props.children}</h1>,
+                      h2: (props) => <h2 className="text-lg font-black text-indigo-600 dark:text-indigo-400 mt-6 mb-3 flex items-center gap-2">
+                        <ArrowUpRight size={18} /> {props.children}
+                      </h2>,
+                      h3: (props) => <h3 className="text-base font-bold text-gray-800 dark:text-gray-200 mt-4 mb-2">{props.children}</h3>,
+                      strong: (props) => <strong className="font-black text-gray-900 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 px-1 rounded-sm">{props.children}</strong>,
+                      ul: (props) => <ul className="list-none space-y-2 my-4">{props.children}</ul>,
+                      li: (props) => <li className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                        <div>{props.children}</div>
+                      </li>,
+                      hr: () => <hr className="my-8 border-gray-100 dark:border-gray-800" />,
                     }}
                   >
                     {aiSummary || ""}
@@ -745,26 +778,28 @@ export default function DashboardPage() {
           </div>
 
           {/* Modal Footer / Input Area */}
-          <div className="p-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 rounded-b-3xl">
-             <div className="relative flex items-center">
-                <input
-                  type="text"
-                  placeholder="Tell me about yesterday's total orders..."
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !generatingSummary && handleGenerateSummary()}
-                  className="w-full pl-6 pr-32 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all text-sm font-medium"
-                />
+          <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+             <div className="max-w-xl mx-auto flex items-center gap-2">
+                <div className="relative flex-1 group">
+                   <input
+                     type="text"
+                     placeholder="Ask about yesterday, last month, or specific items..."
+                     value={aiPrompt}
+                     onChange={(e) => setAiPrompt(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && !generatingSummary && handleGenerateSummary()}
+                     className="w-full pl-5 pr-5 py-4 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 dark:focus:border-indigo-600 rounded-2xl outline-none transition-all text-sm font-semibold shadow-sm group-hover:border-gray-300 dark:group-hover:border-gray-600"
+                   />
+                </div>
                 <button
                   onClick={handleGenerateSummary}
                   disabled={generatingSummary || !aiPrompt.trim()}
-                  className="absolute right-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all disabled:opacity-50 active:scale-95"
+                  className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-700 transition-all disabled:opacity-50 active:scale-95 shadow-lg shadow-indigo-200 dark:shadow-none"
                 >
-                  {generatingSummary ? <RefreshCw size={14} className="animate-spin" /> : "Analyze"}
+                  {generatingSummary ? <RefreshCw size={20} className="animate-spin" /> : <ArrowUpRight size={24} />}
                 </button>
              </div>
-             <p className="mt-3 text-[10px] text-center text-gray-400 font-medium italic">
-                Powered by Gemini AI • Ask about dates, specific items, or platform trends.
+             <p className="mt-4 text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest opacity-60">
+                Powered by Gemini AI • Multi-language support available
              </p>
           </div>
         </div>
