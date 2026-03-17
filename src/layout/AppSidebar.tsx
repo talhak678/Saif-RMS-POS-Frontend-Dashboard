@@ -184,6 +184,9 @@ const AppSidebar: React.FC = () => {
             if (isSuperAdmin && sub.name === "Reports" && sub.path === "/reports-dashboard") {
               return { ...sub, name: "Restaurant Reports" };
             }
+            if (isSuperAdmin && sub.name === "Payment History" && sub.path === "/payments-history") {
+              return { ...sub, name: "Payments & Transactions" };
+            }
             return sub;
           })
           .filter(sub => hasPermission(sub.permission));
