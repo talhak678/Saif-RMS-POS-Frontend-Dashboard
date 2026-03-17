@@ -128,11 +128,11 @@ export default function ReviewsPage() {
 
             if (res.data?.response) {
                 setReplyData({ ...replyData, reply: res.data.response });
-                toast.success("AI Draft generated!");
+                toast.success("AI Reply generated!");
             }
         } catch (err) {
-            console.error("AI Draft failed", err);
-            toast.error("Failed to generate AI draft");
+            console.error("AI Reply generation failed", err);
+            toast.error("Failed to generate AI reply");
         } finally {
             setGeneratingDraft(false);
         }
@@ -299,7 +299,7 @@ export default function ReviewsPage() {
                                             onClick={() => setShowAIInput(!showAIInput)}
                                             className="text-[10px] font-black text-brand-600 uppercase tracking-widest flex items-center gap-1 hover:text-brand-700 disabled:opacity-50 px-2 py-1 bg-brand-50 dark:bg-brand-900/20 rounded-lg transition-all"
                                         >
-                                            Draft reply with AI
+                                            Write a reply using AI
                                         </button>
                                     </div>
                                     
@@ -319,7 +319,7 @@ export default function ReviewsPage() {
                                                     disabled={generatingDraft}
                                                     className="px-4 py-2 bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-700 disabled:opacity-50 transition-all"
                                                 >
-                                                    {generatingDraft ? "..." : "Draft"}
+                                                    {generatingDraft ? "..." : "Write"}
                                                 </button>
                                              </div>
                                         </div>
