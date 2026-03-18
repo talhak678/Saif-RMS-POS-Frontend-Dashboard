@@ -13,6 +13,8 @@ import Loader from "@/components/common/Loader";
 import DatePicker from "@/components/common/DatePicker";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
+import { printOrderReceipt } from "@/lib/printReceipt";
+import { useAuth } from "@/services/permission.service";
 
 const ORDER_STATUSES = [
     "PENDING", "CONFIRMED", "PREPARING", "KITCHEN_READY",
@@ -46,58 +48,7 @@ function getStatusBadge(status: string) {
     return `${base} ${cfg.bg} ${cfg.color}`;
 }
 
-/* ── PRINT RECEIPT ──────────────────────────────────────────── */
-function printOrderReceipt(order: any) {
-    const items = order?.items || [];
-    const subtotal = items.reduce((s: number, i: any) => s + parseFloat(i.price) * i.quantity, 0);
-    const date = new Date(order.createdAt).toLocaleString("en-PK", { hour12: true });
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Courier New',monospace;font-size:12px;width:80mm;padding:4mm 3mm;color:#000;background:#fff}
-        .c{text-align:center}.b{font-weight:bold}.lg{font-size:16px}.sm{font-size:10px}
-        .div{border-top:1px dashed #000;margin:4px 0}
-        .row{display:flex;justify-content:space-between;margin:2px 0}
-        .ri{display:flex;justify-content:space-between;margin:3px 0;align-items:flex-start}
-        .tr{display:flex;justify-content:space-between;font-weight:bold;font-size:14px;margin:4px 0}
-        @media print{body{width:80mm}@page{margin:0;size:80mm auto}}
-    </style></head><body>
-    <div class="c b lg">RMS POS</div>
-    <div class="c sm">Order Receipt</div>
-    <div class="c sm">${date}</div>
-    <div class="c b">Order #${order.orderNo || ''}</div>
-    <div class="div"></div>
-    <div class="row sm"><span>Type: <b>${(order.type || '').replace('_', ' ')}</b></span><span>Src: <b>${order.source || 'N/A'}</b></span></div>
-    ${order.customerName ? `<div class="sm">Customer: <b>${order.customerName}</b></div>` : order.customer?.name ? `<div class="sm">Customer: <b>${order.customer.name}</b></div>` : ''}
-    ${order.customer?.phone ? `<div class="sm">Phone: ${order.customer.phone}</div>` : ''}
-    ${order.tableNumber ? `<div class="sm">Table: ${order.tableNumber}</div>` : ''}
-    ${order.deliveryAddress ? `<div class="sm">Address: ${order.deliveryAddress}</div>` : ''}
-    ${order.branch?.name ? `<div class="sm">Branch: ${order.branch.name}</div>` : ''}
-    <div class="div"></div>
-    <div class="row b sm"><span>ITEM</span><span>QTY</span><span>PRICE</span></div>
-    <div class="div"></div>
-    ${items.map((item: any) => `
-        <div class="ri">
-            <span style="flex:1;margin-right:4px">${item.menuItem?.name || 'Item'}</span>
-            <span style="min-width:20px;text-align:center">${item.quantity}</span>
-            <span style="min-width:50px;text-align:right">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
-        </div>`).join('')}
-    <div class="div"></div>
-    <div class="row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
-    <div class="div"></div>
-    <div class="tr"><span>TOTAL</span><span>$${parseFloat(order.total).toFixed(2)}</span></div>
-    <div class="div"></div>
-    <div class="c sm" style="margin-top:8px">Thank you! Please come again.</div>
-    </body></html>`;
-    const iframe = document.createElement('iframe');
-    Object.assign(iframe.style, { position: 'fixed', top: '-9999px', left: '-9999px', width: '80mm', height: '0' });
-    document.body.appendChild(iframe);
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-    doc.open(); doc.write(html); doc.close();
-    iframe.contentWindow?.focus();
-    setTimeout(() => { iframe.contentWindow?.print(); setTimeout(() => document.body.removeChild(iframe), 1000); }, 400);
-}
+/* ── PRINT RECEIPT REMOVED (Using global) ────────────────── */
 
 /* ── ORDER DETAIL MODAL ──────────────────────────────────────── */
 function OrderDetailModal({
@@ -107,6 +58,7 @@ function OrderDetailModal({
     onStatusChange,
     loadingRiderDetails,
     assignedRider,
+    userLogo,
 }: {
     order: any;
     isOpen: boolean;
@@ -114,6 +66,7 @@ function OrderDetailModal({
     onStatusChange: (order: any, quick?: boolean) => void;
     loadingRiderDetails: boolean;
     assignedRider: any;
+    userLogo?: string;
 }) {
     if (!isOpen || !order) return null;
 
@@ -151,7 +104,7 @@ function OrderDetailModal({
                 {/* ── TOP ACTION BAR ── */}
                 <div className="flex items-center gap-2 px-5 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <button
-                        onClick={() => printOrderReceipt(order)}
+                        onClick={() => printOrderReceipt(order, userLogo)}
                         className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
                     >
                         <Printer className="w-3.5 h-3.5" /> Print
@@ -551,6 +504,7 @@ function OrderCard({ order, onChangeStatus, onView }: {
 
 /* ── MAIN PAGE ───────────────────────────────────────────────── */
 export default function IncomingOrdersPage() {
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<"latest" | "all">("latest");
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -1067,6 +1021,7 @@ export default function IncomingOrdersPage() {
                     onStatusChange={openStatusModal}
                     loadingRiderDetails={loadingRiderDetails}
                     assignedRider={assignedRider}
+                    userLogo={user?.restaurant?.logo}
                 />
 
                 {/* STATUS MODAL */}

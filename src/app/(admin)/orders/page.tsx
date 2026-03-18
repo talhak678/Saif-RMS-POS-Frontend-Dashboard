@@ -24,8 +24,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
-import ReceiptModal from "@/components/orders/ReceiptModal";
 import { ProtectedRoute } from "@/services/protected-route";
+import { printOrderReceipt } from "@/lib/printReceipt";
+import { useAuth } from "@/services/permission.service";
 import Loader from "@/components/common/Loader";
 import { Modal } from "@/components/ui/modal";
 import DatePicker from "@/components/common/DatePicker";
@@ -86,6 +87,7 @@ const getTypeIcon = (type: string) => {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [orders, setOrders]: any = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -108,10 +110,6 @@ export default function OrdersPage() {
   // View Modal State
   const [viewOrder, setViewOrder] = useState<any>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-
-  // Print Modal State
-  const [printOrder, setPrintOrder] = useState<any>(null);
-  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   // Status Update State
   const [statusModal, setStatusModal] = useState(false);
@@ -250,11 +248,6 @@ export default function OrdersPage() {
 
   const openViewModal = (order: any) => {
     router.push(`/orders/${order.id}`);
-  };
-
-  const openPrintModal = (order: any) => {
-    setPrintOrder(order);
-    setIsPrintModalOpen(true);
   };
 
   const openStatusModal = (order: any) => {
@@ -541,7 +534,7 @@ export default function OrdersPage() {
                         <td className="p-4">
                           <div className="flex items-center gap-1.5 transition-opacity">
                             <button
-                              onClick={() => openPrintModal(o)}
+                              onClick={() => printOrderReceipt(o, user?.restaurant?.logo)}
                               className="p-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 transition-all text-gray-500 dark:text-gray-400"
                             >
                               <Printer size={13} />
@@ -641,11 +634,6 @@ export default function OrdersPage() {
             </div>
           </div>
         </div>
-        <ReceiptModal
-          isOpen={isPrintModalOpen}
-          onClose={() => setIsPrintModalOpen(false)}
-          order={printOrder}
-        />
 
         {/* Status Update Modal */}
         <Modal isOpen={statusModal} onClose={() => setStatusModal(false)} showCloseButton={false} className="max-w-sm">
