@@ -24,6 +24,7 @@ export const endpoints = {
     getPermissionById: '/permissions/',
 
     getSubscriptionPrices: '/subscription-prices',
+    getPublicSubscriptionPrices: '/subscription-prices/public',
     addSubscriptionPrice: '/subscription-prices',
     editSubscriptionPrice: '/subscription-prices/',
     deleteSubscriptionPrice: '/subscription-prices/',
