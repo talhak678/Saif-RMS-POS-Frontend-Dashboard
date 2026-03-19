@@ -79,8 +79,7 @@ export default function NotificationDropdown({ isOpen, toggle, close }: Notifica
             // A new incoming notification detected!
             playAlertSound();
             showBrowserNotification(fetched[0].message);
-            toast.info(`🔔 ${fetched[0].message}`, {
-              description: "Dashboard pe check karein.",
+            toast.info(`${fetched[0].message}`, {
               duration: 10000,
             });
           }
