@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/Button";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { endpoints } from "@/types/environment";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 
@@ -67,7 +68,7 @@ const SubscriptionRequestModal = ({ isOpen, onClose, initialContact }: Subscript
         const fetchPlans = async () => {
             setPlansLoading(true);
             try {
-                const res = await api.get("/subscription-prices", { params: { isDefault: true } });
+                const res = await api.get(endpoints.getPublicSubscriptionPrices);
                 if (res.data?.success) {
                     const allPlans: PlanPrice[] = res.data.data || [];
                     const sorted = allPlans

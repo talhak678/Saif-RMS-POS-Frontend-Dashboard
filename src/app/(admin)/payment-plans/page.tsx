@@ -104,7 +104,7 @@ export default function PaymentPlansPage() {
             <div className="min-h-screen p-3 md:p-6 bg-white/60 dark:bg-gray-900/60  dark:text-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                        Payment Plans
+                        {isSuperAdmin ? "Subscription & Plans" : "Payment Plans"}
                     </h1>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         {isSuperAdmin && (
@@ -181,11 +181,18 @@ export default function PaymentPlansPage() {
                                 prices.map((price, index) => (
                                     <tr
                                         key={price.id}
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                        className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${!isSuperAdmin && user?.restaurant?.id === price.restaurantId ? 'bg-brand-50/30 dark:bg-brand-900/10' : ''}`}
                                     >
                                         <td className="px-4 py-3 text-gray-500">{index + 1}</td>
                                         <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-                                            {price.plan}
+                                            <div className="flex items-center gap-2">
+                                                {price.plan}
+                                                {!isSuperAdmin && user?.restaurant?.id === price.restaurantId && (
+                                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-brand-500 text-white shadow-sm shadow-brand-200 dark:shadow-none">
+                                                        SUBSCRIBED
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                                             ${price.price}

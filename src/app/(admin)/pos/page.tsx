@@ -21,6 +21,8 @@ import {
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { ProtectedRoute } from "@/services/protected-route";
+import { printOrderReceipt } from "@/lib/printReceipt";
+import { useAuth } from "@/services/permission.service";
 import Loader from "@/components/common/Loader";
 import { Modal } from "@/components/ui/modal";
 import { loadStripe } from "@stripe/stripe-js";
@@ -249,140 +251,6 @@ function ItemSelectionModal({
             </div>
         </Modal>
     );
-}
-
-// ─── Thermal Receipt Printer ──────────────────────────────────────────────────
-function printReceipt({
-    cart,
-    subtotal,
-    tax,
-    total,
-    orderType,
-    paymentMethod,
-    customerDetails,
-    orderNo,
-}: {
-    cart: CartItem[];
-    subtotal: number;
-    tax: number;
-    total: number;
-    orderType: OrderType;
-    paymentMethod: PaymentMethod;
-    customerDetails: CustomerDetails;
-    orderNo?: string;
-}) {
-    const date = new Date().toLocaleString("en-PK", { hour12: true });
-    const receiptHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Order Receipt</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'Courier New', Courier, monospace;
-                    font-size: 12px;
-                    width: 80mm;
-                    padding: 4mm 3mm;
-                    color: #000;
-                    background: #fff;
-                }
-                .center { text-align: center; }
-                .bold { font-weight: bold; }
-                .lg { font-size: 16px; }
-                .md { font-size: 13px; }
-                .sm { font-size: 10px; }
-                .divider { border-top: 1px dashed #000; margin: 4px 0; }
-                .row { display: flex; justify-content: space-between; margin: 2px 0; }
-                .row-item { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; }
-                .item-name { flex: 1; margin-right: 4px; }
-                .item-right { min-width: 55px; text-align: right; }
-                .item-right .price { font-weight: bold; }
-                .item-right .qty { font-size: 10px; color: #555; margin-top: 1px; }
-                .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin: 4px 0; }
-                .thank-you { text-align: center; margin-top: 8px; font-size: 11px; }
-                @media print {
-                    body { width: 80mm; }
-                    @page { margin: 0; size: 80mm auto; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="center bold lg">RMS POS</div>
-            <div class="center sm">Order Receipt</div>
-            <div class="center sm">${date}</div>
-            ${orderNo ? `<div class="center bold">Order #${orderNo}</div>` : ''}
-            <div class="divider"></div>
-
-            <div class="row sm">
-                <span>Type: <b>${orderType.replace('_', ' ')}</b></span>
-                <span>Pay: <b>${paymentMethod}</b></span>
-            </div>
-            <div class="sm">Customer: <b>${customerDetails.name ? customerDetails.name : 'POS'}</b></div>
-            ${customerDetails.phone ? `<div class="sm">Phone: ${customerDetails.phone}</div>` : ''}
-            ${customerDetails.tableNumber ? `<div class="sm">Table: ${customerDetails.tableNumber}</div>` : ''}
-            ${customerDetails.address ? `<div class="sm">Address: ${customerDetails.address}</div>` : ''}
-
-            <div class="divider"></div>
-            <div class="row bold sm">
-                <span>ITEM</span>
-                <span style="text-align:right">PRICE<br/><span style="font-weight:normal">QTY</span></span>
-            </div>
-            <div class="divider"></div>
-
-            ${cart.map(item => `
-                <div class="row-item">
-                    <span class="item-name">
-                        ${item.name}
-                        ${item.selectedVariation ? `<br/><span class="sm"> (${item.selectedVariation.name})</span>` : ''}
-                        ${item.selectedAddons.length > 0 ? `<br/><span class="sm"> +${item.selectedAddons.map(a => a.name).join(', ')}</span>` : ''}
-                    </span>
-                    <span class="item-right">
-                        <div class="price">$${(item.unitPrice * item.quantity).toFixed(2)}</div>
-                        <div class="qty">x${item.quantity}</div>
-                    </span>
-                </div>
-            `).join('')}
-
-            <div class="divider"></div>
-            <div class="row">
-                <span>Subtotal</span><span>$${subtotal.toFixed(2)}</span>
-            </div>
-            <div class="row">
-                <span>Tax (5%)</span><span>$${tax.toFixed(2)}</span>
-            </div>
-            <div class="divider"></div>
-            <div class="total-row">
-                <span>TOTAL</span><span>$${total.toFixed(2)}</span>
-            </div>
-            <div class="divider"></div>
-
-            <div class="thank-you">
-                Thank you for your order!<br/>
-                Please come again.
-            </div>
-        </body>
-        </html>
-    `;
-
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '80mm';
-    iframe.style.height = '0';
-    document.body.appendChild(iframe);
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-    doc.open();
-    doc.write(receiptHtml);
-    doc.close();
-    iframe.contentWindow?.focus();
-    setTimeout(() => {
-        iframe.contentWindow?.print();
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-    }, 400);
 }
 
 // ─── Customer Details Modal ───────────────────────────────────────────────────
@@ -765,6 +633,7 @@ function StripeModal({
 
 // ─── Main POS Page ────────────────────────────────────────────────────────────
 export default function POSPage() {
+    const { user } = useAuth();
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [cart, setCart] = useState<CartItem[]>([]);
     const [orderType, setOrderType] = useState<OrderType>("DINE_IN");
@@ -868,9 +737,23 @@ export default function POSPage() {
 
     // Update quantity
     const updateQuantity = (id: string, delta: number) => {
+        let updated = false;
         setCart(
             cart
-                .map((item) => item.id === id ? { ...item, quantity: item.quantity + delta } : item)
+                .map((item) => {
+                    if (item.id === id) {
+                        updated = true;
+                        return { ...item, quantity: item.quantity + delta };
+                    }
+                    return item;
+                })
+                .map((item) => {
+                    if (!updated && item.id.startsWith(id + "-") && delta < 0) {
+                        updated = true;
+                        return { ...item, quantity: item.quantity + delta };
+                    }
+                    return item;
+                })
                 .filter((item) => item.quantity > 0)
         );
     };
@@ -968,16 +851,24 @@ export default function POSPage() {
                 } else {
                     toast.success(`Order #${order?.orderNo || ''} placed successfully!`);
                     if (printAfter) {
-                        printReceipt({
-                            cart,
-                            subtotal,
-                            tax,
-                            total,
-                            orderType,
-                            paymentMethod,
-                            customerDetails,
-                            orderNo: order?.orderNo
-                        });
+                        const mockOrder = {
+                            ...order,
+                            branch: branches.find(b => b.id === branchId) || { name: "" },
+                            customer: { name: customerDetails.name, phone: customerDetails.phone },
+                            deliveryAddress: customerDetails.address,
+                            tableNumber: customerDetails.tableNumber,
+                            payment: { method: paymentMethod },
+                            items: cart.map(item => ({
+                                id: item.id,
+                                quantity: item.quantity,
+                                price: item.unitPrice,
+                                menuItem: { 
+                                    name: item.name + (item.selectedVariation ? ` (${item.selectedVariation.name})` : '') + (item.selectedAddons.length > 0 ? ` + ${item.selectedAddons.map(a=>a.name).join(", ")}` : ''), 
+                                    category: { name: "POS Item" } 
+                                }
+                            }))
+                        };
+                        printOrderReceipt(mockOrder, user?.restaurant?.logo);
                     }
                     setCart([]);
                     setShowCustomerModal(false);

@@ -103,9 +103,7 @@ export default function SignUpForm() {
   const fetchPlans = async () => {
     setPlansLoading(true);
     try {
-      const res = await api.get(endpoints.getSubscriptionPrices, {
-        params: { isDefault: true },
-      });
+      const res = await api.get(endpoints.getPublicSubscriptionPrices);
       if (res.data?.success) {
         const allPlans: PlanPrice[] = res.data.data || [];
         const sorted = allPlans
