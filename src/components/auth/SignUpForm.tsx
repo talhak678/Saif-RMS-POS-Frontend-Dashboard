@@ -7,15 +7,18 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import {
-  CheckCircle2,
-  ChevronRight,
-  Info,
-  Loader2,
-  Star,
-} from "lucide-react";
+import { CheckCircle2, ChevronRight, Info, Loader2, Star, CreditCard, ShieldCheck, LockIcon } from "lucide-react";
 import api from "@/services/api";
 import { endpoints } from "@/types/environment";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
 interface PlanPrice {
   id: string;
@@ -38,7 +41,7 @@ export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
-  // Multi-step: 1 = account info, 2 = choose plan, 3 = contact info, 4 = review, 5 = success
+  // Multi-step: 1 = account info, 2 = choose plan, 3 = contact info, 4 = payment, 5 = review, 6 = success
   const [step, setStep] = useState(1);
 
   // Step 1 – account form
@@ -63,6 +66,11 @@ export default function SignUpForm() {
     city: "",
   });
   const [description, setDescription] = useState("");
+
+  // Step 4 – payment
+  const [clientSecret, setClientSecret] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentIntentId, setPaymentIntentId] = useState("");
 
   // Submission
   const [submitting, setSubmitting] = useState(false);
@@ -122,6 +130,36 @@ export default function SignUpForm() {
     }
   };
 
+  const handleCreateIntent = async () => {
+    if (!selectedPlan) return;
+    if (selectedPlan.plan === "FREE") {
+      setStep(5);
+      return;
+    }
+
+    setPaymentLoading(true);
+    try {
+      const res = await api.post("/payments/stripe/signup-intent", {
+        plan: selectedPlan.plan,
+        amount: selectedPlan.price,
+        contactEmail: contactInfo.email,
+      });
+
+      if (res.data?.success) {
+        setClientSecret(res.data.data.clientSecret);
+        setPaymentIntentId(res.data.data.id);
+        setStep(4);
+      } else {
+        toast.error("Failed to initialize payment");
+      }
+    } catch (err) {
+      console.error("Intent Error", err);
+      toast.error("Payment initialization failed");
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedPlan) return;
     try {
@@ -129,7 +167,7 @@ export default function SignUpForm() {
       const res = await api.post("/subscription-requests", {
         plan: selectedPlan.plan,
         billingCycle: selectedPlan.billingCycle,
-        description: `RestaurantName=${contactInfo.restaurantName},Password=${form.password}` + (description ? `,Description=${description}` : ''),
+        description: `RestaurantName=${contactInfo.restaurantName},Password=${form.password},PaymentId=${paymentIntentId}` + (description ? `,Description=${description}` : ''),
         contactName: contactInfo.name,
         contactEmail: contactInfo.email,
         contactPhone: contactInfo.phone,
@@ -141,7 +179,7 @@ export default function SignUpForm() {
         toast.success(
           "Subscription request submitted! Our team will contact you soon."
         );
-        setStep(5);
+        setStep(6);
       } else {
         toast.error(res.data?.message || "Failed to submit request");
       }
@@ -160,8 +198,12 @@ export default function SignUpForm() {
     "Account",
     "Plan",
     "Contact",
+    "Payment",
     "Review",
   ];
+
+  // We show steps 2-5 in the indicator
+  const showIndicator = step >= 2 && step <= 5;
 
   return (
     <div className="w-full max-w-[600px] p-6 sm:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 dark:border-white/10 my-10">
@@ -185,27 +227,37 @@ export default function SignUpForm() {
       </div>
 
 
-      {/* Step Indicator (steps 2-4) */}
-      {step >= 2 && step <= 4 && (
+      {/* Step Indicator */}
+      {showIndicator && (
         <div className="flex items-center justify-between mb-8">
           {stepLabels.map((label, i) => {
-            const s = i + 1;
-            const active = step === s + 1; // step 2 = Plan (index 1), etc.
-            // map: label index 0→step1 (account done), 1→step2(plan), 2→step3(contact), 3→step4(review)
-            const done = step > s + 1;
-            const isCurrent = step === s + 1;
+            const stepNum = i + 1;
+            const isFreePlan = selectedPlan?.plan === "FREE";
+
+            // If it's a FREE plan, we want to visually skip or hide the "Payment" step
+            if (isFreePlan && label === "Payment") return null;
+
+            // Mapping:
+            // stepNum 1: Account
+            // stepNum 2: Plan
+            // stepNum 3: Contact
+            // stepNum 4: Payment
+            // stepNum 5: Review
+            const done = step > stepNum;
+            const isCurrent = step === stepNum;
+
             return (
               <React.Fragment key={label}>
                 <div className="flex flex-col items-center gap-1">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done || s === 0
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done
                       ? "bg-emerald-500 text-white"
                       : isCurrent
                         ? "bg-brand-500 text-white shadow-lg shadow-brand-500/30"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-500"
                       }`}
                   >
-                    {done ? <CheckCircle2 size={16} /> : s + 1}
+                    {done ? <CheckCircle2 size={16} /> : stepNum}
                   </div>
                   <span
                     className={`text-[10px] font-semibold ${isCurrent
@@ -216,9 +268,9 @@ export default function SignUpForm() {
                     {label}
                   </span>
                 </div>
-                {i < stepLabels.length - 1 && (
+                {i < stepLabels.length - 1 && !(isFreePlan && i === 2) && (
                   <div
-                    className={`flex-1 h-0.5 mx-1 rounded ${step > s + 1
+                    className={`flex-1 h-0.5 mx-1 rounded ${step > stepNum
                       ? "bg-emerald-400"
                       : "bg-gray-200 dark:bg-gray-700"
                       }`}
@@ -536,18 +588,62 @@ export default function SignUpForm() {
                   toast.error("Please fill all required business contact fields");
                   return;
                 }
-                setStep(4);
+                handleCreateIntent();
               }}
-              className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/20 active:scale-95 transition-all"
+              disabled={paymentLoading}
+              className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-              Review Request
+              {paymentLoading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <>Next Step <ChevronRight size={18} /></>
+              )}
             </button>
           </div>
         </div>
       )}
 
-      {/* ───────────────────────────── STEP 4: Review ───────────────────────────── */}
-      {step === 4 && selectedPlan && (
+      {/* ───────────────────────────── STEP 4: Payment ───────────────────────────── */}
+      {step === 4 && clientSecret && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
+              Payment Method
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Complete your subscription payment to proceed.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 mb-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="font-medium text-gray-600 dark:text-gray-400">Amount Due</span>
+              <span className="font-bold text-brand-500 text-lg">${selectedPlan?.price}</span>
+            </div>
+          </div>
+
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <StripePaymentForm
+              onSuccess={() => setStep(5)}
+              onBack={() => setStep(3)}
+            />
+          </Elements>
+
+          <div className="flex items-center justify-center gap-6 mt-4">
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+              <ShieldCheck size={14} className="text-emerald-500" />
+              Secure Encrypted Payment
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+              <LockIcon size={14} className="text-emerald-500" />
+              Powered by Stripe
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────── STEP 5: Review ───────────────────────────── */}
+      {step === 5 && selectedPlan && (
         <div className="space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
@@ -614,7 +710,13 @@ export default function SignUpForm() {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setStep(3)}
+              onClick={() => {
+                if (selectedPlan.plan === "FREE") {
+                  setStep(3);
+                } else {
+                  setStep(4);
+                }
+              }}
               disabled={submitting}
               className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all"
             >
@@ -635,8 +737,8 @@ export default function SignUpForm() {
         </div>
       )}
 
-      {/* ───────────────────────────── STEP 5: Success ───────────────────────────── */}
-      {step === 5 && (
+      {/* ───────────────────────────── STEP 6: Success ───────────────────────────── */}
+      {step === 6 && (
         <div className="py-16 flex flex-col items-center text-center space-y-6 animate-in zoom-in duration-500">
           <div className="w-24 h-24 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-2xl shadow-emerald-500/20">
             <CheckCircle2 size={56} />
@@ -659,5 +761,79 @@ export default function SignUpForm() {
         </div>
       )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STRIPE PAYMENT FORM COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+function StripePaymentForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setLoading(true);
+    setErrorMessage(null);
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      setErrorMessage(error.message || "An error occurred");
+      setLoading(false);
+    } else if (paymentIntent && paymentIntent.status === "succeeded") {
+      onSuccess();
+    } else {
+      // For cases where redirect is required but we handled it?
+      // Usually redirect happens automatically if needed.
+    }
+    setLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="payment-element-container p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 shadow-sm">
+        <PaymentElement />
+      </div>
+
+      {errorMessage && (
+        <div className="flex items-start gap-2 text-xs font-semibold text-error-500 bg-error-500/10 p-3 rounded-lg border border-error-500/20">
+          <Info size={14} className="shrink-0 mt-0.5" />
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 transition-all"
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={!stripe || loading}
+          className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-brand-500 text-white hover:bg-brand-600 shadow-xl shadow-brand-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <>
+              <LockIcon size={16} /> Pay & Review Request
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 }
