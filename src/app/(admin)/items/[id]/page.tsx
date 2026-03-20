@@ -123,6 +123,33 @@ function ItemDetails() {
     try {
       setSaveLoading(true);
 
+      // Validation: Ensure all variations and addons have name and price
+      if (parseFloat(formData.price) <= 0) {
+        alert("Base price must be greater than 0");
+        setSaveLoading(false);
+        return;
+      }
+
+      for (const v of formData.variations) {
+        if (!v.name || v.price === "" || v.price === null || v.price === undefined) {
+          alert(`Please provide both name and price for variation: ${v.name || 'Unnamed'}`);
+          setSaveLoading(false);
+          return;
+        }
+        if (parseFloat(v.price) <= 0) {
+          alert(`Price for variation "${v.name}" must be greater than 0`);
+          setSaveLoading(false);
+          return;
+        }
+      }
+      for (const a of formData.addons) {
+        if (!a.name || a.price === "" || a.price === null || a.price === undefined) {
+          alert(`Please provide both name and price for addon: ${a.name || 'Unnamed'}`);
+          setSaveLoading(false);
+          return;
+        }
+      }
+
       const payload = {
         name: formData.name,
         description: formData.description,
@@ -132,11 +159,11 @@ function ItemDetails() {
         isAvailable: formData.isAvailable,
         variations: formData.variations.map((v: any) => ({
           name: v.name,
-          price: parseFloat(v.price) || 0
+          price: parseFloat(v.price)
         })),
         addons: formData.addons.map((a: any) => ({
           name: a.name,
-          price: parseFloat(a.price) || 0
+          price: parseFloat(a.price)
         }))
       };
 
@@ -178,7 +205,7 @@ function ItemDetails() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-        <div className="text-gray-500 animate-pulse text-lg">Loading details...</div>
+        <Loader size="md" />
       </div>
     );
   }
@@ -347,6 +374,7 @@ function ItemDetails() {
                       <div>
                         <label className="text-xs text-gray-500">Item Name</label>
                         <input
+                          required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           className="w-full text-xl font-bold p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -374,7 +402,10 @@ function ItemDetails() {
                   <span className="text-xs text-gray-500 uppercase">Base Price</span>
                   {isEditing ? (
                     <input
+                      required
                       type="number"
+                      min="0.01"
+                      step="0.01"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       className="w-full text-right font-bold p-2 border rounded mt-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -407,14 +438,18 @@ function ItemDetails() {
                       {isEditing ? (
                         <>
                           <input
+                            required
                             placeholder="Name"
                             value={v.name}
                             onChange={(e) => handleArrayChange('variations', idx, 'name', e.target.value)}
                             className="w-full p-1 border rounded text-sm dark:bg-gray-600 dark:border-gray-500"
                           />
                           <input
+                            required
                             placeholder="Price"
                             type="number"
+                            min="0.01"
+                            step="0.01"
                             value={v.price}
                             onChange={(e) => handleArrayChange('variations', idx, 'price', e.target.value)}
                             className="w-24 p-1 border rounded text-sm dark:bg-gray-600 dark:border-gray-500"
@@ -454,14 +489,17 @@ function ItemDetails() {
                       {isEditing ? (
                         <>
                           <input
+                            required
                             placeholder="Name"
                             value={addon.name}
                             onChange={(e) => handleArrayChange('addons', idx, 'name', e.target.value)}
                             className="w-full p-1 border rounded text-sm dark:bg-gray-600 dark:border-gray-500"
                           />
                           <input
+                            required
                             placeholder="Price"
                             type="number"
+                            step="0.01"
                             value={addon.price}
                             onChange={(e) => handleArrayChange('addons', idx, 'price', e.target.value)}
                             className="w-24 p-1 border rounded text-sm dark:bg-gray-600 dark:border-gray-500"
@@ -531,6 +569,7 @@ function ItemDetails() {
 }
 
 import { ProtectedRoute } from "@/services/protected-route";
+import Loader from "@/components/common/Loader";
 
 export default function ItemDetailsPage() {
   return (
