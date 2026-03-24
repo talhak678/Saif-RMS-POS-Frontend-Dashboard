@@ -118,7 +118,7 @@ function AddItemForm() {
         isAvailable: formData.isAvailable,
         variations: formData.variations.map((v) => ({
           name: v.name,
-          price: parseFloat(v.price) || 0,
+          price: parseFloat(v.price),
         })),
         addons: formData.addons.map((a) => ({
           name: a.name,
@@ -216,6 +216,8 @@ function AddItemForm() {
                   required
                   type="number"
                   placeholder="0.00"
+                  min="0.01"
+                  step="0.01"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
@@ -269,6 +271,7 @@ function AddItemForm() {
                   <div className="flex-1">
                     <label className="text-xs text-gray-500 mb-1 block">Name (e.g. Small)</label>
                     <input
+                      required
                       type="text"
                       placeholder="Variation Name"
                       value={item.name}
@@ -279,8 +282,11 @@ function AddItemForm() {
                   <div className="w-32">
                     <label className="text-xs text-gray-500 mb-1 block">Price ($)</label>
                     <input
+                      required
                       type="number"
                       placeholder="0"
+                      min="0.01"
+                      step="0.01"
                       value={item.price}
                       onChange={(e) => handleVariationChange(index, "price", e.target.value)}
                       className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:border-blue-500"
@@ -323,19 +329,22 @@ function AddItemForm() {
                 <div key={index} className="flex gap-3 items-end animate-in fade-in slide-in-from-top-1">
                   <div className="flex-1">
                     <label className="text-xs text-gray-500 mb-1 block">Name (e.g. Extra Cheese)</label>
-                    <input
-                      type="text"
-                      placeholder="Addon Name"
-                      value={item.name}
-                      onChange={(e) => handleAddonChange(index, "name", e.target.value)}
-                      className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:border-purple-500"
-                    />
+                      <input
+                        required
+                        type="text"
+                        placeholder="Addon Name"
+                        value={item.name}
+                        onChange={(e) => handleAddonChange(index, "name", e.target.value)}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:border-purple-500"
+                      />
                   </div>
                   <div className="w-32">
                     <label className="text-xs text-gray-500 mb-1 block">Price ($)</label>
                     <input
+                      required
                       type="number"
                       placeholder="0"
+                      step="0.01"
                       value={item.price}
                       onChange={(e) => handleAddonChange(index, "price", e.target.value)}
                       className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:border-purple-500"
