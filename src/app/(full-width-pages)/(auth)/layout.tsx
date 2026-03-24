@@ -16,28 +16,27 @@ export default function AuthLayout({
   const isSignUp = pathname?.includes("signup");
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className={`relative min-h-screen w-full ${!isSignUp ? "bg-gradient-to-br from-[#e0e7ff] via-[#f3f4f6] to-[#fae8ff]" : ""}`}>
       <ThemeProvider>
-        {/* Full-screen background image */}
-        <div className="fixed inset-0 z-0">
-          <Image
-            src={
-              isSignUp
-                ? "/images/authentication-images/SIgn Up BG.jpeg"
-                : "/images/authentication-images/Login BG.jpeg"
-            }
-            alt="Auth Background"
-            fill
-            className="object-cover"
-            priority
-          />
-          {/* Subtle overlay to enhance form readability */}
-          <div className="absolute inset-0 bg-black/30 dark:bg-black/60" />
-        </div>
+        {/* Only show image BG for signup */}
+        {isSignUp && (
+          <div className="fixed inset-0 z-0">
+            <Image
+              src="/images/authentication-images/SIgn Up BG.jpeg"
+              alt="Auth Background"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/30 dark:bg-black/60" />
+          </div>
+        )}
 
-        {/* Centered form container */}
-        <div className="relative z-10 flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
-          {children}
+        {/* Ultra-minimal container with zero gap */}
+        <div className="relative z-10 flex min-h-screen items-center justify-center p-1 lg:p-2 w-full">
+          <div className="w-full h-full flex items-center justify-center">
+            {children}
+          </div>
         </div>
 
         <div className="fixed bottom-6 right-6 z-50 hidden sm:block">

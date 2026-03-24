@@ -16,12 +16,18 @@ import {
     Upload,
     MoreVertical,
     ChevronDown,
+    FileSpreadsheet,
+    Download,
+    FileUp,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/protected-route";
 import Loader from "@/components/common/Loader";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
+
+const ALLOWED_UNITS = ["kg", "g", "l", "ml", "pcs", "box", "pack", "dozen", "bottle", "can", "bag", "packet"];
 
 export default function IngredientsPage() {
     const router = useRouter();
@@ -37,6 +43,7 @@ export default function IngredientsPage() {
     const [bulkData, setBulkData] = useState("");
     const [formLoading, setFormLoading] = useState(false);
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
 
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -114,18 +121,61 @@ export default function IngredientsPage() {
         e.preventDefault();
         setBulkLoading(true);
         try {
-            // Parse CSV format: Name, Unit, Category, UnitPrice, ParLevel
-            const lines = bulkData.split("\n").filter(line => line.trim().length > 0);
-            const items = lines.map(line => {
-                const parts = line.split(",").map(p => p.trim());
-                return {
-                    name: parts[0],
-                    unit: parts[1] || "pcs",
-                    category: parts[2] || undefined,
-                    unitPrice: parts[3] ? parseFloat(parts[3]) : undefined,
-                    parLevel: parts[4] ? parseFloat(parts[4]) : undefined
-                };
-            }).filter(item => item.name);
+            let items: any[] = [];
+
+            if (uploadFile) {
+                // Parse Excel File
+                const data = await uploadFile.arrayBuffer();
+                const workbook = XLSX.read(data);
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+                const invalidUnits: string[] = [];
+                items = jsonData.map((row: any, index: number) => {
+                    const unit = (row.Unit || row.unit || "pcs").toLowerCase().trim();
+                    if (!ALLOWED_UNITS.includes(unit)) {
+                        invalidUnits.push(`Row ${index + 2}: ${unit}`);
+                    }
+                    return {
+                        name: row.Name || row.name,
+                        unit: unit,
+                        category: row.Category || row.category || undefined,
+                        unitPrice: row.UnitPrice || row.unitPrice || row["Unit Price"] ? parseFloat(row.UnitPrice || row.unitPrice || row["Unit Price"]) : undefined,
+                        parLevel: row.ParLevel || row.parLevel || row["Par Level"] ? parseFloat(row.ParLevel || row.parLevel || row["Par Level"]) : undefined
+                    };
+                }).filter(item => item.name);
+
+                if (invalidUnits.length > 0) {
+                    toast.error(`Invalid units found: ${invalidUnits.slice(0, 3).join(", ")}${invalidUnits.length > 3 ? "..." : ""}. Allowed: ${ALLOWED_UNITS.join(", ")}`);
+                    setBulkLoading(false);
+                    return;
+                }
+            } else if (bulkData.trim()) {
+                // Parse CSV format from textarea: Name, Unit, Category, UnitPrice, ParLevel
+                const lines = bulkData.split("\n").filter(line => line.trim().length > 0);
+                const invalidUnits: string[] = [];
+                
+                items = lines.map((line, index) => {
+                    const parts = line.split(",").map(p => p.trim());
+                    const unit = (parts[1] || "pcs").toLowerCase();
+                    if (!ALLOWED_UNITS.includes(unit)) {
+                        invalidUnits.push(`Line ${index + 1}: ${unit}`);
+                    }
+                    return {
+                        name: parts[0],
+                        unit: unit,
+                        category: parts[2] || undefined,
+                        unitPrice: parts[3] ? parseFloat(parts[3]) : undefined,
+                        parLevel: parts[4] ? parseFloat(parts[4]) : undefined
+                    };
+                }).filter(item => item.name);
+
+                if (invalidUnits.length > 0) {
+                    toast.error(`Invalid units: ${invalidUnits.slice(0, 3).join(", ")}. Allowed: ${ALLOWED_UNITS.join(", ")}`);
+                    setBulkLoading(false);
+                    return;
+                }
+            }
 
             if (items.length === 0) {
                 toast.error("No valid items found");
@@ -134,9 +184,10 @@ export default function IngredientsPage() {
 
             const res = await api.post("/ingredients/bulk", items);
             if (res.data?.success) {
-                toast.success(`Broadcasting added: ${res.data.message}`);
+                toast.success(`${items.length} Ingredients added successfully`);
                 setIsBulkModalOpen(false);
                 setBulkData("");
+                setUploadFile(null);
                 fetchIngredients();
             }
         } catch (error: any) {
@@ -145,6 +196,29 @@ export default function IngredientsPage() {
         } finally {
             setBulkLoading(false);
         }
+    };
+
+    const downloadTemplate = () => {
+        const templateData = [
+            { Name: "Tomatoes", Unit: "kg", Category: "Vegetables", UnitPrice: 2.5, ParLevel: 10 },
+            { Name: "Flour", Unit: "kg", Category: "Baking", UnitPrice: 1.2, ParLevel: 50 },
+            { Name: "Cheese", Unit: "pcs", Category: "Dairy", UnitPrice: 5.0, ParLevel: 20 },
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(templateData);
+        
+        // Add a small guide about allowed units
+        const guideData = [
+            { "Allowed Units Guide": "" },
+            ...ALLOWED_UNITS.map(u => ({ "Allowed Units Guide": u }))
+        ];
+        const guideSheet = XLSX.utils.json_to_sheet(guideData);
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Ingredients");
+        XLSX.utils.book_append_sheet(workbook, guideSheet, "Allowed Units");
+        
+        XLSX.writeFile(workbook, "Ingredients_Bulk_Template.xlsx");
     };
 
     const handleDelete = async () => {
@@ -356,14 +430,17 @@ export default function IngredientsPage() {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Base Unit</label>
-                                <input
+                                <select
                                     required
-                                    type="text"
-                                    placeholder="kg, box, litre"
                                     value={formData.unit}
                                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                />
+                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium text-gray-700 dark:text-gray-200 appearance-none"
+                                >
+                                    <option value="" disabled>Select a unit</option>
+                                    {ALLOWED_UNITS.map(unit => (
+                                        <option key={unit} value={unit}>{unit}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Category</label>
@@ -428,7 +505,8 @@ export default function IngredientsPage() {
                 >
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                            <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <FileSpreadsheet size={18} className="text-emerald-500" />
                                 Bulk Create Ingredients
                             </h2>
                             <button onClick={() => setIsBulkModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -437,33 +515,86 @@ export default function IngredientsPage() {
                         </div>
 
                         <form onSubmit={handleBulkSubmit} className="p-6 space-y-5">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Entries (Format: Name, Unit)</label>
-                                <textarea
-                                    required
-                                    rows={8}
-                                    placeholder="Tomatoes, kg&#10;Onion, box&#10;Cheese, grams"
-                                    value={bulkData}
-                                    onChange={(e) => setBulkData(e.target.value)}
-                                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium font-mono text-gray-700 dark:text-gray-200"
-                                />
-                                <p className="text-[10px] text-gray-400 mt-1 italic">Enter one ingredient per line. Separate Name and Unit with a comma.</p>
+                            <div className="space-y-4">
+                                {/* Excel Upload Option */}
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Upload Excel File</label>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept=".xlsx, .xls, .csv"
+                                            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                                            className="hidden"
+                                            id="bulk-excel-upload"
+                                        />
+                                        <label
+                                            htmlFor="bulk-excel-upload"
+                                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer group"
+                                        >
+                                            {uploadFile ? (
+                                                <div className="flex flex-col items-center gap-2 text-emerald-600">
+                                                    <FileSpreadsheet size={32} />
+                                                    <span className="text-xs font-bold">{uploadFile.name}</span>
+                                                    <button type="button" onClick={(e) => { e.preventDefault(); setUploadFile(null); }} className="text-[10px] text-gray-400 hover:text-rose-500 underline">Remove</button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <FileUp className="text-gray-400 group-hover:text-brand-500 mb-2 transition-colors" size={24} />
+                                                    <p className="text-xs font-bold text-gray-500 group-hover:text-gray-600">Click to upload .xlsx or .csv</p>
+                                                    <p className="text-[10px] text-gray-400 mt-1 italic">Maximum file size 5MB</p>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={downloadTemplate}
+                                        className="flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 transition-colors bg-brand-50 dark:bg-brand-900/20 px-3 py-1.5 rounded-lg mt-2 w-fit"
+                                    >
+                                        <Download size={14} /> Download Sample Template
+                                    </button>
+                                </div>
+
+                                <div className="relative py-2">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-gray-100 dark:border-gray-800"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-xs">
+                                        <span className="bg-white dark:bg-gray-900 px-3 font-bold text-gray-400">OR ENTER MANUALLY</span>
+                                    </div>
+                                </div>
+
+                                {/* Manual CSV entry */}
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Manual (Format: Name, Unit)</label>
+                                    <textarea
+                                        rows={4}
+                                        placeholder="Tomatoes, kg&#10;Onion, box"
+                                        value={bulkData}
+                                        onChange={(e) => setBulkData(e.target.value)}
+                                        className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium font-mono text-gray-700 dark:text-gray-200"
+                                    />
+                                    <p className="text-[10px] text-gray-400 mt-1 italic">Enter one ingredient per line. Separate Name and Unit with a comma.</p>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"
-                                    onClick={() => setIsBulkModalOpen(false)}
+                                    onClick={() => {
+                                        setIsBulkModalOpen(false);
+                                        setUploadFile(null);
+                                    }}
                                     className="flex-1 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={bulkLoading}
-                                    className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm"
+                                    disabled={bulkLoading || (!uploadFile && !bulkData.trim())}
+                                    className="flex-[2] bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-600/10"
                                 >
-                                    {bulkLoading ? "Creating..." : "Create Items"}
+                                    {bulkLoading ? "Processing..." : "Create Items"}
                                 </button>
                             </div>
                         </form>

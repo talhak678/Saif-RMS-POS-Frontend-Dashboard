@@ -213,25 +213,18 @@ function BannerCarousel() {
       {/* Left — big banner */}
       <div className="relative flex-[2.5] overflow-hidden rounded-2xl group shadow-md">
         <Image
-          src="/images/authentication-images/Dashboard-Banner.jpg.jpeg"
+          src="/images/authentication-images/img-1.png"
           alt="Dashboard Banner 1"
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           priority
         />
-        <div className="absolute inset-0 bg-black/35 flex items-center justify-center p-6 transition-colors duration-300 group-hover:bg-black/45">
-          <h2 className="text-xl md:text-3xl font-black text-white leading-tight drop-shadow-2xl text-center">
-            Our digital menu makes restaurant management{" "}
-            <br className="hidden md:block" />
-            <span className="text-brand-400">simple and comfortable</span>
-          </h2>
-        </div>
       </div>
 
       {/* Right — small banner */}
       <div className="relative flex-1 overflow-hidden rounded-2xl group shadow-md">
         <Image
-          src="/images/authentication-images/Dashboard-Banner 2.jpg.jpeg"
+          src="/images/authentication-images/img-2.png"
           alt="Dashboard Banner 2"
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"

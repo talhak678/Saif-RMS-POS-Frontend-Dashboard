@@ -30,7 +30,10 @@ import {
   Phone,
   ExternalLink,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Truck,
+  ShoppingBag,
+  Utensils
 } from "lucide-react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -176,6 +179,9 @@ export default function ProfilePage() {
     country: "Pakistan",
     countryCode: "PK",
     cuisines: [],
+    isDeliveryEnabled: true,
+    isPickupEnabled: true,
+    isDineInEnabled: true,
     serviceType: "BOTH",
     status: "ACTIVE",
     lat: 30.1575,
@@ -358,6 +364,9 @@ export default function ProfilePage() {
           country: data.country || "Pakistan",
           countryCode: data.countryCode || "PK",
           cuisines: data.cuisines || [],
+          isDeliveryEnabled: data.isDeliveryEnabled ?? true,
+          isPickupEnabled: data.isPickupEnabled ?? true,
+          isDineInEnabled: data.isDineInEnabled ?? true,
           serviceType: data.serviceType || "BOTH",
           status: data.status || "ACTIVE",
           lat: data.lat || 30.1575,
@@ -1008,24 +1017,71 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Service Type Field */}
-                  <div className="flex flex-col md:flex-row md:items-center py-2">
-                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 mb-1 md:mb-0">Service Type</Label>
-                    <div className="flex-1">
-                      <CustomSelect
-                        value={restaurantForm.serviceType}
-                        options={[
-                          { value: "DELIVERY", label: "🚚  Delivery Only" },
-                          { value: "PICKUP", label: "🏃  Pickup Only" },
-                          { value: "DINE_IN", label: "🍽️  Dine-in Only" },
-                          { value: "BOTH", label: "🚚🏃  Delivery & Pickup" },
-                          { value: "DELIVERY_DINE_IN", label: "🚚🍽️  Delivery & Dine-in" },
-                          { value: "PICKUP_DINE_IN", label: "🏃🍽️  Pickup & Dine-in" },
-                          { value: "ALL", label: "🚚🏃🍽️  All (Delivery, Pickup, Dine-in)" },
-                        ]}
-                        onChange={(val) => setRestaurantForm({ ...restaurantForm, serviceType: val })}
-                        placeholder="Select service type"
-                      />
+                  {/* Service Availability Toggles */}
+                  <div className="flex flex-col md:flex-row md:items-start py-6 border-b border-gray-50 dark:border-gray-700/50">
+                    <Label className="w-full md:w-1/4 font-black text-gray-700 dark:text-gray-300 pt-2">Service Availability</Label>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      
+                      {/* Delivery Toggle */}
+                      <button 
+                        type="button"
+                        onClick={() => setRestaurantForm({ ...restaurantForm, isDeliveryEnabled: !restaurantForm.isDeliveryEnabled })}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${restaurantForm.isDeliveryEnabled ? 'bg-brand-50 border-brand-200 dark:bg-brand-900/10 dark:border-brand-800' : 'bg-gray-50 border-gray-100 dark:bg-gray-900/40 dark:border-gray-700'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${restaurantForm.isDeliveryEnabled ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'bg-gray-200 text-gray-500 dark:bg-gray-700'}`}>
+                            <Truck className="w-5 h-5 text-current" />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-sm font-bold ${restaurantForm.isDeliveryEnabled ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Delivery</p>
+                            <p className="text-[10px] text-gray-400 font-medium">{restaurantForm.isDeliveryEnabled ? 'Enabled' : 'Disabled'}</p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${restaurantForm.isDeliveryEnabled ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-300 bg-transparent text-transparent'}`}>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
+                      {/* Pickup Toggle */}
+                      <button 
+                        type="button"
+                        onClick={() => setRestaurantForm({ ...restaurantForm, isPickupEnabled: !restaurantForm.isPickupEnabled })}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${restaurantForm.isPickupEnabled ? 'bg-brand-50 border-brand-200 dark:bg-brand-900/10 dark:border-brand-800' : 'bg-gray-50 border-gray-100 dark:bg-gray-900/40 dark:border-gray-700'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${restaurantForm.isPickupEnabled ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'bg-gray-200 text-gray-500 dark:bg-gray-700'}`}>
+                            <ShoppingBag className="w-5 h-5 text-current" />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-sm font-bold ${restaurantForm.isPickupEnabled ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Pickup</p>
+                            <p className="text-[10px] text-gray-400 font-medium">{restaurantForm.isPickupEnabled ? 'Enabled' : 'Disabled'}</p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${restaurantForm.isPickupEnabled ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-300 bg-transparent text-transparent'}`}>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
+                      {/* Dine-In Toggle */}
+                      <button 
+                        type="button"
+                        onClick={() => setRestaurantForm({ ...restaurantForm, isDineInEnabled: !restaurantForm.isDineInEnabled })}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${restaurantForm.isDineInEnabled ? 'bg-brand-50 border-brand-200 dark:bg-brand-900/10 dark:border-brand-800' : 'bg-gray-50 border-gray-100 dark:bg-gray-900/40 dark:border-gray-700'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${restaurantForm.isDineInEnabled ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'bg-gray-200 text-gray-500 dark:bg-gray-700'}`}>
+                            <Utensils className="w-5 h-5 text-current" />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-sm font-bold ${restaurantForm.isDineInEnabled ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>Dine-In</p>
+                            <p className="text-[10px] text-gray-400 font-medium">{restaurantForm.isDineInEnabled ? 'Enabled' : 'Disabled'}</p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${restaurantForm.isDineInEnabled ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-300 bg-transparent text-transparent'}`}>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
                     </div>
                   </div>
 

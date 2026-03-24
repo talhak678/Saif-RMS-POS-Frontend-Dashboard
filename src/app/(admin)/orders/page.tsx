@@ -22,7 +22,8 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { ViewDetailModal } from "@/components/ViewDetailModal";
 import { ProtectedRoute } from "@/services/protected-route";
 import { printOrderReceipt } from "@/lib/printReceipt";
@@ -86,14 +87,24 @@ const getTypeIcon = (type: string) => {
 };
 
 export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader size="lg" /></div>}>
+      <OrdersPageInner />
+    </Suspense>
+  );
+}
+
+function OrdersPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
   const { user } = useAuth();
   const [orders, setOrders]: any = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   // Filters State
-  const [searchRef, setSearchRef] = useState("");
+  const [searchRef, setSearchRef] = useState(initialSearch);
   const [searchCustomerRef, setSearchCustomerRef] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
   const [searchName, setSearchName] = useState("");

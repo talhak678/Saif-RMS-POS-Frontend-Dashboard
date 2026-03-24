@@ -119,8 +119,21 @@ function NotificationsInner() {
         if (!notification.isRead) {
             markAsRead(notification.id);
         }
-        if (notification.message.toLowerCase().includes("upgrade request") || notification.message.toLowerCase().includes("subscription")) {
+
+        const msg = notification.message.toLowerCase();
+        
+        // Redirect to subscription requests
+        if (msg.includes("upgrade request") || msg.includes("subscription")) {
             router.push("/profile?tab=SUBSCRIPTION_REQUESTS");
+            return;
+        }
+
+        // Redirect to orders if message contains # followed by numbers (e.g. Website Order Received! #137)
+        const orderMatch = notification.message.match(/#(\d+)/);
+        if (orderMatch) {
+            const orderNo = orderMatch[1];
+            router.push(`/orders?search=${orderNo}`);
+            return;
         }
     };
 

@@ -78,103 +78,111 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="w-full max-w-[550px] p-6 sm:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 dark:border-white/10">
-      <div className="flex justify-center mb-8">
+    <div className="flex flex-col lg:flex-row w-full gap-0 items-stretch h-screen ">
+      
+      {/* Left side: Image Box - Stretched to fill */}
+      <div className="relative hidden lg:block lg:w-[62%] h-[900px] rounded-3xl overflow-hidden shadow-2xl">
         <Image
-          src="/images/authentication-images/logo-black.png"
-          alt="Logo"
-          width={180}
-          height={48}
-          className="dark:hidden"
+          src="/images/authentication-images/image.png"
+          alt="Sign In Illustration"
+          fill
+          className="object-cover"
+          priority
         />
-        <Image
-          src="/images/authentication-images/logo-white.png"
-          alt="Logo"
-          width={180}
-          height={48}
-          className="hidden dark:block"
-        />
+        {/* Subtle overlay */}
+        <div className="absolute inset-0 bg-black/10" />
       </div>
-      <div className="flex flex-col justify-center w-full mx-auto">
-        <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+
+      {/* Right side: Form Container */}
+      <div className="flex items-center justify-center w-full lg:w-[38%] p-6 sm:p-8">
+        {/* Form Card - Balanced & Balanced */}
+        <div className="w-full max-w-[460px] p-8 sm:p-10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl rounded-[2.5rem] shadow-2xl border border-white/40 dark:border-white/10">
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/images/authentication-images/logo-black.png"
+              alt="Logo"
+              width={160}
+              height={42}
+              className="dark:hidden"
+            />
+            <Image
+              src="/images/authentication-images/logo-white.png"
+              alt="Logo"
+              width={160}
+              height={42}
+              className="hidden dark:block"
+            />
+          </div>
+
+          <div className="mb-8 text-center lg:text-left">
+            <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
               Sign In
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
               Enter your email and password to sign in!
             </p>
           </div>
-          <div>
-            {/* 5. Connected Form */}
-            <form onSubmit={handleLogin}>
-              <div className="space-y-6">
 
-                {/* Error Message Display */}
-                {error && (
-                  <div className="p-3 text-sm text-center text-red-500 bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-400">
-                    {error}
-                  </div>
-                )}
-
-                <div>
-                  <Label>
-                    Email <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input
-                    placeholder="info@gmail.com"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>
-                    Password <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  {/* <div className="flex items-center gap-3">
-                    <Checkbox checked={isChecked} onChange={setIsChecked} />
-                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Keep me logged in
-                    </span>
-                  </div> */}
-                  <Link
-                    href="/reset-password"
-                    className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div>
-                  <Button className="w-full" size="sm" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign in"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-
-            {!isSuperAdmin && (
-              <div className="mt-5">
-                <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400">
-                  Don&apos;t have an account? {""}
-                  <Link
-                    href="/signup"
-                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
+          <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm font-medium text-center text-red-600 bg-red-50 rounded-xl border border-red-100 dark:bg-red-900/20 dark:text-red-400">
+                {error}
               </div>
             )}
-          </div>
+
+            <div>
+              <Label className="mb-1.5 ml-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Email Address <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="admin@example.com"
+                type="email"
+                className="h-11 rounded-xl"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label className="mb-1.5 ml-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Password <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="password"
+                placeholder="••••••••••"
+                className="h-11 rounded-xl"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center justify-end">
+              <Link
+                href="/reset-password"
+                className="text-sm font-bold text-brand-500 hover:text-brand-600 dark:text-brand-400"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <Button className="w-full h-11 text-sm font-bold rounded-xl" disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
+
+          {!isSuperAdmin && (
+            <div className="mt-8 text-center">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-400">
+                Don&apos;t have an account? {" "}
+                <Link
+                  href="/signup"
+                  className="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-bold"
+                >
+                  Sign Up
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
