@@ -343,57 +343,89 @@ export default function IngredientsPage() {
                                     <tr>
                                         <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Name</th>
                                         <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Category</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">In Stock</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Par Level</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Unit Price</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Total Stock</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Status</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-center">Min Alert</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right">Cost/Unit</th>
                                         <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider text-right pr-8">Total Value</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider"></th>
+                                        <th className="px-6 py-4 text-[11px] font-bold uppercase text-gray-400 tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                                    {loading ? (
-                                        <tr><td colSpan={7} className="py-20 text-center"><Loader size="sm" /></td></tr>
-                                    ) : filteredIngredients.length === 0 ? (
-                                        <tr><td colSpan={7} className="py-20 text-center text-gray-400 text-sm italic">No records found.</td></tr>
-                                    ) : (
-                                        filteredIngredients.map((ing: any) => (
-                                            <tr
-                                                key={ing.id}
-                                                className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                                                onClick={() => router.push(`/ingredients/${ing.id}`)}
-                                            >
-                                                <td className="px-6 py-4">
-                                                    <div>
-                                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{ing.name}</span>
-                                                        <span className="block text-[10px] text-gray-400 mt-0.5 font-medium uppercase">{ing.id.slice(-6)}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400 font-medium">{ing.category || "Uncategorized"}</td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="inline-flex items-baseline gap-1 px-3 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 rounded-lg">
-                                                        <span className="text-sm font-bold">{getOnHand(ing.stocks)}</span>
-                                                        <span className="text-[10px] font-medium opacity-70 uppercase">{ing.unit}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center text-xs text-gray-400 dark:text-gray-500 font-medium italic">{ing.parLevel ? `${ing.parLevel} ${ing.unit}` : "Not set"}</td>
-                                                <td className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 font-semibold">${ing.unitPrice ? parseFloat(ing.unitPrice).toFixed(2) : "0.00"}</td>
-                                                <td className="px-6 py-4 text-right text-sm font-bold text-gray-800 dark:text-gray-200 pr-8">
-                                                    ${(getOnHand(ing.stocks) * (ing.unitPrice ? parseFloat(ing.unitPrice) : 0)).toFixed(2)}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                                                        <button onClick={() => openEditModal(ing)} className="p-2 text-gray-400 hover:text-brand-600 transition-colors">
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button onClick={() => setDeleteId(ing.id)} className="p-2 text-gray-400 hover:text-rose-600 transition-colors">
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
+                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                                     {loading ? (
+                                         <tr><td colSpan={8} className="py-20 text-center"><Loader size="sm" /></td></tr>
+                                     ) : filteredIngredients.length === 0 ? (
+                                         <tr><td colSpan={8} className="py-20 text-center text-gray-400 text-sm italic">No records found.</td></tr>
+                                     ) : (
+                                         filteredIngredients.map((ing: any) => {
+                                             const onHand = getOnHand(ing.stocks);
+                                             const parLevel = Number(ing.parLevel || 0);
+                                             
+                                             let statusClass = "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/30";
+                                             let statusText = "In Stock";
+
+                                             if (onHand <= 0) {
+                                                 statusClass = "bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 border-rose-100 dark:border-rose-800/30";
+                                                 statusText = "Out of Stock";
+                                             } else if (parLevel > 0 && onHand <= parLevel) {
+                                                 statusClass = "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border-amber-100 dark:border-amber-800/30";
+                                                 statusText = "Low Stock";
+                                             }
+
+                                             return (
+                                                 <tr
+                                                     key={ing.id}
+                                                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                                     onClick={() => router.push(`/ingredients/${ing.id}`)}
+                                                 >
+                                                     <td className="px-6 py-4 text-xs">
+                                                         <div>
+                                                             <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{ing.name}</span>
+                                                             <span className="block text-[10px] text-gray-400 mt-0.5 font-medium uppercase">{ing.id.slice(-6)}</span>
+                                                         </div>
+                                                     </td>
+                                                     <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400 font-medium">{ing.category || "Uncategorized"}</td>
+                                                     
+                                                     <td className="px-6 py-4 text-center">
+                                                         <div className="inline-flex items-baseline gap-1 px-3 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-100 dark:border-gray-600 shadow-sm">
+                                                             <span className="text-sm font-black">{onHand}</span>
+                                                             <span className="text-[10px] font-medium opacity-70 uppercase">{ing.unit}</span>
+                                                         </div>
+                                                     </td>
+
+                                                     <td className="px-6 py-4 text-center">
+                                                         <span className={`inline-flex items-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border shadow-sm ${statusClass}`}>
+                                                             {statusText}
+                                                         </span>
+                                                     </td>
+
+                                                     <td className="px-6 py-4 text-center text-xs text-gray-400 dark:text-gray-500 font-medium italic">
+                                                         {parLevel > 0 ? `${parLevel} ${ing.unit}` : "Not set"}
+                                                     </td>
+
+                                                     <td className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 font-semibold">
+                                                         ${ing.unitPrice ? parseFloat(ing.unitPrice).toFixed(2) : "0.00"}
+                                                     </td>
+
+                                                     <td className="px-6 py-4 text-right text-sm font-bold text-gray-800 dark:text-gray-200">
+                                                        ${(onHand * (ing.unitPrice ? parseFloat(ing.unitPrice) : 0)).toFixed(2)}
+                                                     </td>
+                                                     
+                                                     <td className="px-6 py-4 text-right">
+                                                         <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                                                            <button onClick={() => openEditModal(ing)} className="p-2 text-gray-400 hover:text-brand-600 transition-colors">
+                                                                <Edit size={16} />
+                                                            </button>
+                                                            <button onClick={() => setDeleteId(ing.id)} className="p-2 text-gray-400 hover:text-rose-600 transition-colors">
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                         </div>
+                                                     </td>
+                                                 </tr>
+                                             )
+                                         })
+                                     )}
+                                 </tbody>
                             </table>
                         </div>
                     </div>

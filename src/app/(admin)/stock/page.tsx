@@ -202,10 +202,12 @@ export default function StocksPage() {
         {/* STOCKS TABLE */}
         <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700">
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 tracking-widers">
+            <thead className="bg-gray-100 dark:bg-gray-700 text-[10px] font-bold uppercase text-gray-400 tracking-wider">
               <tr>
                 <th className="px-6 py-3 text-left">Ingredient</th>
-                <th className="px-6 py-3 text-left">Current Stock</th>
+                <th className="px-6 py-3 text-center">Current Stock</th>
+                <th className="px-6 py-3 text-center">Min Alert (Par)</th>
+                <th className="px-6 py-3 text-center">Status</th>
                 <th className="px-6 py-3 text-left">Last Updated</th>
                 <th className="px-6 py-3 text-left">Actions</th>
               </tr>
@@ -214,58 +216,86 @@ export default function StocksPage() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-20 text-center text-gray-500">
+                  <td colSpan={6} className="py-20 text-center text-gray-500">
                     <Loader size="md" />
                   </td>
                 </tr>
               ) : stocks.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-10 text-center text-gray-500">
+                  <td colSpan={6} className="py-10 text-center text-gray-500">
                     No stock data found. Click "Add Stock" to begin.
                   </td>
                 </tr>
               ) : (
-                stocks.map((stock: any) => (
-                  <tr
-                    key={stock.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
-                      {stock.ingredient?.name}
-                    </td>
+                stocks.map((stock: any) => {
+                  const quantity = Number(stock.quantity);
+                  const parLevel = Number(stock.ingredient?.parLevel || 0);
+                  
+                  let badgeClass = "bg-emerald-100 text-emerald-800 border-emerald-200";
+                  let statusText = "In Stock";
 
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${stock.quantity < 10
-                        ? "bg-red-100 text-red-800 border-red-200"
-                        : "bg-green-100 text-green-800 border-green-200"
-                        }`}>
-                        {stock.quantity} {stock.ingredient?.unit}
-                      </span>
-                    </td>
+                  if (quantity <= 0) {
+                    badgeClass = "bg-rose-100 text-rose-800 border-rose-200";
+                    statusText = "Out of Stock";
+                  } else if (parLevel > 0 && quantity <= parLevel) {
+                    badgeClass = "bg-amber-100 text-amber-800 border-amber-200";
+                    statusText = "Low Stock";
+                  }
 
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">
-                      {new Date(stock.updatedAt).toLocaleString()}
-                    </td>
+                  return (
+                    <tr
+                      key={stock.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-900 dark:text-gray-100">{stock.ingredient?.name}</span>
+                          <span className="text-[10px] text-gray-400 font-medium uppercase">{stock.ingredient?.category || "Uncategorized"}</span>
+                        </div>
+                      </td>
 
-                    <td className="px-6 py-4 flex items-center gap-2">
-                      <button
-                        onClick={() => openUpdateModal(stock)}
-                        className="text-xs px-3 py-1.5 rounded bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-1 transition-colors"
-                      >
-                        <RefreshCcw size={12} /> Update
-                      </button>
-                      <button
-                        onClick={() => {
-                          setViewStock(stock);
-                          setIsViewModalOpen(true);
-                        }}
-                        className="p-1.5 rounded transition-colors hover:bg-gray-100 text-gray-500 dark:hover:bg-gray-700"
-                      >
-                        <Eye size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      <td className="px-6 py-4 text-center">
+                        <span className="font-black text-gray-800 dark:text-white">
+                          {quantity} <span className="text-[10px] font-medium text-gray-400 uppercase">{stock.ingredient?.unit}</span>
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-xs text-gray-500 italic">
+                          {parLevel > 0 ? `${parLevel} ${stock.ingredient?.unit}` : "Not Set"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-tighter shadow-sm ${badgeClass}`}>
+                          {statusText}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">
+                        {new Date(stock.updatedAt).toLocaleString()}
+                      </td>
+
+                      <td className="px-6 py-4 flex items-center gap-2">
+                        <button
+                          onClick={() => openUpdateModal(stock)}
+                          className="text-xs px-3 py-1.5 rounded bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-1 transition-colors"
+                        >
+                          <RefreshCcw size={12} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setViewStock(stock);
+                            setIsViewModalOpen(true);
+                          }}
+                          className="p-1.5 rounded transition-colors hover:bg-gray-100 text-gray-500 dark:hover:bg-gray-700"
+                        >
+                          <Eye size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
