@@ -130,7 +130,7 @@ export default function ForgotPasswordForm() {
     return (
         <div className="flex flex-col lg:flex-row w-full gap-0 items-stretch h-screen overflow-hidden ">
             {/* Left side: Image Box - Stretched to fill */}
-            <div className="relative hidden lg:block lg:w-[62%] h-[900px] rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative hidden lg:block lg:w-[62%] h-[calc(100vh-2rem)] m-4 rounded-3xl overflow-hidden shadow-2xl self-center">
                 <Image
                     src="/images/authentication-images/image.png"
                     alt="Forgot Password Illustration"
