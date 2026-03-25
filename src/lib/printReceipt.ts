@@ -3,9 +3,9 @@ export function printOrderReceipt(order: any, restaurantLogo?: string) {
     const subtotal = items.reduce((s: number, i: any) => s + parseFloat(i.price) * i.quantity, 0);
     const date = new Date(order.createdAt).toLocaleString("en-PK", { hour12: true });
 
-    let headerContent = `<div class="c b lg">RMS POS</div>`;
+    let headerContent = `<div class="c b lg" style="margin-bottom: 10px;">RMS POS</div>`;
     if (restaurantLogo) {
-        headerContent = `<div class="c"><img src="${restaurantLogo}" alt="Logo" style="max-height: 60px; object-fit: contain; margin: 0 auto; display: block;" /></div>`;
+        headerContent = `<div class="c"><img src="${restaurantLogo}" alt="Logo" style="max-height: 60px; object-fit: contain; margin: 0 auto 10px; display: block;" /></div>`;
     }
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt</title>
@@ -49,6 +49,9 @@ export function printOrderReceipt(order: any, restaurantLogo?: string) {
     <div class="tr"><span>TOTAL</span><span>$${parseFloat(order.total).toFixed(2)}</span></div>
     <div class="div"></div>
     <div class="c sm" style="margin-top:8px">Thank you! Please come again.</div>
+    <div class="div" style="margin-top:10px"></div>
+    <div class="c sm" style="margin-top:4px; font-size: 9px; opacity: 0.8;">Software Developed by <b>PlatterOS</b></div>
+    <div class="c sm" style="font-size: 9px; opacity: 0.8;">Website: <b>www.platteros.com</b></div>
     <script>
         window.onload = function() {
             setTimeout(function() {
