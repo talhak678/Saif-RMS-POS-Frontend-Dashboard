@@ -206,7 +206,25 @@ export default function SignUpForm() {
   const showIndicator = step >= 2 && step <= 5;
 
   return (
-    <div className="w-full max-w-[600px] p-6 sm:p-10 rounded-3xl shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 dark:border-white/10 my-10">
+    <div className="flex flex-col lg:flex-row w-full gap-0 items-stretch h-screen overflow-hidden">
+      
+      {/* Left side: Image Box - Stretched to fill */}
+      <div className="relative hidden lg:block lg:w-[62%] h-[900px] rounded-3xl overflow-hidden shadow-2xl">
+        <Image
+          src="/images/authentication-images/image.png"
+          alt="Sign Up Illustration"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Subtle overlay */}
+        <div className="absolute inset-0 bg-black/10" />
+      </div>
+
+      {/* Right side: Form Container */}
+      <div className="flex items-center justify-center w-full lg:w-[38%] p-6 sm:p-8 overflow-y-auto">
+        {/* Form Card */}
+        <div className="w-full max-w-[600px] p-8 sm:p-10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl rounded-[2.5rem] shadow-2xl border border-white/40 dark:border-white/10 my-10">
 
       {/* Logo */}
       <div className="flex justify-center mb-8">
@@ -760,6 +778,8 @@ export default function SignUpForm() {
           </Link>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

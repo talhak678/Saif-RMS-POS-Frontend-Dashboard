@@ -128,13 +128,30 @@ export default function ForgotPasswordForm() {
     const currentIdx = STEPS.indexOf(step);
 
     return (
-        <div className="w-full max-w-[480px] p-6 sm:p-10 rounded-3xl shadow-2xl  bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10">
-
-            {/* Logo */}
-            <div className="flex justify-center mb-8">
-                <Image src="/images/authentication-images/logo-black.png" alt="Logo" width={180} height={48} className="dark:hidden" />
-                <Image src="/images/authentication-images/logo-white.png" alt="Logo" width={180} height={48} className="hidden dark:block" />
+        <div className="flex flex-col lg:flex-row w-full gap-0 items-stretch h-screen overflow-hidden ">
+            {/* Left side: Image Box - Stretched to fill */}
+            <div className="relative hidden lg:block lg:w-[62%] h-[900px] rounded-3xl overflow-hidden shadow-2xl">
+                <Image
+                    src="/images/authentication-images/image.png"
+                    alt="Forgot Password Illustration"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                {/* Subtle overlay */}
+                <div className="absolute inset-0 bg-black/10" />
             </div>
+
+            {/* Right side: Form Container */}
+            <div className="flex items-center justify-center w-full lg:w-[38%] p-6 sm:p-8">
+                {/* Form Card */}
+                <div className="w-full max-w-[480px] p-8 sm:p-10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl rounded-[2.5rem] shadow-2xl border border-white/40 dark:border-white/10">
+
+                    {/* Logo */}
+                    <div className="flex justify-center mb-8">
+                        <Image src="/images/authentication-images/logo-black.png" alt="Logo" width={160} height={42} className="dark:hidden" />
+                        <Image src="/images/authentication-images/logo-white.png" alt="Logo" width={160} height={42} className="hidden dark:block" />
+                    </div>
 
             {/* Back link */}
             <div className="w-full mx-auto mb-5">
@@ -329,6 +346,8 @@ export default function ForgotPasswordForm() {
                     </div>
                 </form>
             )}
+                </div>
+            </div>
         </div>
     );
 }
